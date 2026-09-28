@@ -1,0 +1,9 @@
+/* App-wide utility classes the design uses in several screens. */
+
+/* The small bold label above a form section (design 4a/2d: 「だれの？」「トピック」). */
+.field-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+  padding-bottom: 6px;
+}
