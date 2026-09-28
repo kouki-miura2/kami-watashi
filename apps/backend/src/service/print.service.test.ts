@@ -51,6 +51,7 @@ const createService = (overrides: Partial<PrintRepository> = {}) => {
     replaceImages: vi.fn<PrintRepository['replaceImages']>(async () => {}),
     delete: vi.fn<PrintRepository['delete']>(async () => {}),
     countCreatedBy: vi.fn<PrintRepository['countCreatedBy']>(async () => 2),
+    imageBytesCreatedBy: vi.fn<PrintRepository['imageBytesCreatedBy']>(async () => 5000),
     listImagesCreatedBy: vi.fn<PrintRepository['listImagesCreatedBy']>(async () => [
       { printId: 'p8', imageId: 'i8' },
     ]),
@@ -116,6 +117,7 @@ test('list queries the caller’s view with today in JST and drops the family id
       coverImageId: 'i1',
       isRead: false,
       miteneStatus: 'none',
+      miteneFromName: null,
     },
   ])
   const { service } = createService({ list })
@@ -436,8 +438,9 @@ test('countOld and deleteOld use the JST calendar months before now', async () =
   // 2026-06-28 12:00 JST.
   const cutoff = Date.UTC(2026, 5, 28, 3)
 
-  expect(await service.countOld(invitedUser, 3)).toEqual({ count: 2 })
+  expect(await service.countOld(invitedUser, 3)).toEqual({ count: 2, bytes: 5000 })
   expect(printRepository.countCreatedBy).toHaveBeenCalledWith('f1', cutoff)
+  expect(printRepository.imageBytesCreatedBy).toHaveBeenCalledWith('f1', cutoff)
 
   expect(await service.deleteOld(invitedUser, 3)).toEqual({ count: 2 })
   expect(printRepository.deleteCreatedBy).toHaveBeenCalledWith(

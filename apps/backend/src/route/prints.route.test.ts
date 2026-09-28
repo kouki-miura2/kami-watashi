@@ -218,12 +218,12 @@ test('DELETE /prints/:id deletes the print', async () => {
 })
 
 test('bulk delete counts and deletes for an allowed period only', async () => {
-  const countOld = vi.fn<PrintService['countOld']>(async () => ({ count: 4 }))
+  const countOld = vi.fn<PrintService['countOld']>(async () => ({ count: 4, bytes: 4000 }))
   const deleteOld = vi.fn<PrintService['deleteOld']>(async () => ({ count: 4 }))
   const app = createTestApp({ services: { printService: { countOld, deleteOld } } })
 
   const count = await app.request('/prints/bulk-delete?olderThanMonths=6', authorized)
-  expect(await count.json()).toEqual({ count: 4 })
+  expect(await count.json()).toEqual({ count: 4, bytes: 4000 })
   expect(countOld.mock.calls[0][1]).toBe(6)
 
   const deleted = await app.request('/prints/bulk-delete', json('POST', { olderThanMonths: 12 }))

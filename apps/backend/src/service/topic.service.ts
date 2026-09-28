@@ -7,9 +7,14 @@ export interface TopicView {
   name: string
 }
 
+export interface TopicListItemView extends TopicView {
+  /** How many prints the topic is set on (shown in topic management, and when deleting). */
+  printCount: number
+}
+
 export interface TopicService {
   /** By name. */
-  list: (user: AuthenticatedUser) => Promise<TopicView[]>
+  list: (user: AuthenticatedUser) => Promise<TopicListItemView[]>
   create: (user: AuthenticatedUser, name: string) => Promise<TopicView>
   rename: (user: AuthenticatedUser, id: string, name: string) => Promise<TopicView>
   /** Deletes the topic; it comes off every print. */
@@ -25,9 +30,9 @@ export const createTopicService = (deps: { topicRepository: TopicRepository }): 
 
   return {
     list: async (user) =>
-      (await deps.topicRepository.listByFamily(user.familyId))
+      (await deps.topicRepository.listWithPrintCounts(user.familyId))
         .toSorted((a, b) => a.name.localeCompare(b.name, 'ja'))
-        .map(({ id, name }) => ({ id, name })),
+        .map(({ id, name, printCount }) => ({ id, name, printCount })),
 
     create: async (user, name) => {
       assertNameAvailable(await deps.topicRepository.listByFamily(user.familyId), name)

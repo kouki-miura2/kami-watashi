@@ -82,7 +82,8 @@ export interface PrintService {
   ) => Promise<{ images: { id: string; page: number }[] }>
   delete: (user: AuthenticatedUser, id: string) => Promise<void>
   /** Prints registered at least `months` ago, family-wide (for the confirmation dialog). */
-  countOld: (user: AuthenticatedUser, months: number) => Promise<{ count: number }>
+  /** What deleting prints older than `months` would remove: how many, and their photo bytes. */
+  countOld: (user: AuthenticatedUser, months: number) => Promise<{ count: number; bytes: number }>
   deleteOld: (user: AuthenticatedUser, months: number) => Promise<{ count: number }>
   getImage: (user: AuthenticatedUser, imageId: string) => Promise<StoredImage>
 }
@@ -387,12 +388,14 @@ export const createPrintService = (deps: {
       await deleteImagesQuietly(user.familyId, refsOf(id, images))
     },
 
-    countOld: async (user, months) => ({
-      count: await deps.printRepository.countCreatedBy(
-        user.familyId,
-        addJstMonths(new Date(), -months).getTime(),
-      ),
-    }),
+    countOld: async (user, months) => {
+      const cutoff = addJstMonths(new Date(), -months).getTime()
+      const [count, bytes] = await Promise.all([
+        deps.printRepository.countCreatedBy(user.familyId, cutoff),
+        deps.printRepository.imageBytesCreatedBy(user.familyId, cutoff),
+      ])
+      return { count, bytes }
+    },
 
     deleteOld: async (user, months) => {
       const now = Date.now()

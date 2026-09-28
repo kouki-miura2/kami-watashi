@@ -19,6 +19,7 @@ const listRecord: PrintListRecord = {
   ...record,
   is_read: 1,
   mitene_status: 'requested',
+  mitene_from_name: '二郎',
   topic_ids: '["t1","t2"]',
   image_count: 2,
   cover_image_id: 'i1',
@@ -49,6 +50,7 @@ const createDao = () =>
     replaceImages: vi.fn<PrintDao['replaceImages']>(async () => {}),
     delete: vi.fn<PrintDao['delete']>(async () => {}),
     countCreatedBy: async () => 7,
+    imageBytesCreatedBy: async () => 700,
     listImagesCreatedBy: async () => [{ print_id: 'p1', image_id: 'i1' }],
     deleteCreatedBy: vi.fn<PrintDao['deleteCreatedBy']>(async () => {}),
   }) satisfies PrintDao
@@ -84,6 +86,7 @@ test('maps list rows, parsing topic ids and the read flag', async () => {
     coverImageId: 'i1',
     isRead: true,
     miteneStatus: 'requested',
+    miteneFromName: '二郎',
   })
 })
 

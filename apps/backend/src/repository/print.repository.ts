@@ -33,6 +33,8 @@ export interface PrintListItem extends Print {
   coverImageId: string | null
   isRead: boolean
   miteneStatus: MiteneStatus
+  /** Who sent the viewer's mitene; `null` without one. */
+  miteneFromName: string | null
 }
 
 export interface PrintImage {
@@ -95,6 +97,7 @@ export interface PrintRepository {
     now: number,
   ) => Promise<void>
   countCreatedBy: (familyId: string, cutoff: number) => Promise<number>
+  imageBytesCreatedBy: (familyId: string, cutoff: number) => Promise<number>
   listImagesCreatedBy: (familyId: string, cutoff: number) => Promise<ImageRef[]>
   deleteCreatedBy: (
     familyId: string,
@@ -132,6 +135,7 @@ export const createPrintRepository = (dao: PrintDao): PrintRepository => ({
       coverImageId: record.cover_image_id,
       isRead: record.is_read === 1,
       miteneStatus: record.mitene_status,
+      miteneFromName: record.mitene_from_name,
     })),
 
   findInFamily: async (familyId, id) => {
@@ -215,6 +219,7 @@ export const createPrintRepository = (dao: PrintDao): PrintRepository => ({
     dao.delete(print.id, toHistoryRecord(print.familyId, history, now)),
 
   countCreatedBy: async (familyId, cutoff) => dao.countCreatedBy(familyId, cutoff),
+  imageBytesCreatedBy: async (familyId, cutoff) => dao.imageBytesCreatedBy(familyId, cutoff),
 
   listImagesCreatedBy: async (familyId, cutoff) =>
     (await dao.listImagesCreatedBy(familyId, cutoff)).map((record) => ({

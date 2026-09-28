@@ -8,6 +8,7 @@ const soccer: TopicRecord = { id: 't1', family_id: 'f1', name: 'サッカー' }
 const createDao = () =>
   ({
     listByFamily: async () => [soccer],
+    listWithPrintCounts: async () => [{ ...soccer, print_count: 3 }],
     findInFamily: async (_familyId: string, id: string) => (id === 't1' ? soccer : null),
     create: vi.fn<TopicDao['create']>(async () => {}),
     rename: vi.fn<TopicDao['rename']>(async () => {}),
@@ -21,6 +22,9 @@ test('maps rows to topics', async () => {
 
   expect(await repository.listByFamily('f1')).toEqual([
     { id: 't1', familyId: 'f1', name: 'サッカー' },
+  ])
+  expect(await repository.listWithPrintCounts('f1')).toEqual([
+    { id: 't1', familyId: 'f1', name: 'サッカー', printCount: 3 },
   ])
   expect(await repository.findInFamily('f1', 'missing')).toBeNull()
 })

@@ -14,6 +14,11 @@ const excursion: Topic = { id: 't3', familyId: 'f1', name: 'えんそく' }
 const createService = (overrides: Partial<TopicRepository> = {}) => {
   const topicRepository = {
     listByFamily: vi.fn<TopicRepository['listByFamily']>(async () => [soccer, game, excursion]),
+    listWithPrintCounts: vi.fn<TopicRepository['listWithPrintCounts']>(async () => [
+      { ...soccer, printCount: 2 },
+      { ...game, printCount: 0 },
+      { ...excursion, printCount: 5 },
+    ]),
     findInFamily: vi.fn<TopicRepository['findInFamily']>(
       async (_familyId, id) => [soccer, game, excursion].find((topic) => topic.id === id) ?? null,
     ),
@@ -33,15 +38,15 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
-test('list sorts topics by name', async () => {
+test('list sorts topics by name, with their print counts', async () => {
   const { service, topicRepository } = createService()
 
   expect(await service.list(invitedUser)).toEqual([
-    { id: 't3', name: 'えんそく' },
-    { id: 't1', name: 'サッカー' },
-    { id: 't2', name: '試合' },
+    { id: 't3', name: 'えんそく', printCount: 5 },
+    { id: 't1', name: 'サッカー', printCount: 2 },
+    { id: 't2', name: '試合', printCount: 0 },
   ])
-  expect(topicRepository.listByFamily).toHaveBeenCalledWith('f1')
+  expect(topicRepository.listWithPrintCounts).toHaveBeenCalledWith('f1')
 })
 
 test('create adds the topic and records it', async () => {

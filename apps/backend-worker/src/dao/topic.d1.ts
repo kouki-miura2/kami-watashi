@@ -1,4 +1,8 @@
-import type { TopicDao, TopicRecord } from 'backend/src/dao/topic.interface.ts'
+import type {
+  TopicDao,
+  TopicRecord,
+  TopicWithPrintCountRecord,
+} from 'backend/src/dao/topic.interface.ts'
 
 import { rethrowUniqueConstraint } from './d1-errors.ts'
 import { insertHistory } from './history.d1.ts'
@@ -10,6 +14,19 @@ export const createTopicD1Dao = (db: D1Database): TopicDao => ({
         .prepare('SELECT id, family_id, name FROM topics WHERE family_id = ?')
         .bind(familyId)
         .all<TopicRecord>()
+    ).results,
+
+  listWithPrintCounts: async (familyId) =>
+    (
+      await db
+        .prepare(
+          `SELECT t.id, t.family_id, t.name, COUNT(pt.print_id) AS print_count
+           FROM topics t LEFT JOIN print_topics pt ON pt.topic_id = t.id
+           WHERE t.family_id = ?
+           GROUP BY t.id`,
+        )
+        .bind(familyId)
+        .all<TopicWithPrintCountRecord>()
     ).results,
 
   findInFamily: async (familyId, id) =>

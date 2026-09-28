@@ -152,6 +152,11 @@ test('list filters and sorts one slot', async () => {
   expect(await ids({ responseStatus: 'todo' })).toEqual(['l2'])
   expect(await ids({ miteneStatus: 'requested' })).toEqual(['l1'])
   expect(await ids({ miteneStatus: 'none' })).toEqual(['l5', 'l4', 'l3', 'l2'])
+  // The sender's name comes with a mitene, for the list's 「見てね・二郎」.
+  const [requested] = await dao.list(listQuery({ miteneStatus: 'requested' }))
+  expect(requested?.mitene_from_name).toEqual(expect.any(String))
+  const [none] = await dao.list(listQuery({ miteneStatus: 'none' }))
+  expect(none?.mitene_from_name).toBeNull()
   // Another family's view of the same child id sees nothing.
   expect(await ids({ familyId: 'f2' })).toEqual([])
 })
@@ -269,6 +274,14 @@ test('bulk deletion counts, lists and deletes prints registered by the cutoff', 
 
   expect(await dao.countCreatedBy('f1', 1000)).toBe(total)
   expect((await dao.listImagesCreatedBy('f1', 1000)).length).toBeGreaterThan(0)
+  // The photo bytes of exactly those prints: everything used so far, but not `new1`'s.
+  const oldBytes = await db
+    .prepare(
+      "SELECT SUM(i.size) AS bytes FROM print_images i JOIN prints p ON p.id = i.print_id WHERE p.family_id = 'f1' AND p.id != 'new1'",
+    )
+    .first<number>('bytes')
+  expect(await dao.imageBytesCreatedBy('f1', 1000)).toBe(oldBytes)
+  expect(await dao.imageBytesCreatedBy('f2', 1000)).toBe(0)
 
   await dao.deleteCreatedBy(
     'f1',

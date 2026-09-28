@@ -96,6 +96,7 @@ export const createPrintD1Dao = (db: D1Database): PrintDao => ({
             .join(', ')},
              COALESCE(s.is_read, 0) AS is_read,
              COALESCE(s.mitene_status, 'none') AS mitene_status,
+             (SELECT name FROM members WHERE id = s.mitene_from) AS mitene_from_name,
              (SELECT json_group_array(topic_id) FROM print_topics WHERE print_id = p.id) AS topic_ids,
              (SELECT COUNT(*) FROM print_images WHERE print_id = p.id) AS image_count,
              (SELECT id FROM print_images WHERE print_id = p.id ORDER BY page LIMIT 1) AS cover_image_id
@@ -286,6 +287,16 @@ export const createPrintD1Dao = (db: D1Database): PrintDao => ({
       .prepare('SELECT COUNT(*) AS count FROM prints WHERE family_id = ? AND created_at <= ?')
       .bind(familyId, cutoff)
       .first<number>('count')) ?? 0,
+
+  imageBytesCreatedBy: async (familyId, cutoff) =>
+    (await db
+      .prepare(
+        `SELECT COALESCE(SUM(i.size), 0) AS bytes
+         FROM print_images i JOIN prints p ON p.id = i.print_id
+         WHERE p.family_id = ? AND p.created_at <= ?`,
+      )
+      .bind(familyId, cutoff)
+      .first<number>('bytes')) ?? 0,
 
   listImagesCreatedBy: async (familyId, cutoff) =>
     (

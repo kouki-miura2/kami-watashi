@@ -9,6 +9,8 @@ export interface Topic {
 
 export interface TopicRepository {
   listByFamily: (familyId: string) => Promise<Topic[]>
+  /** The family's topics with the number of prints each is set on. */
+  listWithPrintCounts: (familyId: string) => Promise<(Topic & { printCount: number })[]>
   findInFamily: (familyId: string, id: string) => Promise<Topic | null>
   /** Throws `UniqueConstraintError` if the name is taken. */
   create: (topic: Topic, history: HistoryEntry, now: number) => Promise<void>
@@ -25,6 +27,11 @@ const toTopic = (record: TopicRecord): Topic => ({
 
 export const createTopicRepository = (dao: TopicDao): TopicRepository => ({
   listByFamily: async (familyId) => (await dao.listByFamily(familyId)).map(toTopic),
+  listWithPrintCounts: async (familyId) =>
+    (await dao.listWithPrintCounts(familyId)).map((record) => ({
+      ...toTopic(record),
+      printCount: record.print_count,
+    })),
   findInFamily: async (familyId, id) => {
     const record = await dao.findInFamily(familyId, id)
     return record ? toTopic(record) : null

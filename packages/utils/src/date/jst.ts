@@ -14,6 +14,15 @@ export const toJstDateString = (date: Date): string => {
   return `${wall.getUTCFullYear()}-${pad(wall.getUTCMonth() + 1)}-${pad(wall.getUTCDate())}`
 }
 
+/** JST calendar date of an instant in the app's display format: `2026.09.27`. */
+export const formatJstDate = (date: Date): string => toJstDateString(date).replaceAll('-', '.')
+
+/** JST date and time (to the minute) of an instant in the app's display format: `2026.09.27 12:40`. */
+export const formatJstDateTime = (date: Date): string => {
+  const wall = toJstWallClock(date)
+  return `${formatJstDate(date)} ${pad(wall.getUTCHours())}:${pad(wall.getUTCMinutes())}`
+}
+
 /** Start (00:00 JST) of the calendar week containing `date`. Weeks start on Monday. */
 export const startOfJstWeek = (date: Date): Date => {
   const wall = toJstWallClock(date)

@@ -1,11 +1,30 @@
 import { expect, test } from 'vite-plus/test'
 
-import { addJstMonths, startOfJstMonth, startOfJstWeek, toJstDateString } from './jst.ts'
+import {
+  addJstMonths,
+  formatJstDate,
+  formatJstDateTime,
+  startOfJstMonth,
+  startOfJstWeek,
+  toJstDateString,
+} from './jst.ts'
 
 test('toJstDateString uses the JST calendar date, not UTC', () => {
   // 2026-09-27 15:30 UTC is already 2026-09-28 00:30 in JST.
   expect(toJstDateString(new Date('2026-09-27T15:30:00Z'))).toBe('2026-09-28')
   expect(toJstDateString(new Date('2026-09-27T14:59:59Z'))).toBe('2026-09-27')
+})
+
+test('formatJstDate formats the JST calendar date with dots', () => {
+  expect(formatJstDate(new Date('2026-09-27T15:30:00Z'))).toBe('2026.09.28')
+  expect(formatJstDate(new Date('2026-01-05T00:00:00Z'))).toBe('2026.01.05')
+})
+
+test('formatJstDateTime formats the JST date and time to the minute', () => {
+  // 2026-09-27 03:40:59 UTC is 12:40 JST; seconds are dropped, not rounded.
+  expect(formatJstDateTime(new Date('2026-09-27T03:40:59Z'))).toBe('2026.09.27 12:40')
+  // 15:05 UTC crosses into the next JST day.
+  expect(formatJstDateTime(new Date('2026-09-27T15:05:00Z'))).toBe('2026.09.28 00:05')
 })
 
 test('startOfJstWeek returns Monday 00:00 JST', () => {

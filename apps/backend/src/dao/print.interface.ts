@@ -21,6 +21,8 @@ export interface PrintRecord {
 export interface PrintListRecord extends PrintRecord {
   is_read: number
   mitene_status: MiteneStatus
+  /** Who sent the viewer's mitene (their current name); `null` without one. */
+  mitene_from_name: string | null
   /** JSON array of topic ids. */
   topic_ids: string
   image_count: number
@@ -133,6 +135,8 @@ export interface PrintDao {
   delete: (printId: string, history: HistoryRecord) => Promise<void>
   /** Prints registered at or before `cutoff` (Unix ms), family-wide. */
   countCreatedBy: (familyId: string, cutoff: number) => Promise<number>
+  /** Total photo bytes of the prints `countCreatedBy` counts (what deleting them frees). */
+  imageBytesCreatedBy: (familyId: string, cutoff: number) => Promise<number>
   listImagesCreatedBy: (familyId: string, cutoff: number) => Promise<PrintImageRefRecord[]>
   deleteCreatedBy: (familyId: string, cutoff: number, history: HistoryRecord) => Promise<void>
 }

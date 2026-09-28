@@ -8,7 +8,7 @@ import { type AppEnv, invalidInput, nameSchema } from './context.ts'
 const LOCAL_HOSTNAMES = ['localhost', '127.0.0.1', '[::1]']
 
 /**
- * Local-development only (see `docs/implementation-plan.md` 2.5). `createApp` mounts these only
+ * Local-development only (see "Local development" in `apps/backend-worker/AGENTS.md`). `createApp` mounts these only
  * when `config.devLogin` is on, and they additionally refuse any non-local hostname.
  */
 export const createDevRoutes = (deps: { authService: AuthService }) =>

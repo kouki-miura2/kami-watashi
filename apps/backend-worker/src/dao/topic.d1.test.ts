@@ -56,6 +56,20 @@ test('lists and finds topics only within the family', async () => {
   expect(await dao.findInFamily('f1', 'tx')).toBeNull()
 })
 
+test('listWithPrintCounts counts the prints each topic is on, zero included', async () => {
+  const { db } = testD1
+  await db.prepare("INSERT INTO topics (id, family_id, name) VALUES ('t0', 'f1', '未使用')").run()
+
+  const counts = await createTopicD1Dao(db).listWithPrintCounts('f1')
+
+  expect(counts.toSorted((a, b) => a.id.localeCompare(b.id))).toEqual([
+    { id: 't0', family_id: 'f1', name: '未使用', print_count: 0 },
+    { id: 't1', family_id: 'f1', name: 'サッカー', print_count: 1 },
+    { id: 't2', family_id: 'f1', name: '試合', print_count: 1 },
+  ])
+  await db.prepare("DELETE FROM topics WHERE id = 't0'").run()
+})
+
 test('create and rename write their history rows; a taken name throws', async () => {
   const dao = createTopicD1Dao(testD1.db)
 

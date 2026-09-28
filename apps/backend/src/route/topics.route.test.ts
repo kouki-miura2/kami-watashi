@@ -11,7 +11,7 @@ const json = (method: string, body: unknown) => ({
 })
 
 test('GET /topics lists the topics of the caller family', async () => {
-  const topics = [{ id: 't1', name: 'サッカー' }]
+  const topics = [{ id: 't1', name: 'サッカー', printCount: 2 }]
   const list = vi.fn<TopicService['list']>(async () => topics)
   const app = createTestApp({ user: invitedUser, services: { topicService: { list } } })
 
