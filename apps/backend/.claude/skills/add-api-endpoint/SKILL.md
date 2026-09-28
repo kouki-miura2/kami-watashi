@@ -1,6 +1,6 @@
 ---
 name: add-api-endpoint
-description: Add a new API endpoint to apps/backend, following the app.ts -> service -> repository -> dao layering with co-located tests at every layer. Use when adding, wiring, or scaffolding a new backend route/endpoint, or when asked how a backend endpoint should be structured.
+description: Add a new API endpoint to apps/backend, following the route -> service -> repository -> dao layering with co-located tests at every layer. Use when adding, wiring, or scaffolding a new backend route/endpoint, or when asked how a backend endpoint should be structured.
 ---
 
 # Add a backend API endpoint
@@ -8,38 +8,40 @@ description: Add a new API endpoint to apps/backend, following the app.ts -> ser
 `apps/backend` request handling is strictly layered (see `apps/backend/AGENTS.md`):
 
 ```
-route (src/app.ts) -> service (src/service/*.service.ts)
-                    -> repository (src/repository/*.repository.ts)
-                    -> dao (src/dao/*.interface.ts + *.memory.ts;
-                            datastore-backed DAOs in the runtime package)
+route (src/route/*.route.ts) -> service (src/service/*.service.ts)
+                             -> repository (src/repository/*.repository.ts)
+                             -> dao (src/dao/*.interface.ts;
+                                     implementations in the runtime package, e.g. *.d1.ts)
 ```
 
-- A **route** depends only on a service. No business logic or datastore access in `app.ts`.
+- A **route** depends only on a service. No business logic or datastore access in a route file.
 - A **service** holds business logic, orchestrates one or more repositories, and is the only
   layer that decides outcomes like "not found" / validation. It knows nothing about HTTP.
 - A **repository** maps a DAO's raw storage shape to a domain entity. No datastore access here
   either — that's the DAO's job.
 - A **dao** is the only layer that talks to a datastore, behind an interface, so different
   runtime packages (`apps/backend-*`) can wire in their own concrete DAOs without touching service/repository/route code.
+  DAO methods are cut per operation, not per table: a write spanning several tables (plus its
+  history row) is one method, so the runtime can run it atomically (D1 `batch()`).
 
-`src/{service,repository,dao}/sample.*`, wired to `GET /sample/:id` in `src/app.ts`, is a worked
-reference for this exact chain. Read it before starting, and copy its shape rather than inventing
-a new one.
+Topics are the simplest complete example of this chain — read it before starting and copy its
+shape rather than inventing a new one: `src/route/topics.route.ts` → `src/service/topic.service.ts`
+→ `src/repository/topic.repository.ts` → `src/dao/topic.interface.ts` →
+`apps/backend-worker/src/dao/topic.d1.ts`, each with its co-located test.
 
 ## Procedure
 
 Build bottom-up — each layer's test needs the layer below it to already have an interface.
-Replace `<name>` below with the resource name (e.g. `widget`), matching the `sample.*` naming
+Replace `<name>` below with the resource name (e.g. `widget`), matching the `topic.*` naming
 scheme.
 
 ### 1. DAO layer
 
 - `src/dao/<name>.interface.ts` — the raw storage type (`<Name>Record`) and the `<Name>Dao`
   interface (the methods this endpoint needs, e.g. `findById`).
-- `src/dao/<name>.memory.ts` — a concrete in-memory implementation (`create<Name>Dao`). When/if
-  a real datastore is needed, add its implementation in the runtime package, not here
-  (`apps/backend-*/src/dao/<name>.<datastore>.ts`; see that package's `AGENTS.md`).
-- `src/dao/<name>.memory.test.ts` — co-located test for the concrete DAO (see `sample.memory.test.ts`).
+- No in-memory implementation here. The concrete DAO lives in the runtime package
+  (`apps/backend-worker/src/dao/<name>.d1.ts` / `.r2.ts`, see that package's `AGENTS.md`),
+  with its own co-located test there.
 
 ### 2. Repository layer
 
@@ -47,8 +49,8 @@ scheme.
   `<Name>Repository` interface, and `create<Name>Repository(dao)` mapping the DAO's raw record to
   the domain entity.
 - `src/repository/<name>.repository.test.ts` — co-located test, using a hand-written fake
-  `<Name>Dao` (not the real `.memory` implementation) so the test only exercises the repository's
-  mapping logic (see `sample.repository.test.ts`).
+  `<Name>Dao` (not a real implementation) so the test only exercises the repository's
+  mapping logic (see `topic.repository.test.ts`).
 
 ### 3. Service layer
 
@@ -57,22 +59,29 @@ scheme.
   logic and orchestration. Express "not found" / "invalid" as `null` or a thrown error — never an
   HTTP status here.
 - `src/service/<name>.service.test.ts` — co-located test, using a hand-written fake
-  `<Name>Repository` (see `sample.service.test.ts`).
+  `<Name>Repository` (see `topic.service.test.ts`).
 
-### 4. Route layer (`src/app.ts`)
+### 4. Route layer (`src/route/<name>.route.ts`)
 
-- Add the new dependency to `AppDependencies` (e.g. `<name>Service: <Name>Service`).
-- Add the route inside `createApp(...)`, calling only the service and translating its result to
-  an HTTP response (status code, JSON body). No business logic in the route itself.
-- Extend `src/app.test.ts` (already co-located with `app.ts`) with cases for the new route, using
-  a hand-written fake `<Name>Service` — covering the success path, the "not found"/error path, and
-  auth guard interaction if the route isn't excluded from it.
+- Add the new dependency to `AppDependencies` in `src/app.ts` (e.g. `<name>Service: <Name>Service`).
+- `src/route/<name>.route.ts` — `create<Name>Routes(deps)` returning a Hono sub-app. Each handler
+  validates input with `zValidator` from `@hono/zod-validator` (shape and `LIMITS`-based input
+  limits; this also gives Hono RPC the request types), calls only the service, and translates its
+  result to an HTTP response (status code, JSON body). No business logic in the route itself.
+- Chain it into `createApp(...)` in `src/app.ts` with `.route('/<path>', create<Name>Routes(deps))`
+  — keep it in the chain so `AppType` still carries the new route's types.
+- `src/route/<name>.route.test.ts` — co-located test using a hand-written fake `<Name>Service`,
+  covering the success path, the "not found"/error path, validation errors, and auth guard
+  interaction if the route isn't excluded from it.
 
 ### 5. Wire real dependencies
 
-- Update the runtime package's entrypoint (in `apps/backend-*/src/`) to construct the real
-  dao -> repository -> service chain and pass it into `createApp`, the same way it already does
-  for `sampleService`.
+- Add the datastore-backed DAO in the runtime package (`apps/backend-worker/src/dao/<name>.d1.ts`,
+  with a `<name>.d1.test.ts` against the local D1 from `createTestD1()`).
+- Update the runtime package's entrypoint (`apps/backend-worker/src/worker.ts`) to construct the
+  real dao -> repository -> service chain and pass it into `createApp`, the same way it already
+  does for `topicService`.
+- Add the new service to `createTestApp`'s defaults in `src/testing.ts`.
 
 ### 6. Validate
 
@@ -86,7 +95,5 @@ vp test    # or: vp run backend#test
 - Every file has its test right next to it (`foo.ts` + `foo.test.ts`) — never a separate `test/`
   or `__tests__/` tree.
 - Each layer's test fakes only the interface directly below it, not the real implementation, so
-  layers stay independently testable. The DAO's own test is the only one that touches the real
-  (in this case in-memory) implementation.
-- Once real endpoints make `sample.*` (files and the `/sample/:id` route) unnecessary as a
-  reference, delete them per `apps/backend/AGENTS.md`.
+  layers stay independently testable. The DAO's own test (in the runtime package) is the only
+  one that touches a real implementation.

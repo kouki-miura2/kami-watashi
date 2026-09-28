@@ -1,0 +1,62 @@
+import type { MemberDao, MemberRecord } from '../dao/member.interface.ts'
+import { type HistoryEntry, toHistoryRecord } from './history.repository.ts'
+
+export interface Member {
+  id: string
+  familyId: string
+  name: string
+  /** The owner is the member who signed in with Google (`google_sub` is set). */
+  isOwner: boolean
+  termsVersion: string | null
+}
+
+export interface NewInvitedMember {
+  id: string
+  familyId: string
+  name: string
+  keyHash: string
+  termsVersion: string
+  now: number
+  maxMembers: number
+}
+
+export interface MemberRepository {
+  findById: (id: string) => Promise<Member | null>
+  findByKeyHash: (keyHash: string) => Promise<Member | null>
+  findByGoogleSub: (googleSub: string) => Promise<Member | null>
+  listByFamily: (familyId: string) => Promise<Member[]>
+  /** `false` if the family was already full. Throws `UniqueConstraintError` if the name is taken. */
+  createInvited: (member: NewInvitedMember) => Promise<boolean>
+  /** Throws `UniqueConstraintError` if the name is taken. */
+  rename: (
+    member: Pick<Member, 'id' | 'familyId'>,
+    name: string,
+    history: HistoryEntry,
+    now: number,
+  ) => Promise<void>
+  agreeTerms: (memberId: string, termsVersion: string, now: number) => Promise<void>
+  delete: (memberId: string) => Promise<void>
+}
+
+const toMember = (record: MemberRecord): Member => ({
+  id: record.id,
+  familyId: record.family_id,
+  name: record.name,
+  isOwner: record.google_sub !== null,
+  termsVersion: record.terms_version,
+})
+
+const toMemberOrNull = (record: MemberRecord | null): Member | null =>
+  record ? toMember(record) : null
+
+export const createMemberRepository = (dao: MemberDao): MemberRepository => ({
+  findById: async (id) => toMemberOrNull(await dao.findById(id)),
+  findByKeyHash: async (keyHash) => toMemberOrNull(await dao.findByKeyHash(keyHash)),
+  findByGoogleSub: async (googleSub) => toMemberOrNull(await dao.findByGoogleSub(googleSub)),
+  listByFamily: async (familyId) => (await dao.listByFamily(familyId)).map(toMember),
+  createInvited: async (member) => dao.createInvited(member),
+  rename: async (member, name, history, now) =>
+    dao.rename(member.id, name, toHistoryRecord(member.familyId, history, now)),
+  agreeTerms: async (memberId, termsVersion, now) => dao.agreeTerms(memberId, termsVersion, now),
+  delete: async (memberId) => dao.delete(memberId),
+})

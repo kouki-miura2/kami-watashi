@@ -164,6 +164,9 @@ settings:
 
 catalogs:
   default:
+    '@hono/zod-validator':
+      specifier: ^0.9.1
+      version: 0.9.1
     '@mdi/font':
       specifier: ^7.4.47
       version: 7.4.47
@@ -179,6 +182,9 @@ catalogs:
     vite-plus:
       specifier: 0.3.3
       version: 0.3.3
+    zod:
+      specifier: ^4.6.5
+      version: 4.6.5
 
 overrides:
   vite: npm:@voidzero-dev/vite-plus-core@0.3.3
@@ -196,12 +202,18 @@ importers:
 
   apps/backend:
     dependencies:
+      '@hono/zod-validator':
+        specifier: 'catalog:'
+        version: 0.9.1(hono@4.13.8)(zod@4.6.5)
       hono:
         specifier: ^4.13.7
         version: 4.13.8
       utils:
         specifier: workspace:*
         version: link:../../packages/utils
+      zod:
+        specifier: 'catalog:'
+        version: 4.6.5
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -216,12 +228,15 @@ importers:
         specifier: workspace:*
         version: link:../backend
     devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.13.6
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
       wrangler:
         specifier: ^4.131.1
-        version: 4.135.0(@types/node@26.6.2)
+        version: 4.135.0(@types/node@24.13.6)
 
   apps/frontend:
     dependencies:
@@ -519,6 +534,12 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@hono/zod-validator@0.9.1':
+    resolution: {integrity: sha512-iiv6w0qrIc0arfvCtUqBWsvl4fXjzaTcQcCJTTtCnkawF9HHGE+KjEl0ox3gQJ6rKZEgE3mLExlQCF72M+mNuw==}
+    peerDependencies:
+      hono: '>=4.11.2'
+      zod: ^3.25.0 || ^4.0.0
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -2253,6 +2274,9 @@ packages:
   yuku-parser@0.9.5:
     resolution: {integrity: sha512-IBnAdNVMswWbJcM7woPluOudectJzFjJ1N8jVRxP9Uq4CIv5hZdBIcdmtRbFDYF/Ph2j2gVup4YJ4N9mh0jYFA==}
 
+  zod@4.6.5:
+    resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
+
 snapshots:
 
   '@babel/code-frame@7.29.7':
@@ -2387,6 +2411,11 @@ snapshots:
 
   '@esbuild/win32-x64@0.28.1':
     optional: true
+
+  '@hono/zod-validator@0.9.1(hono@4.13.8)(zod@4.6.5)':
+    dependencies:
+      hono: 4.13.8
+      zod: 4.6.5
 
   '@img/colour@1.1.0': {}
 
@@ -3412,10 +3441,10 @@ snapshots:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  miniflare@5.20260918.0-alpha(@types/node@26.6.2):
+  miniflare@5.20260918.0-alpha(@types/node@24.13.6):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
-      sharp: 0.35.4(@types/node@26.6.2)
+      sharp: 0.35.4(@types/node@24.13.6)
       undici: 7.29.0
       workerd: 1.20260918.1
       ws: 8.21.0
@@ -3658,7 +3687,7 @@ snapshots:
 
   semver@7.8.5: {}
 
-  sharp@0.35.4(@types/node@26.6.2):
+  sharp@0.35.4(@types/node@24.13.6):
     dependencies:
       '@img/colour': 1.1.0
       detect-libc: 2.1.2
@@ -3689,7 +3718,7 @@ snapshots:
       '@img/sharp-win32-arm64': 0.35.4
       '@img/sharp-win32-ia32': 0.35.4
       '@img/sharp-win32-x64': 0.35.4
-      '@types/node': 26.6.2
+      '@types/node': 24.13.6
 
   siginfo@2.0.0: {}
 
@@ -4141,13 +4170,13 @@ snapshots:
       '@cloudflare/workerd-linux-arm64': 1.20260918.1
       '@cloudflare/workerd-windows-64': 1.20260918.1
 
-  wrangler@4.135.0(@types/node@26.6.2):
+  wrangler@4.135.0(@types/node@24.13.6):
     dependencies:
       '@cloudflare/kv-asset-handler': 0.5.0
       '@cloudflare/unenv-preset': 2.16.1(unenv@2.0.0-rc.24)(workerd@1.20260918.1)
       blake3-wasm: 2.1.5
       esbuild: 0.28.1
-      miniflare: 5.20260918.0-alpha(@types/node@26.6.2)
+      miniflare: 5.20260918.0-alpha(@types/node@24.13.6)
       path-to-regexp: 6.3.0
       unenv: 2.0.0-rc.24
       workerd: 1.20260918.1
@@ -4216,3 +4245,5 @@ snapshots:
       '@yuku-parser/binding-linux-x64-musl': 0.9.5
       '@yuku-parser/binding-win32-arm64': 0.9.5
       '@yuku-parser/binding-win32-x64': 0.9.5
+
+  zod@4.6.5: {}

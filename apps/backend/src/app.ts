@@ -1,9 +1,34 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { createLogger } from 'utils'
 
-import type { AuthGuard, AuthenticatedUser } from './repository/auth-guard.interface.ts'
-import type { SampleService } from './service/sample.service.ts'
+import type { AuthGuard } from './repository/auth-guard.interface.ts'
+import { createAuthRoutes } from './route/auth.route.ts'
+import { createChildrenRoutes } from './route/children.route.ts'
+import { type AppEnv } from './route/context.ts'
+import { createDevRoutes } from './route/dev.route.ts'
+import { createFamilyRoutes } from './route/family.route.ts'
+import { createHistoriesRoutes } from './route/histories.route.ts'
+import { createImagesRoutes } from './route/images.route.ts'
+import { createInvitesRoutes } from './route/invites.route.ts'
+import { createLaunchRoutes } from './route/launch.route.ts'
+import { createMeRoutes } from './route/me.route.ts'
+import { createMembersRoutes } from './route/members.route.ts'
+import { createPrintsRoutes } from './route/prints.route.ts'
+import { createStatsRoutes } from './route/stats.route.ts'
+import { createTopicsRoutes } from './route/topics.route.ts'
+import type { AuthService } from './service/auth.service.ts'
+import type { ChildService } from './service/child.service.ts'
+import { AppError, type AppErrorCode } from './service/errors.ts'
+import type { FamilyService } from './service/family.service.ts'
+import type { HistoryService } from './service/history.service.ts'
+import type { InviteService } from './service/invite.service.ts'
+import type { MemberService } from './service/member.service.ts'
+import type { MiteneService } from './service/mitene.service.ts'
+import type { PrintService } from './service/print.service.ts'
+import type { StatsService } from './service/stats.service.ts'
+import type { TopicService } from './service/topic.service.ts'
 
 export interface AuthConfig {
   guard: AuthGuard
@@ -12,12 +37,56 @@ export interface AuthConfig {
   excludePaths: string[]
 }
 
-export interface AppDependencies {
-  sampleService: SampleService
-  auth: AuthConfig
+export interface AppConfig {
+  /** Current terms/privacy policy version. Members who agreed to an older one get `terms_required`. */
+  termsVersion: string
+  /** CORS allow-list (the Capacitor app origins, plus the Vite dev server locally). */
+  allowedOrigins: string[]
+  /** Mounts `/dev/*` (local-only sign-in). Must never be on in a deployed Worker. */
+  devLogin: boolean
 }
 
-type Variables = { user: AuthenticatedUser | null; requestId: string }
+export interface AppDependencies {
+  config: AppConfig
+  auth: AuthConfig
+  authService: AuthService
+  memberService: MemberService
+  inviteService: InviteService
+  childService: ChildService
+  topicService: TopicService
+  printService: PrintService
+  miteneService: MiteneService
+  historyService: HistoryService
+  statsService: StatsService
+  familyService: FamilyService
+}
+
+/** Paths reachable without credentials — pass as `auth.excludePaths`. */
+export const PUBLIC_PATHS = [
+  '/auth/google',
+  '/auth/google/register',
+  '/invites/redeem',
+  '/dev/login',
+]
+
+/** Reachable with outdated terms, so the app can launch and ask for agreement again. */
+const TERMS_EXEMPT_PATHS = ['/launch', '/me/terms']
+
+const statusByErrorCode: Record<AppErrorCode, ContentfulStatusCode> = {
+  invalid_input: 400,
+  invalid_terms_version: 400,
+  invalid_invite: 400,
+  invite_expired: 400,
+  unauthorized: 401,
+  forbidden: 403,
+  terms_required: 403,
+  not_found: 404,
+  not_registered: 404,
+  already_registered: 409,
+  name_taken: 409,
+  member_limit: 409,
+  storage_limit: 413,
+}
 
 // 4 random bytes as hex: short enough to scan by eye in logs, still ~4 billion values so
 // collisions within one log stream are practically a non-issue.
@@ -30,53 +99,91 @@ const generateRequestId = (): string =>
 export const createApp = (deps: AppDependencies) => {
   const logger = createLogger({ format: 'json' })
 
-  return (
-    new Hono<{ Variables: Variables }>()
-      .use('*', cors())
-      // Audit trail: start/end pair per request, joined by requestId (needed since concurrent
-      // requests to the same method+path would otherwise be indistinguishable in the log stream).
-      // Wraps the auth guard so a rejected (401) request is still logged, not just successful ones.
-      .use('*', async (c, next) => {
-        const requestId = generateRequestId()
-        c.set('requestId', requestId)
-        const startedAt = Date.now()
+  const app = new Hono<AppEnv>()
+    .use('*', cors({ origin: deps.config.allowedOrigins }))
+    // Audit trail: start/end pair per request, joined by requestId (needed since concurrent
+    // requests to the same method+path would otherwise be indistinguishable in the log stream).
+    // Wraps the auth guard so a rejected (401) request is still logged, not just successful ones.
+    .use('*', async (c, next) => {
+      const requestId = generateRequestId()
+      c.set('requestId', requestId)
+      const startedAt = Date.now()
 
-        logger.info('request started', { requestId, method: c.req.method, path: c.req.path })
+      logger.info('request started', { requestId, method: c.req.method, path: c.req.path })
 
-        try {
-          await next()
-        } finally {
-          logger.info('request completed', {
-            requestId,
-            method: c.req.method,
-            path: c.req.path,
-            user: c.get('user')?.id ?? 'anonymous',
-            status: c.res.status,
-            durationMs: Date.now() - startedAt,
-          })
-        }
-      })
-      .use('*', async (c, next) => {
-        if (deps.auth.enabled && !deps.auth.excludePaths.includes(c.req.path)) {
-          const user = await deps.auth.guard.authenticate(c.req.raw)
-          if (!user) return c.json({ error: 'Unauthorized' }, 401)
-          c.set('user', user)
-        } else {
-          c.set('user', null)
-        }
+      try {
         await next()
-      })
-      // Reference implementation of one endpoint through the app -> service -> repository -> dao
-      // layering: the runtime entrypoints wire the concrete dependencies, this route only talks
-      // to `SampleService`. Build real routes the same way, then delete this route and the
-      // `service/sample.*`, `repository/sample.*`, `dao/sample.*` files once they're not needed
-      // as a reference anymore.
-      .get('/sample/:id', async (c) => {
-        const sample = await deps.sampleService.getSample(c.req.param('id'))
-        if (!sample) return c.json({ error: 'Not Found' }, 404)
-        return c.json(sample)
-      })
-  )
+      } finally {
+        logger.info('request completed', {
+          requestId,
+          method: c.req.method,
+          path: c.req.path,
+          user: c.get('user')?.id ?? 'anonymous',
+          status: c.res.status,
+          durationMs: Date.now() - startedAt,
+        })
+      }
+    })
+    // API responses reflect per-member state (read/mitene) and must not be served from a cache.
+    // A route that is safe to cache (images) sets its own Cache-Control.
+    .use('*', async (c, next) => {
+      await next()
+      if (!c.res.headers.has('cache-control')) c.res.headers.set('cache-control', 'no-store')
+    })
+    .use('*', async (c, next) => {
+      if (deps.auth.enabled && !deps.auth.excludePaths.includes(c.req.path)) {
+        const user = await deps.auth.guard.authenticate(c.req.raw)
+        if (!user) return c.json({ error: 'unauthorized' }, 401)
+        c.set('user', user)
+      } else {
+        c.set('user', null)
+      }
+      await next()
+    })
+    .use('*', async (c, next) => {
+      const user = c.get('user')
+      if (
+        user &&
+        user.termsVersion !== deps.config.termsVersion &&
+        !TERMS_EXEMPT_PATHS.includes(c.req.path)
+      ) {
+        throw new AppError('terms_required')
+      }
+      await next()
+    })
+    .route('/auth', createAuthRoutes(deps))
+    .route('/launch', createLaunchRoutes(deps))
+    .route('/me', createMeRoutes(deps))
+    .route('/members', createMembersRoutes(deps))
+    .route('/invites', createInvitesRoutes(deps))
+    .route('/children', createChildrenRoutes(deps))
+    .route('/topics', createTopicsRoutes(deps))
+    .route('/prints', createPrintsRoutes(deps))
+    .route('/images', createImagesRoutes(deps))
+    .route('/histories', createHistoriesRoutes(deps))
+    .route('/stats', createStatsRoutes(deps))
+    .route('/family', createFamilyRoutes(deps))
+
+  app.notFound((c) => c.json({ error: 'not_found' }, 404))
+  app.onError((error, c) => {
+    if (error instanceof AppError) {
+      return c.json(
+        { error: error.code, ...(error.details ? { details: error.details } : {}) },
+        statusByErrorCode[error.code],
+      )
+    }
+    logger.error('unhandled error', {
+      requestId: c.get('requestId'),
+      error: error instanceof Error ? (error.stack ?? error.message) : String(error),
+    })
+    return c.json({ error: 'internal_error' }, 500)
+  })
+
+  // Mounted outside the chain on purpose: `/dev/*` is not part of `AppType` (the frontend never
+  // calls it) and doesn't exist at all unless `devLogin` is on.
+  if (deps.config.devLogin) app.route('/dev', createDevRoutes(deps))
+
+  return app
 }
 
 /** Hono RPC contract consumed by `apps/frontend` via `hc<AppType>()`. */

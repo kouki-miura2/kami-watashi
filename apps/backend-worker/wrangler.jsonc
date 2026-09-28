@@ -6,4 +6,35 @@
   "observability": {
     "enabled": true,
   },
+  // `database_id` is filled in on the first remote deploy (automatic provisioning). Local dev
+  // (`wrangler dev`) and local migrations don't need it.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "kami-watashi",
+      "migrations_dir": "migrations",
+    },
+  ],
+  // Private bucket: images are only served through the Worker's auth guard (`GET /images/:id`).
+  // Never attach an r2.dev URL or a custom domain.
+  "r2_buckets": [
+    {
+      "binding": "IMAGES",
+      "bucket_name": "kami-watashi-images",
+    },
+  ],
+  // Daily at 03:00 JST: delete families inactive for LIMITS.autoDeleteDays (`scheduled` in worker.ts).
+  "triggers": {
+    "crons": ["0 18 * * *"],
+  },
+  // Public values only — anything here is readable by anyone with access to the Worker.
+  // Secrets: `SESSION_SECRET` via `wrangler secret put` (locally `.dev.vars`).
+  // `DEV_LOGIN_ENABLED` belongs in `.dev.vars` only, never here.
+  "vars": {
+    "TERMS_VERSION": "2026-10-01",
+    // OAuth client ids (iOS / Android / Web, comma-separated) accepted as a Google ID token's
+    // `aud`. Public by design (they ship in the app). Empty = Google sign-in rejects everything.
+    "GOOGLE_CLIENT_IDS": "",
+    "ALLOWED_ORIGINS": "capacitor://localhost,https://localhost",
+  },
 }

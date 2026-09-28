@@ -13,8 +13,6 @@ table entry.
 Worked references:
 
 - `src/views/SampleView.vue` — a view with no server data, using a Pinia store directly.
-- `src/views/HomeView.vue` + `src/composables/useSampleQuery.ts` — a view backed by server data
-  via TanStack Query, reacting to a query error through a Pinia store.
 - `src/router/routes.ts` / `src/router/routes.test.ts` — the route table and its test.
 
 ## Procedure
@@ -36,11 +34,11 @@ A view can need none, either, or both of the first two.
 
 - `src/composables/use<Name>Query.ts` — wraps `useQuery` (or `useMutation`), calling the Hono RPC
   `apiClient` from `src/api/client.ts`. Accept an optional `queryClient` param, passed through to
-  `useQuery` as the second argument, purely so tests can run it outside a mounted app (see
-  `useSampleQuery.ts`).
+  `useQuery` as the second argument, purely so tests can run it outside a mounted app. Throw on a
+  non-OK response (`if (!res.ok) throw new Error(...)`) so TanStack Query sees it as an error.
 - `src/composables/use<Name>Query.test.ts` — co-located test: `vi.mock('../api/client.ts', ...)`,
   run the composable inside `effectScope().run(...)` with an explicit throwaway `QueryClient`
-  (`retry: false`), and await state with `vi.waitFor(...)` (see `useSampleQuery.test.ts`).
+  (`retry: false`), and await state with `vi.waitFor(...)`.
 
 ### 3. Create the view
 
@@ -83,5 +81,5 @@ DOM-free ceiling for what this view can be unit-tested with. To see the screen i
   `routes.test.ts`) — never a separate `test/` or `__tests__/` tree.
 - API request/response types come from `apps/backend`'s `AppType` via Hono RPC — never hand-write
   a DTO for the response a composable consumes.
-- `SampleView.vue` / `HomeView.vue` and their supporting files are reference implementations, not
-  fixed scaffolding to keep around forever — follow their shape, don't just import from them.
+- `SampleView.vue` and its supporting files are a reference implementation, not fixed scaffolding
+  to keep around forever — follow its shape, don't just import from it.
