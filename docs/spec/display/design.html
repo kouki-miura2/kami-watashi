@@ -1,0 +1,4817 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <x-dc>
+      <helmet data-dc-atomics="">
+        <meta name="design_doc_mode" content="canvas" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <style>
+          /* fallback */
+
+          .material-symbols-rounded {
+            font-family: 'Material Symbols Rounded';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+          }
+        </style>
+        <style>
+          body {
+            margin: 0;
+            background: #e9e5db;
+            font-family: 'Zen Kaku Gothic New', system-ui, sans-serif;
+            color: #1f1d1a;
+          }
+          a {
+            color: #b8431f;
+          }
+          a:hover {
+            color: #8f3215;
+          }
+          .ms {
+            font-family: 'Material Symbols Rounded';
+            font-weight: normal;
+            font-style: normal;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            -webkit-font-feature-settings: 'liga';
+            font-feature-settings: 'liga';
+            font-size: 22px;
+          }
+          .dv-turn {
+            padding: 40px 44px 32px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            scroll-margin-top: 16px;
+          }
+          .dv-thd {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            margin: 0 0 20px;
+          }
+          .dv-tid {
+            font:
+              600 10px 'IBM Plex Mono',
+              monospace;
+            padding: 3px 7px;
+            background: #1f1d1a;
+            color: #fff;
+            border-radius: 4px;
+            text-decoration: none;
+          }
+          .dv-tname {
+            font:
+              700 15px/1.2 'Zen Kaku Gothic New',
+              sans-serif;
+            color: #1f1d1a;
+          }
+          .dv-opts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 36px;
+            align-items: flex-start;
+          }
+          .dv-opt {
+            flex: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            scroll-margin-top: 16px;
+          }
+          .dv-oid {
+            font:
+              600 10.5px 'IBM Plex Mono',
+              monospace;
+            padding: 3px 7px;
+            background: rgba(0, 0, 0, 0.08);
+            color: #1f1d1a;
+            border-radius: 5px;
+            text-decoration: none;
+          }
+          .dv-olabel {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            font:
+              500 12px/1.3 'Zen Kaku Gothic New',
+              sans-serif;
+            color: #1f1d1a;
+          }
+          .dv-opt:target .dv-oid {
+            background: #d9542b;
+            color: #fff;
+          }
+          .dv-next {
+            margin: 22px 0 0;
+            font:
+              12px/1.5 'Zen Kaku Gothic New',
+              sans-serif;
+            color: rgba(0, 0, 0, 0.55);
+          }
+        </style>
+      </helmet>
+
+      <section class="dv-turn" id="t0" style="padding-bottom: 24px">
+        <div
+          style="
+            display: grid;
+            grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr);
+            gap: 40px;
+            max-width: 1500px;
+          "
+        >
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div
+              style="
+                font:
+                  600 11px 'IBM Plex Mono',
+                  monospace;
+                letter-spacing: 0.12em;
+                color: #b8431f;
+              "
+            >
+              KAMI-WATASHI / SCREEN DESIGN v1
+            </div>
+            <h1 style="margin: 0; font-size: 40px; font-weight: 900; letter-spacing: 0.02em">
+              かみわたし 画面設計
+            </h1>
+            <p
+              style="
+                margin: 0;
+                font-size: 14px;
+                line-height: 1.8;
+                color: #4a463e;
+                text-wrap: pretty;
+                max-width: 560px;
+              "
+            >
+              仕様書（総論・各論・リミット値）から画面を洗い出し、iPhone / Android
+              共通のモバイル画面として設計しました。デザインシステムが空だったため、「紙のプリント」を主題にした生成り×墨×朱のトーンを仮置きしています。Vuetify
+              のコンポーネント（App bar / Bottom navigation / Bottom sheet / Dialog /
+              Chip）に素直に置き換えられる構成です。
+            </p>
+          </div>
+          <div
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+              font-size: 13px;
+              line-height: 1.7;
+            "
+          >
+            <div style="font-weight: 700">ナビゲーション</div>
+            <div style="color: #4a463e">
+              下部タブ4つ：<b>こども</b>（ホーム）／<b>履歴</b>／<b>集計</b>／<b>設定</b>。プリント一覧・詳細・登録はこども配下にプッシュ遷移。見てね送信・対応状態・情報・絞り込みはボトムシート。削除系はすべてダイアログ確認。
+            </div>
+          </div>
+          <div
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+              font-size: 13px;
+              line-height: 1.7;
+            "
+          >
+            <div style="font-weight: 700">仮定</div>
+            <div style="color: #4a463e">
+              ・日付表示は JST、形式は仕様の履歴例に合わせ
+              <span style="font-family: 'IBM Plex Mono'">2026.09.27</span
+              ><br />・画面例のログインユーザーは「一郎（オーナー）」<br />・プッシュ通知なし＝バッジと絞り込みが唯一の通知導線<br />・オフライン時は全画面で操作を無効化（<a
+                href="#7a"
+                >7a</a
+              >）
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 1 初期設定 -->
+      <section class="dv-turn" id="t1">
+        <div class="dv-thd">
+          <a class="dv-tid" href="#t1">1</a><span class="dv-tname">初期設定・参加</span>
+        </div>
+        <div class="dv-opts">
+          <div class="dv-opt" id="1a">
+            <div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>ようこそ</div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #f6f3ec;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div
+                  style="
+                    height: 40px;
+                    flex: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 26px;
+                    font:
+                      600 13px 'IBM Plex Mono',
+                      monospace;
+                  "
+                >
+                  <span>9:41</span
+                  ><span style="display: flex; gap: 4px"
+                    ><span class="ms" style="font-size: 16px">signal_cellular_alt</span
+                    ><span class="ms" style="font-size: 16px">wifi</span
+                    ><span class="ms" style="font-size: 16px">battery_full</span></span
+                  >
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    padding: 0 32px;
+                    gap: 20px;
+                  "
+                >
+                  <div
+                    style="
+                      width: 72px;
+                      height: 88px;
+                      background: #fff;
+                      border: 1.5px solid #1f1d1a;
+                      border-radius: 4px;
+                      position: relative;
+                      box-shadow: 6px 6px 0 #d9542b;
+                    "
+                  >
+                    <div
+                      style="
+                        position: absolute;
+                        left: 12px;
+                        right: 12px;
+                        top: 16px;
+                        height: 3px;
+                        background: #1f1d1a;
+                      "
+                    ></div>
+                    <div
+                      style="
+                        position: absolute;
+                        left: 12px;
+                        right: 22px;
+                        top: 28px;
+                        height: 2px;
+                        background: #c9c2b2;
+                      "
+                    ></div>
+                    <div
+                      style="
+                        position: absolute;
+                        left: 12px;
+                        right: 16px;
+                        top: 37px;
+                        height: 2px;
+                        background: #c9c2b2;
+                      "
+                    ></div>
+                    <div
+                      style="
+                        position: absolute;
+                        left: 12px;
+                        right: 28px;
+                        top: 46px;
+                        height: 2px;
+                        background: #c9c2b2;
+                      "
+                    ></div>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 6px">
+                    <div
+                      style="
+                        font:
+                          600 12px 'IBM Plex Mono',
+                          monospace;
+                        letter-spacing: 0.14em;
+                        color: #b8431f;
+                      "
+                    >
+                      KAMI-WATASHI
+                    </div>
+                    <div style="font-size: 30px; font-weight: 900; line-height: 1.3">
+                      学校のプリントを、<br />家族みんなで。
+                    </div>
+                  </div>
+                  <div style="font-size: 14px; line-height: 1.8; color: #4a463e">
+                    写真に撮って、こどもごとに整理。<br />「見てね」で家族に声をかけられます。
+                  </div>
+                </div>
+                <div style="padding: 0 24px 36px; display: flex; flex-direction: column; gap: 12px">
+                  <div
+                    style="
+                      height: 52px;
+                      border-radius: 26px;
+                      background: #1f1d1a;
+                      color: #fff;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 10px;
+                      font-size: 15px;
+                      font-weight: 700;
+                    "
+                  >
+                    <span
+                      style="
+                        width: 22px;
+                        height: 22px;
+                        border-radius: 11px;
+                        background: #fff;
+                        color: #1f1d1a;
+                        font: 700 13px sans-serif;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                      "
+                      >G</span
+                    >Googleでログイン
+                  </div>
+                  <div
+                    style="font-size: 11px; color: #6b665c; text-align: center; margin-top: -4px"
+                  >
+                    家族を作る人（オーナー）はこちら
+                  </div>
+                  <div
+                    style="
+                      height: 52px;
+                      border-radius: 26px;
+                      border: 1.5px solid #1f1d1a;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 8px;
+                      font-size: 15px;
+                      font-weight: 700;
+                    "
+                  >
+                    <span class="ms">qr_code_scanner</span>招待QRコードで参加
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・2つの入口を明確に分ける。オーナー復帰（機種変更）も同じGoogleボタン<br />・招待は対面のみなので「QRで参加」はカメラ起動に直結
+            </div>
+          </div>
+
+          <div class="dv-opt" id="1b">
+            <div class="dv-olabel">
+              <a class="dv-oid" href="#1b">1b</a>利用規約・プライバシーポリシーへの同意
+            </div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #f6f3ec;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div
+                  style="
+                    height: 40px;
+                    flex: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 26px;
+                    font:
+                      600 13px 'IBM Plex Mono',
+                      monospace;
+                  "
+                >
+                  <span>9:41</span
+                  ><span style="display: flex; gap: 4px"
+                    ><span class="ms" style="font-size: 16px">signal_cellular_alt</span
+                    ><span class="ms" style="font-size: 16px">wifi</span
+                    ><span class="ms" style="font-size: 16px">battery_full</span></span
+                  >
+                </div>
+                <div
+                  style="
+                    height: 56px;
+                    display: flex;
+                    align-items: center;
+                    padding: 0 12px;
+                    gap: 8px;
+                  "
+                >
+                  <span class="ms" style="padding: 8px">arrow_back</span
+                  ><span style="font-size: 17px; font-weight: 700">はじめる前に</span>
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    padding: 8px 24px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 16px;
+                  "
+                >
+                  <div style="font-size: 14px; line-height: 1.8; color: #4a463e">
+                    ご利用には以下への同意が必要です。
+                  </div>
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid #e4dfd3;
+                      border-radius: 14px;
+                      overflow: hidden;
+                    "
+                  >
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 16px;
+                        border-bottom: 1px solid #e4dfd3;
+                        font-size: 15px;
+                        font-weight: 500;
+                      "
+                    >
+                      利用規約<span class="ms" style="color: #6b665c">open_in_new</span>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 16px;
+                        font-size: 15px;
+                        font-weight: 500;
+                      "
+                    >
+                      プライバシーポリシー<span class="ms" style="color: #6b665c">open_in_new</span>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      background: #fbede6;
+                      border-radius: 14px;
+                      padding: 14px 16px;
+                      display: flex;
+                      gap: 10px;
+                      font-size: 12.5px;
+                      line-height: 1.7;
+                      color: #6e2a14;
+                    "
+                  >
+                    <span class="ms" style="font-size: 20px">info</span>
+                    <div>
+                      ・Googleアカウントを失うと家族のデータは使えなくなります<br />・365日だれもアプリを開かないと、データは自動で削除されます
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 12px;
+                      padding: 6px 2px;
+                      font-size: 14px;
+                      font-weight: 500;
+                    "
+                  >
+                    <span
+                      style="
+                        width: 24px;
+                        height: 24px;
+                        border-radius: 6px;
+                        background: #1f1d1a;
+                        color: #fff;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                      "
+                      ><span class="ms" style="font-size: 18px">check</span></span
+                    >内容を確認し、同意します
+                  </div>
+                </div>
+                <div style="padding: 0 24px 36px">
+                  <div
+                    style="
+                      height: 52px;
+                      border-radius: 26px;
+                      background: #d9542b;
+                      color: #fff;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 15px;
+                      font-weight: 700;
+                    "
+                  >
+                    同意してはじめる
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・オーナー登録時／メンバー参加時／規約改定後の次回起動時に表示<br />・改定時はタイトルを「規約が改定されました」に差し替え
+            </div>
+          </div>
+
+          <div class="dv-opt" id="1c">
+            <div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>表示名の入力</div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #f6f3ec;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div
+                  style="
+                    height: 40px;
+                    flex: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 26px;
+                    font:
+                      600 13px 'IBM Plex Mono',
+                      monospace;
+                  "
+                >
+                  <span>9:41</span
+                  ><span style="display: flex; gap: 4px"
+                    ><span class="ms" style="font-size: 16px">signal_cellular_alt</span
+                    ><span class="ms" style="font-size: 16px">wifi</span
+                    ><span class="ms" style="font-size: 16px">battery_full</span></span
+                  >
+                </div>
+                <div
+                  style="
+                    height: 56px;
+                    display: flex;
+                    align-items: center;
+                    padding: 0 12px;
+                    gap: 8px;
+                  "
+                >
+                  <span class="ms" style="padding: 8px">arrow_back</span
+                  ><span style="font-size: 17px; font-weight: 700">あなたの呼び名</span>
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    padding: 8px 24px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                  "
+                >
+                  <div style="font-size: 14px; line-height: 1.8; color: #4a463e">
+                    「見てね」の宛先や履歴に表示されます。
+                  </div>
+                  <div
+                    style="
+                      margin-top: 12px;
+                      background: #fff;
+                      border: 2px solid #1f1d1a;
+                      border-radius: 12px;
+                      padding: 10px 14px 12px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 2px;
+                    "
+                  >
+                    <span style="font-size: 11px; color: #6b665c; font-weight: 500">表示名</span
+                    ><span style="font-size: 18px; font-weight: 500"
+                      >一郎<span
+                        style="
+                          display: inline-block;
+                          width: 2px;
+                          height: 20px;
+                          background: #d9542b;
+                          vertical-align: -3px;
+                          margin-left: 1px;
+                        "
+                      ></span
+                    ></span>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 11.5px;
+                      color: #6b665c;
+                      padding: 0 4px;
+                    "
+                  >
+                    <span>家族の中で同じ名前は使えません</span
+                    ><span style="font-family: 'IBM Plex Mono'">2/20</span>
+                  </div>
+                </div>
+                <div style="padding: 0 24px 36px">
+                  <div
+                    style="
+                      height: 52px;
+                      border-radius: 26px;
+                      background: #1f1d1a;
+                      color: #fff;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 15px;
+                      font-weight: 700;
+                    "
+                  >
+                    つぎへ
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・オーナー：Googleアカウント名の先頭20文字を初期値に<br />・メンバー：QR読取後に同じ画面で入力（重複はここでエラー表示）
+            </div>
+          </div>
+
+          <div class="dv-opt" id="1d">
+            <div class="dv-olabel">
+              <a class="dv-oid" href="#1d">1d</a>招待QRの読み取り（参加する側）
+            </div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #141311;
+                  color: #fff;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div
+                  style="
+                    height: 40px;
+                    flex: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 26px;
+                    font:
+                      600 13px 'IBM Plex Mono',
+                      monospace;
+                  "
+                >
+                  <span>9:41</span
+                  ><span style="display: flex; gap: 4px"
+                    ><span class="ms" style="font-size: 16px">signal_cellular_alt</span
+                    ><span class="ms" style="font-size: 16px">wifi</span
+                    ><span class="ms" style="font-size: 16px">battery_full</span></span
+                  >
+                </div>
+                <div
+                  style="
+                    height: 56px;
+                    display: flex;
+                    align-items: center;
+                    padding: 0 12px;
+                    gap: 8px;
+                  "
+                >
+                  <span class="ms" style="padding: 8px">close</span
+                  ><span style="font-size: 17px; font-weight: 700">招待QRを読み取る</span>
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 24px;
+                    background: repeating-linear-gradient(
+                      135deg,
+                      #1c1b18 0 12px,
+                      #211f1c 12px 24px
+                    );
+                  "
+                >
+                  <div style="width: 220px; height: 220px; position: relative">
+                    <div
+                      style="
+                        position: absolute;
+                        left: 0;
+                        top: 0;
+                        width: 40px;
+                        height: 40px;
+                        border-left: 4px solid #fff;
+                        border-top: 4px solid #fff;
+                        border-radius: 10px 0 0 0;
+                      "
+                    ></div>
+                    <div
+                      style="
+                        position: absolute;
+                        right: 0;
+                        top: 0;
+                        width: 40px;
+                        height: 40px;
+                        border-right: 4px solid #fff;
+                        border-top: 4px solid #fff;
+                        border-radius: 0 10px 0 0;
+                      "
+                    ></div>
+                    <div
+                      style="
+                        position: absolute;
+                        left: 0;
+                        bottom: 0;
+                        width: 40px;
+                        height: 40px;
+                        border-left: 4px solid #fff;
+                        border-bottom: 4px solid #fff;
+                        border-radius: 0 0 0 10px;
+                      "
+                    ></div>
+                    <div
+                      style="
+                        position: absolute;
+                        right: 0;
+                        bottom: 0;
+                        width: 40px;
+                        height: 40px;
+                        border-right: 4px solid #fff;
+                        border-bottom: 4px solid #fff;
+                        border-radius: 0 0 10px 0;
+                      "
+                    ></div>
+                    <div
+                      style="
+                        position: absolute;
+                        left: 16px;
+                        right: 16px;
+                        top: 50%;
+                        height: 2px;
+                        background: #d9542b;
+                        box-shadow: 0 0 12px #d9542b;
+                      "
+                    ></div>
+                  </div>
+                  <div
+                    style="
+                      font:
+                        500 11px 'IBM Plex Mono',
+                        monospace;
+                      color: #8a857a;
+                    "
+                  >
+                    camera preview
+                  </div>
+                </div>
+                <div
+                  style="
+                    padding: 20px 28px 40px;
+                    font-size: 13.5px;
+                    line-height: 1.8;
+                    color: #d8d3c7;
+                    text-align: center;
+                  "
+                >
+                  オーナーの画面に表示されたQRコードを<br />枠の中に写してください
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・読取成功 → <a href="#1b">1b</a> 同意 → <a href="#1c">1c</a> 表示名 → 鍵ファイル保存
+              → <a href="#2a">2a</a
+              ><br />・エラー：期限切れ（10分）／メンバー上限3人／すでに別の家族に参加中
+            </div>
+          </div>
+        </div>
+        <p class="dv-next">
+          Try next: "オンボーディングにこども登録ステップを追加" · "<a class="dv-oid" href="#1a"
+            >1a</a
+          >
+          をイラストなしのシンプル版に"
+        </p>
+      </section>
+
+      <!-- 2 閲覧 -->
+      <section class="dv-turn" id="t2">
+        <div class="dv-thd">
+          <a class="dv-tid" href="#t2">2</a><span class="dv-tname">こども一覧・プリント一覧</span>
+        </div>
+        <div class="dv-opts">
+          <div class="dv-opt" id="2a">
+            <div class="dv-olabel"><a class="dv-oid" href="#2a">2a</a>こども一覧（ホーム）</div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #f6f3ec;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div
+                  style="
+                    height: 40px;
+                    flex: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 26px;
+                    font:
+                      600 13px 'IBM Plex Mono',
+                      monospace;
+                  "
+                >
+                  <span>9:41</span
+                  ><span style="display: flex; gap: 4px"
+                    ><span class="ms" style="font-size: 16px">signal_cellular_alt</span
+                    ><span class="ms" style="font-size: 16px">wifi</span
+                    ><span class="ms" style="font-size: 16px">battery_full</span></span
+                  >
+                </div>
+                <div
+                  style="
+                    padding: 12px 24px 8px;
+                    display: flex;
+                    align-items: flex-end;
+                    justify-content: space-between;
+                  "
+                >
+                  <div>
+                    <div
+                      style="
+                        font:
+                          500 12px 'IBM Plex Mono',
+                          monospace;
+                        color: #6b665c;
+                      "
+                    >
+                      2026.09.28 月
+                    </div>
+                    <div style="font-size: 26px; font-weight: 900; margin-top: 2px">こども</div>
+                  </div>
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    padding: 12px 16px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                  "
+                >
+                  <sc-for list="{{ children }}" as="c" hint-placeholder-count="3">
+                    <div
+                      style="
+                        background: #fff;
+                        border: 1px solid #e4dfd3;
+                        border-radius: 18px;
+                        padding: 18px 16px 18px 18px;
+                        display: flex;
+                        align-items: center;
+                        gap: 14px;
+                      "
+                    >
+                      <div
+                        style="width:48px;height:48px;border-radius:14px;background:{{ c.color }};color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;flex:none"
+                      >
+                        {{ c.initial }}
+                      </div>
+                      <div
+                        style="
+                          flex: 1;
+                          min-width: 0;
+                          display: flex;
+                          flex-direction: column;
+                          gap: 3px;
+                        "
+                      >
+                        <div style="font-size: 18px; font-weight: 700">{{ c.name }}</div>
+                        <div style="font-size: 12.5px; color: #6b665c">
+                          今週
+                          <span
+                            style="font-family: 'IBM Plex Mono'; font-weight: 600; color: #1f1d1a"
+                            >{{ c.week }}</span
+                          >
+                          件
+                        </div>
+                      </div>
+                      <sc-if value="{{ c.hasMitene }}" hint-placeholder-val="{{ true }}"
+                        ><div
+                          style="
+                            height: 32px;
+                            padding: 0 12px 0 8px;
+                            border-radius: 16px;
+                            background: #d9542b;
+                            color: #fff;
+                            display: flex;
+                            align-items: center;
+                            gap: 4px;
+                            font-size: 12.5px;
+                            font-weight: 700;
+                          "
+                        >
+                          <span
+                            class="ms"
+                            style="font-size: 18px; font-variation-settings: 'FILL' 1"
+                            >visibility</span
+                          >見てね {{ c.mitene }}
+                        </div></sc-if
+                      >
+                      <span class="ms" style="color: #a8a194">chevron_right</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <div
+                  style="
+                    position: absolute;
+                    right: 20px;
+                    bottom: 100px;
+                    height: 56px;
+                    padding: 0 22px 0 18px;
+                    border-radius: 18px;
+                    background: #1f1d1a;
+                    color: #fff;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 15px;
+                    font-weight: 700;
+                    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+                  "
+                >
+                  <span class="ms">photo_camera</span>プリントを登録
+                </div>
+                <div
+                  style="
+                    height: 80px;
+                    flex: none;
+                    border-top: 1px solid #e4dfd3;
+                    background: #fbf9f4;
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    padding-bottom: 12px;
+                  "
+                >
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 2px;
+                      font-size: 11px;
+                      font-weight: 700;
+                    "
+                  >
+                    <span style="padding: 3px 18px; border-radius: 14px; background: #f2d9cd"
+                      ><span class="ms" style="font-variation-settings: 'FILL' 1; color: #b8431f"
+                        >family_restroom</span
+                      ></span
+                    >こども
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 5px;
+                      font-size: 11px;
+                      color: #6b665c;
+                    "
+                  >
+                    <span class="ms">history</span>履歴
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 5px;
+                      font-size: 11px;
+                      color: #6b665c;
+                    "
+                  >
+                    <span class="ms">bar_chart</span>集計
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 5px;
+                      font-size: 11px;
+                      color: #6b665c;
+                    "
+                  >
+                    <span class="ms">settings</span>設定
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・「家族共通」枠は常に最下段・削除不可<br />・見てねバッジをタップ →
+              <a href="#2b">2b</a>
+              を「見てね」で絞り込んで表示<br />・件数は起動時・フォアグラウンド復帰時に取得。こども0人時は「こどもを登録」の空状態カード
+            </div>
+          </div>
+
+          <div class="dv-opt" id="2b">
+            <div class="dv-olabel">
+              <a class="dv-oid" href="#2b">2b</a>プリント一覧（登録日時順）
+            </div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #f6f3ec;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div
+                  style="
+                    height: 40px;
+                    flex: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 26px;
+                    font:
+                      600 13px 'IBM Plex Mono',
+                      monospace;
+                  "
+                >
+                  <span>9:41</span
+                  ><span style="display: flex; gap: 4px"
+                    ><span class="ms" style="font-size: 16px">signal_cellular_alt</span
+                    ><span class="ms" style="font-size: 16px">wifi</span
+                    ><span class="ms" style="font-size: 16px">battery_full</span></span
+                  >
+                </div>
+                <div
+                  style="
+                    height: 56px;
+                    display: flex;
+                    align-items: center;
+                    padding: 0 8px 0 12px;
+                    gap: 6px;
+                  "
+                >
+                  <span class="ms" style="padding: 8px">arrow_back</span
+                  ><span style="font-size: 18px; font-weight: 700; flex: 1">はなこのプリント</span
+                  ><span class="ms" style="padding: 8px">tune</span>
+                </div>
+                <div style="padding: 0 16px 10px; display: flex; flex-direction: column; gap: 10px">
+                  <div
+                    style="
+                      display: grid;
+                      grid-template-columns: 1fr 1fr;
+                      background: #ece8de;
+                      border-radius: 12px;
+                      padding: 3px;
+                      font-size: 13px;
+                      font-weight: 700;
+                    "
+                  >
+                    <div
+                      style="
+                        background: #fff;
+                        border-radius: 9px;
+                        padding: 8px;
+                        text-align: center;
+                        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+                      "
+                    >
+                      登録日時順
+                    </div>
+                    <div style="padding: 8px; text-align: center; color: #6b665c">期限順</div>
+                  </div>
+                  <div style="display: flex; gap: 6px; overflow: hidden">
+                    <div
+                      style="
+                        height: 30px;
+                        padding: 0 10px 0 8px;
+                        border-radius: 15px;
+                        background: #1f1d1a;
+                        color: #fff;
+                        display: flex;
+                        align-items: center;
+                        gap: 4px;
+                        font-size: 12px;
+                        font-weight: 500;
+                        flex: none;
+                      "
+                    >
+                      <span class="ms" style="font-size: 16px">visibility</span>見てね<span
+                        class="ms"
+                        style="font-size: 16px"
+                        >close</span
+                      >
+                    </div>
+                    <div
+                      style="
+                        height: 30px;
+                        padding: 0 12px;
+                        border-radius: 15px;
+                        border: 1px solid #d6d0c3;
+                        display: flex;
+                        align-items: center;
+                        font-size: 12px;
+                        flex: none;
+                      "
+                    >
+                      未読
+                    </div>
+                    <div
+                      style="
+                        height: 30px;
+                        padding: 0 12px;
+                        border-radius: 15px;
+                        border: 1px solid #d6d0c3;
+                        display: flex;
+                        align-items: center;
+                        font-size: 12px;
+                        flex: none;
+                      "
+                    >
+                      未対応
+                    </div>
+                    <div
+                      style="
+                        height: 30px;
+                        padding: 0 12px;
+                        border-radius: 15px;
+                        border: 1px solid #d6d0c3;
+                        display: flex;
+                        align-items: center;
+                        font-size: 12px;
+                        flex: none;
+                      "
+                    >
+                      トピック
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    overflow: hidden;
+                    display: flex;
+                    flex-direction: column;
+                    border-top: 1px solid #e4dfd3;
+                  "
+                >
+                  <sc-for list="{{ prints }}" as="p" hint-placeholder-count="5">
+                    <div
+                      style="display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid #E4DFD3;background:{{ p.bg }}"
+                    >
+                      <div
+                        style="
+                          width: 56px;
+                          height: 72px;
+                          flex: none;
+                          border-radius: 6px;
+                          border: 1px solid #d6d0c3;
+                          background: repeating-linear-gradient(0deg, #fff 0 7px, #efebe2 7px 8px);
+                          position: relative;
+                        "
+                      >
+                        <span
+                          style="
+                            position: absolute;
+                            right: 3px;
+                            bottom: 3px;
+                            font:
+                              600 9px 'IBM Plex Mono',
+                              monospace;
+                            background: #1f1d1a;
+                            color: #fff;
+                            padding: 1px 4px;
+                            border-radius: 3px;
+                          "
+                          >{{ p.pages }}</span
+                        >
+                      </div>
+                      <div
+                        style="
+                          flex: 1;
+                          min-width: 0;
+                          display: flex;
+                          flex-direction: column;
+                          gap: 4px;
+                        "
+                      >
+                        <div style="display: flex; align-items: center; gap: 6px">
+                          <sc-if value="{{ p.unread }}" hint-placeholder-val="{{ false }}"
+                            ><span
+                              style="
+                                width: 8px;
+                                height: 8px;
+                                border-radius: 4px;
+                                background: #d9542b;
+                                flex: none;
+                              "
+                            ></span></sc-if
+                          ><span
+                            style="
+                              font:
+                                500 11px 'IBM Plex Mono',
+                                monospace;
+                              color: #6b665c;
+                            "
+                            >{{ p.seq }}</span
+                          ><span
+                            style="
+                              font:
+                                400 11px 'IBM Plex Mono',
+                                monospace;
+                              color: #8a857a;
+                            "
+                            >{{ p.created }}</span
+                          >
+                        </div>
+                        <div
+                          style="font-size:14.5px;font-weight:{{ p.weight }};color:{{ p.titleColor }};overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                        >
+                          {{ p.title }}
+                        </div>
+                        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap">
+                          <sc-if value="{{ p.hasDue }}" hint-placeholder-val="{{ true }}"
+                            ><span
+                              style="
+                                font:
+                                  500 11px 'IBM Plex Mono',
+                                  monospace;
+                                color: #1f1d1a;
+                                display: flex;
+                                align-items: center;
+                                gap: 2px;
+                              "
+                              ><span class="ms" style="font-size: 14px">event</span>{{ p.due
+                              }}まで</span
+                            ></sc-if
+                          >
+                          <sc-if value="{{ p.todo }}" hint-placeholder-val="{{ false }}"
+                            ><span
+                              style="
+                                font-size: 10.5px;
+                                font-weight: 700;
+                                padding: 2px 7px;
+                                border-radius: 5px;
+                                background: #fbebc8;
+                                color: #7a5200;
+                              "
+                              >未対応</span
+                            ></sc-if
+                          >
+                          <sc-if value="{{ p.done }}" hint-placeholder-val="{{ false }}"
+                            ><span
+                              style="
+                                font-size: 10.5px;
+                                font-weight: 700;
+                                padding: 2px 7px;
+                                border-radius: 5px;
+                                background: #ddede2;
+                                color: #2a5e40;
+                              "
+                              >対応済</span
+                            ></sc-if
+                          >
+                          <sc-if value="{{ p.mitene }}" hint-placeholder-val="{{ false }}"
+                            ><span
+                              style="
+                                font-size: 10.5px;
+                                font-weight: 700;
+                                padding: 2px 7px;
+                                border-radius: 5px;
+                                background: #d9542b;
+                                color: #fff;
+                              "
+                              >見てね・{{ p.miteneFrom }}</span
+                            ></sc-if
+                          >
+                        </div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+                <div
+                  style="
+                    position: absolute;
+                    right: 20px;
+                    bottom: 28px;
+                    width: 56px;
+                    height: 56px;
+                    border-radius: 18px;
+                    background: #1f1d1a;
+                    color: #fff;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+                  "
+                >
+                  <span class="ms">photo_camera</span>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・未読＝朱の点＋太字。タイトル未設定は「タイトルなし」をグレーで<br />・「不要」は表示しない（目立たせない）<br />・FAB
+              はこのこどもを選択済みで <a href="#4a">4a</a> を開く
+            </div>
+          </div>
+
+          <div class="dv-opt" id="2c">
+            <div class="dv-olabel"><a class="dv-oid" href="#2c">2c</a>プリント一覧（期限順）</div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #f6f3ec;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div
+                  style="
+                    height: 40px;
+                    flex: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 26px;
+                    font:
+                      600 13px 'IBM Plex Mono',
+                      monospace;
+                  "
+                >
+                  <span>9:41</span
+                  ><span style="display: flex; gap: 4px"
+                    ><span class="ms" style="font-size: 16px">signal_cellular_alt</span
+                    ><span class="ms" style="font-size: 16px">wifi</span
+                    ><span class="ms" style="font-size: 16px">battery_full</span></span
+                  >
+                </div>
+                <div
+                  style="
+                    height: 56px;
+                    display: flex;
+                    align-items: center;
+                    padding: 0 8px 0 12px;
+                    gap: 6px;
+                  "
+                >
+                  <span class="ms" style="padding: 8px">arrow_back</span
+                  ><span style="font-size: 18px; font-weight: 700; flex: 1">はなこのプリント</span
+                  ><span class="ms" style="padding: 8px">tune</span>
+                </div>
+                <div style="padding: 0 16px 10px">
+                  <div
+                    style="
+                      display: grid;
+                      grid-template-columns: 1fr 1fr;
+                      background: #ece8de;
+                      border-radius: 12px;
+                      padding: 3px;
+                      font-size: 13px;
+                      font-weight: 700;
+                    "
+                  >
+                    <div style="padding: 8px; text-align: center; color: #6b665c">登録日時順</div>
+                    <div
+                      style="
+                        background: #fff;
+                        border-radius: 9px;
+                        padding: 8px;
+                        text-align: center;
+                        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+                      "
+                    >
+                      期限順
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    overflow: hidden;
+                    padding: 4px 16px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                  "
+                >
+                  <sc-for list="{{ dueGroups }}" as="g" hint-placeholder-count="3">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px">
+                      <span style="font-size:12px;font-weight:700;color:{{ g.color }}"
+                        >{{ g.label }}</span
+                      ><span style="flex: 1; height: 1px; background: #e4dfd3"></span>
+                    </div>
+                    <sc-for list="{{ g.items }}" as="d" hint-placeholder-count="2">
+                      <div
+                        style="
+                          display: flex;
+                          align-items: center;
+                          gap: 12px;
+                          background: #fff;
+                          border: 1px solid #e4dfd3;
+                          border-radius: 14px;
+                          padding: 10px 14px;
+                        "
+                      >
+                        <div
+                          style="
+                            width: 48px;
+                            flex: none;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            border-right: 1px dashed #d6d0c3;
+                            padding-right: 10px;
+                          "
+                        >
+                          <span
+                            style="
+                              font:
+                                600 10px 'IBM Plex Mono',
+                                monospace;
+                              color: #6b665c;
+                            "
+                            >{{ d.month }}</span
+                          ><span
+                            style="font:600 22px/1.1 'IBM Plex Mono',monospace;color:{{ g.color }}"
+                            >{{ d.day }}</span
+                          ><span style="font-size: 10px; color: #6b665c">{{ d.wd }}</span>
+                        </div>
+                        <div
+                          style="
+                            flex: 1;
+                            min-width: 0;
+                            display: flex;
+                            flex-direction: column;
+                            gap: 3px;
+                          "
+                        >
+                          <span
+                            style="
+                              font:
+                                500 10.5px 'IBM Plex Mono',
+                                monospace;
+                              color: #6b665c;
+                            "
+                            >{{ d.seq }}</span
+                          ><span
+                            style="
+                              font-size: 14px;
+                              font-weight: 700;
+                              overflow: hidden;
+                              text-overflow: ellipsis;
+                              white-space: nowrap;
+                            "
+                            >{{ d.title }}</span
+                          >
+                        </div>
+                        <span
+                          style="font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:5px;background:{{ d.stBg }};color:{{ d.stFg }};flex:none"
+                          >{{ d.st }}</span
+                        >
+                      </div>
+                    </sc-for>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・期限設定ありのみ、古い順。「期限切れ」グループは未対応のものだけ残る<br />・日付をカレンダー風に大きく見せ、登録日時順と見分けやすく
+            </div>
+          </div>
+
+          <div class="dv-opt" id="2d">
+            <div class="dv-olabel"><a class="dv-oid" href="#2d">2d</a>絞り込み（ボトムシート）</div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #f6f3ec;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div style="position: absolute; inset: 0; background: rgba(20, 18, 15, 0.45)"></div>
+                <div
+                  style="
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: #fbf9f4;
+                    border-radius: 24px 24px 0 0;
+                    padding: 10px 20px 28px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 16px;
+                  "
+                >
+                  <div
+                    style="
+                      width: 36px;
+                      height: 4px;
+                      border-radius: 2px;
+                      background: #d6d0c3;
+                      align-self: center;
+                    "
+                  ></div>
+                  <div style="display: flex; align-items: center; justify-content: space-between">
+                    <span style="font-size: 18px; font-weight: 700">絞り込み</span
+                    ><span style="font-size: 13px; color: #b8431f; font-weight: 700">リセット</span>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 8px">
+                    <div style="font-size: 12px; font-weight: 700; color: #6b665c">
+                      トピック <span style="font-weight: 400">— 選んだものをすべて含む</span>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px">
+                      <sc-for list="{{ topicChips }}" as="t" hint-placeholder-count="6"
+                        ><span
+                          style="height:32px;padding:0 12px;border-radius:16px;display:flex;align-items:center;gap:4px;font-size:13px;background:{{ t.bg }};color:{{ t.fg }};border:1px solid {{ t.bd }}"
+                          >{{ t.name }}</span
+                        ></sc-for
+                      >
+                    </div>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 8px">
+                    <div style="font-size: 12px; font-weight: 700; color: #6b665c">既読状態</div>
+                    <div
+                      style="
+                        display: grid;
+                        grid-template-columns: repeat(3, 1fr);
+                        background: #ece8de;
+                        border-radius: 10px;
+                        padding: 3px;
+                        font-size: 13px;
+                        text-align: center;
+                      "
+                    >
+                      <div
+                        style="padding: 7px; background: #fff; border-radius: 8px; font-weight: 700"
+                      >
+                        すべて
+                      </div>
+                      <div style="padding: 7px">未読</div>
+                      <div style="padding: 7px">既読</div>
+                    </div>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 8px">
+                    <div style="font-size: 12px; font-weight: 700; color: #6b665c">対応状態</div>
+                    <div
+                      style="
+                        display: grid;
+                        grid-template-columns: repeat(4, 1fr);
+                        background: #ece8de;
+                        border-radius: 10px;
+                        padding: 3px;
+                        font-size: 13px;
+                        text-align: center;
+                      "
+                    >
+                      <div style="padding: 7px">すべて</div>
+                      <div style="padding: 7px">不要</div>
+                      <div
+                        style="padding: 7px; background: #fff; border-radius: 8px; font-weight: 700"
+                      >
+                        未対応
+                      </div>
+                      <div style="padding: 7px">対応済</div>
+                    </div>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 8px">
+                    <div style="font-size: 12px; font-weight: 700; color: #6b665c">見てね状態</div>
+                    <div
+                      style="
+                        display: grid;
+                        grid-template-columns: repeat(4, 1fr);
+                        background: #ece8de;
+                        border-radius: 10px;
+                        padding: 3px;
+                        font-size: 13px;
+                        text-align: center;
+                      "
+                    >
+                      <div
+                        style="padding: 7px; background: #fff; border-radius: 8px; font-weight: 700"
+                      >
+                        すべて
+                      </div>
+                      <div style="padding: 7px">なし</div>
+                      <div style="padding: 7px">見てね</div>
+                      <div style="padding: 7px">見たよ</div>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      height: 50px;
+                      border-radius: 25px;
+                      background: #1f1d1a;
+                      color: #fff;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 15px;
+                      font-weight: 700;
+                      margin-top: 4px;
+                    "
+                  >
+                    8件を表示
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・トピックは複数選択＝AND。ボタンに該当件数を表示し「0件」を事前に防ぐ<br />・適用中の条件は
+              <a href="#2b">2b</a> のチップ列に出し、×で個別解除
+            </div>
+          </div>
+        </div>
+        <p class="dv-next">
+          Try next: "一覧をグリッド（写真サムネ大）表示に" · "<a class="dv-oid" href="#2a">2a</a>
+          に未対応件数も出す"
+        </p>
+      </section>
+
+      <!-- 3 詳細 -->
+      <section class="dv-turn" id="t3">
+        <div class="dv-thd">
+          <a class="dv-tid" href="#t3">3</a><span class="dv-tname">プリント詳細・見てね</span>
+        </div>
+        <div class="dv-opts">
+          <div class="dv-opt" id="3a">
+            <div class="dv-olabel"><a class="dv-oid" href="#3a">3a</a>プリント詳細</div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #2a2824;
+                  color: #fff;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div
+                  style="
+                    height: 40px;
+                    flex: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 26px;
+                    font:
+                      600 13px 'IBM Plex Mono',
+                      monospace;
+                  "
+                >
+                  <span>9:41</span
+                  ><span style="display: flex; gap: 4px"
+                    ><span class="ms" style="font-size: 16px">signal_cellular_alt</span
+                    ><span class="ms" style="font-size: 16px">wifi</span
+                    ><span class="ms" style="font-size: 16px">battery_full</span></span
+                  >
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    align-items: flex-start;
+                    padding: 4px 8px 10px 12px;
+                    gap: 6px;
+                  "
+                >
+                  <span class="ms" style="padding: 8px">arrow_back</span>
+                  <div style="flex: 1; min-width: 0; padding-top: 4px">
+                    <div style="font-size: 12px; color: #b5afa2">
+                      はなこのプリント（<span style="font-family: 'IBM Plex Mono'">00012</span>）
+                    </div>
+                    <div style="font-size: 17px; font-weight: 700; margin-top: 2px">
+                      運動会のお知らせ
+                    </div>
+                  </div>
+                  <span class="ms" style="padding: 8px">more_vert</span>
+                </div>
+                <div
+                  style="
+                    margin: 0 14px;
+                    padding: 10px 12px;
+                    border-radius: 12px;
+                    background: #d9542b;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    font-size: 13px;
+                  "
+                >
+                  <span class="ms" style="font-size: 20px; font-variation-settings: 'FILL' 1"
+                    >visibility</span
+                  ><span style="flex: 1"><b>二郎</b> から見てね → <b>見たよ</b> にしました</span>
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 14px 24px;
+                    position: relative;
+                  "
+                >
+                  <div
+                    style="
+                      width: 100%;
+                      height: 100%;
+                      max-height: 420px;
+                      background: repeating-linear-gradient(
+                        0deg,
+                        #faf8f3 0 13px,
+                        #ece7dc 13px 14px
+                      );
+                      border-radius: 3px;
+                      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                    "
+                  >
+                    <span
+                      style="
+                        font:
+                          500 11px 'IBM Plex Mono',
+                          monospace;
+                        color: #8a857a;
+                        background: #faf8f3;
+                        padding: 4px 8px;
+                      "
+                      >print photo · pinch zoom</span
+                    >
+                  </div>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 6px;
+                    padding-bottom: 12px;
+                  "
+                >
+                  <span
+                    style="width: 18px; height: 6px; border-radius: 3px; background: #fff"
+                  ></span
+                  ><span
+                    style="width: 6px; height: 6px; border-radius: 3px; background: #6b665c"
+                  ></span
+                  ><span
+                    style="width: 6px; height: 6px; border-radius: 3px; background: #6b665c"
+                  ></span
+                  ><span
+                    style="
+                      font:
+                        500 11px 'IBM Plex Mono',
+                        monospace;
+                      color: #b5afa2;
+                      margin-left: 6px;
+                    "
+                    >1 / 3</span
+                  >
+                </div>
+                <div
+                  style="
+                    background: #1f1d1a;
+                    padding: 10px 12px 26px;
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 8px;
+                  "
+                >
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      gap: 4px;
+                      font-size: 11px;
+                    "
+                  >
+                    <span
+                      style="
+                        width: 52px;
+                        height: 36px;
+                        border-radius: 18px;
+                        background: #3a3732;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                      "
+                      ><span class="ms">visibility</span></span
+                    >見てね
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      gap: 4px;
+                      font-size: 11px;
+                      color: #fbd98a;
+                    "
+                  >
+                    <span
+                      style="
+                        width: 52px;
+                        height: 36px;
+                        border-radius: 18px;
+                        background: #5a4413;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                      "
+                      ><span class="ms">pending_actions</span></span
+                    >未対応
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      gap: 4px;
+                      font-size: 11px;
+                    "
+                  >
+                    <span
+                      style="
+                        width: 52px;
+                        height: 36px;
+                        border-radius: 18px;
+                        background: #3a3732;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                      "
+                      ><span class="ms">info</span></span
+                    >情報
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・写真を主役にするため暗背景。開いた時点で既読、見てね→見たよ<br />・上部帯：受け取った見てね（送信者＋状態）。自分が送った見てねは
+              <a href="#3b">3b</a>
+              で確認<br />・対応状態「不要」はアイコンをグレー・ラベル「対応」のまま控えめに<br />・⋯
+              → 変更／こどもの付け替え／削除（<a href="#4c">4c</a>）
+            </div>
+          </div>
+
+          <div class="dv-opt" id="3b">
+            <div class="dv-olabel"><a class="dv-oid" href="#3b">3b</a>見てねを送る（シート）</div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #2a2824;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div style="position: absolute; inset: 0; background: rgba(10, 9, 8, 0.5)"></div>
+                <div
+                  style="
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: #fbf9f4;
+                    border-radius: 24px 24px 0 0;
+                    padding: 10px 20px 28px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 14px;
+                  "
+                >
+                  <div
+                    style="
+                      width: 36px;
+                      height: 4px;
+                      border-radius: 2px;
+                      background: #d6d0c3;
+                      align-self: center;
+                    "
+                  ></div>
+                  <div>
+                    <div style="font-size: 18px; font-weight: 700">見てね</div>
+                    <div style="font-size: 12.5px; color: #6b665c; margin-top: 4px">
+                      このプリントを見てほしい人を選んでください
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid #e4dfd3;
+                      border-radius: 14px;
+                      overflow: hidden;
+                    "
+                  >
+                    <sc-for list="{{ miteneTargets }}" as="m" hint-placeholder-count="2">
+                      <div
+                        style="
+                          display: flex;
+                          align-items: center;
+                          gap: 12px;
+                          padding: 14px 16px;
+                          border-bottom: 1px solid #efebe2;
+                        "
+                      >
+                        <span
+                          style="width:24px;height:24px;border-radius:6px;background:{{ m.boxBg }};border:1.5px solid #1F1D1A;color:#fff;display:flex;align-items:center;justify-content:center;box-sizing:border-box"
+                          ><span class="ms" style="font-size: 18px">{{ m.check }}</span></span
+                        >
+                        <span style="flex: 1; font-size: 15px; font-weight: 500">{{ m.name }}</span>
+                        <span
+                          style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;background:{{ m.stBg }};color:{{ m.stFg }}"
+                          >{{ m.st }}</span
+                        >
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="font-size: 11.5px; color: #6b665c; line-height: 1.6">
+                    すでに見てねがある人に送ると、送信者があなたに変わり「見てね」に戻ります。
+                  </div>
+                  <div
+                    style="
+                      height: 50px;
+                      border-radius: 25px;
+                      background: #d9542b;
+                      color: #fff;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 6px;
+                      font-size: 15px;
+                      font-weight: 700;
+                    "
+                  >
+                    <span class="ms" style="font-size: 20px">send</span>見てねを送る
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・自分以外のメンバーのみ（最大2人）。右の状態＝自分が送った見てねの現在値<br />・「見たよ」を確認する場所もこのシート
+            </div>
+          </div>
+
+          <div class="dv-opt" id="3c">
+            <div class="dv-olabel"><a class="dv-oid" href="#3c">3c</a>対応状態（シート）</div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #2a2824;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div style="position: absolute; inset: 0; background: rgba(10, 9, 8, 0.5)"></div>
+                <div
+                  style="
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: #fbf9f4;
+                    border-radius: 24px 24px 0 0;
+                    padding: 10px 20px 32px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 14px;
+                  "
+                >
+                  <div
+                    style="
+                      width: 36px;
+                      height: 4px;
+                      border-radius: 2px;
+                      background: #d6d0c3;
+                      align-self: center;
+                    "
+                  ></div>
+                  <div>
+                    <div style="font-size: 18px; font-weight: 700">対応状態</div>
+                    <div style="font-size: 12.5px; color: #6b665c; margin-top: 4px">
+                      家族全員で共有されます
+                    </div>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 8px">
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        padding: 14px 16px;
+                        border-radius: 14px;
+                        border: 1px solid #e4dfd3;
+                        background: #fff;
+                      "
+                    >
+                      <span class="ms" style="color: #8a857a">remove_circle_outline</span>
+                      <div style="flex: 1">
+                        <div style="font-size: 15px; font-weight: 500">不要</div>
+                        <div style="font-size: 11.5px; color: #6b665c">読むだけでOKなお知らせ</div>
+                      </div>
+                      <span
+                        style="
+                          width: 20px;
+                          height: 20px;
+                          border-radius: 10px;
+                          border: 2px solid #c9c2b2;
+                          box-sizing: border-box;
+                        "
+                      ></span>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        padding: 14px 16px;
+                        border-radius: 14px;
+                        border: 2px solid #c98a12;
+                        background: #fff8e8;
+                      "
+                    >
+                      <span class="ms" style="color: #9a6a00">pending_actions</span>
+                      <div style="flex: 1">
+                        <div style="font-size: 15px; font-weight: 700">未対応</div>
+                        <div style="font-size: 11.5px; color: #6b665c">
+                          提出・持ち物・申込みなどがある
+                        </div>
+                      </div>
+                      <span
+                        style="
+                          width: 20px;
+                          height: 20px;
+                          border-radius: 10px;
+                          border: 6px solid #c98a12;
+                          box-sizing: border-box;
+                        "
+                      ></span>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        padding: 14px 16px;
+                        border-radius: 14px;
+                        border: 1px solid #e4dfd3;
+                        background: #fff;
+                      "
+                    >
+                      <span class="ms" style="color: #3e7d5a">task_alt</span>
+                      <div style="flex: 1">
+                        <div style="font-size: 15px; font-weight: 500">対応済</div>
+                        <div style="font-size: 11.5px; color: #6b665c">やることは終わった</div>
+                      </div>
+                      <span
+                        style="
+                          width: 20px;
+                          height: 20px;
+                          border-radius: 10px;
+                          border: 2px solid #c9c2b2;
+                          box-sizing: border-box;
+                        "
+                      ></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・選んだ瞬間に保存して閉じる（あと勝ち）。履歴には「変更（対応=対応済）」
+            </div>
+          </div>
+
+          <div class="dv-opt" id="3d">
+            <div class="dv-olabel"><a class="dv-oid" href="#3d">3d</a>情報（シート）</div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #2a2824;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div style="position: absolute; inset: 0; background: rgba(10, 9, 8, 0.5)"></div>
+                <div
+                  style="
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: #fbf9f4;
+                    border-radius: 24px 24px 0 0;
+                    padding: 10px 20px 32px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 14px;
+                  "
+                >
+                  <div
+                    style="
+                      width: 36px;
+                      height: 4px;
+                      border-radius: 2px;
+                      background: #d6d0c3;
+                      align-self: center;
+                    "
+                  ></div>
+                  <div style="font-size: 18px; font-weight: 700">プリントの情報</div>
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid #e4dfd3;
+                      border-radius: 14px;
+                      font-size: 14px;
+                    "
+                  >
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        padding: 14px 16px;
+                        border-bottom: 1px solid #efebe2;
+                      "
+                    >
+                      <span style="color: #6b665c">受け取った日</span
+                      ><span style="font-family: 'IBM Plex Mono'; font-weight: 500"
+                        >2026.09.25</span
+                      >
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        padding: 14px 16px;
+                        border-bottom: 1px solid #efebe2;
+                      "
+                    >
+                      <span style="color: #6b665c">期限・行事の日</span
+                      ><span style="font-family: 'IBM Plex Mono'; font-weight: 600; color: #b8431f"
+                        >2026.10.03</span
+                      >
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        padding: 12px 16px;
+                        border-bottom: 1px solid #efebe2;
+                        gap: 12px;
+                      "
+                    >
+                      <span style="color: #6b665c; flex: none">トピック</span
+                      ><span
+                        style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end"
+                        ><span
+                          style="
+                            font-size: 12px;
+                            padding: 3px 9px;
+                            border-radius: 12px;
+                            background: #ece8de;
+                          "
+                          >運動会</span
+                        ><span
+                          style="
+                            font-size: 12px;
+                            padding: 3px 9px;
+                            border-radius: 12px;
+                            background: #ece8de;
+                          "
+                          >持ち物</span
+                        ></span
+                      >
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 14px 16px">
+                      <span style="color: #6b665c">登録</span
+                      ><span style="font-family: 'IBM Plex Mono'; font-size: 13px"
+                        >2026.09.25 19:02</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・未設定の項目は「—」表示。編集はここではなく ⋯ → 変更
+            </div>
+          </div>
+        </div>
+        <p class="dv-next">
+          Try next: "詳細を明るい背景版に" · "<a class="dv-oid" href="#3a">3a</a>
+          の下部アクションをラベルなしに"
+        </p>
+      </section>
+
+      <!-- 4 登録・変更 -->
+      <section class="dv-turn" id="t4">
+        <div class="dv-thd">
+          <a class="dv-tid" href="#t4">4</a><span class="dv-tname">プリントの登録・変更・削除</span>
+        </div>
+        <div class="dv-opts">
+          <div class="dv-opt" id="4a">
+            <div class="dv-olabel"><a class="dv-oid" href="#4a">4a</a>プリント登録</div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #f6f3ec;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div
+                  style="
+                    height: 40px;
+                    flex: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 26px;
+                    font:
+                      600 13px 'IBM Plex Mono',
+                      monospace;
+                  "
+                >
+                  <span>9:41</span
+                  ><span style="display: flex; gap: 4px"
+                    ><span class="ms" style="font-size: 16px">signal_cellular_alt</span
+                    ><span class="ms" style="font-size: 16px">wifi</span
+                    ><span class="ms" style="font-size: 16px">battery_full</span></span
+                  >
+                </div>
+                <div
+                  style="
+                    height: 56px;
+                    display: flex;
+                    align-items: center;
+                    padding: 0 16px 0 12px;
+                    gap: 6px;
+                  "
+                >
+                  <span class="ms" style="padding: 8px">close</span
+                  ><span style="font-size: 18px; font-weight: 700; flex: 1">プリントを登録</span>
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    overflow: hidden;
+                    padding: 0 16px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 16px;
+                  "
+                >
+                  <div style="display: flex; flex-direction: column; gap: 8px">
+                    <div style="font-size: 12px; font-weight: 700; color: #6b665c">
+                      だれの？<span style="color: #b8431f">*</span>
+                    </div>
+                    <div style="display: flex; gap: 6px">
+                      <span
+                        style="
+                          height: 36px;
+                          padding: 0 14px;
+                          border-radius: 18px;
+                          background: #d9542b;
+                          color: #fff;
+                          display: flex;
+                          align-items: center;
+                          font-size: 14px;
+                          font-weight: 700;
+                        "
+                        >はなこ</span
+                      ><span
+                        style="
+                          height: 36px;
+                          padding: 0 14px;
+                          border-radius: 18px;
+                          border: 1px solid #d6d0c3;
+                          display: flex;
+                          align-items: center;
+                          font-size: 14px;
+                        "
+                        >たろう</span
+                      ><span
+                        style="
+                          height: 36px;
+                          padding: 0 14px;
+                          border-radius: 18px;
+                          border: 1px solid #d6d0c3;
+                          display: flex;
+                          align-items: center;
+                          font-size: 14px;
+                        "
+                        >家族共通</span
+                      >
+                    </div>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 8px">
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        font-size: 12px;
+                        font-weight: 700;
+                        color: #6b665c;
+                      "
+                    >
+                      <span>写真<span style="color: #b8431f">*</span></span
+                      ><span style="font-family: 'IBM Plex Mono'; font-weight: 500">2/5</span>
+                    </div>
+                    <div style="display: flex; gap: 8px">
+                      <div
+                        style="
+                          width: 72px;
+                          height: 92px;
+                          border-radius: 8px;
+                          border: 1px solid #d6d0c3;
+                          background: repeating-linear-gradient(0deg, #fff 0 8px, #efebe2 8px 9px);
+                          position: relative;
+                        "
+                      >
+                        <span
+                          style="
+                            position: absolute;
+                            left: 4px;
+                            top: 4px;
+                            font:
+                              600 10px 'IBM Plex Mono',
+                              monospace;
+                            background: #1f1d1a;
+                            color: #fff;
+                            padding: 1px 5px;
+                            border-radius: 3px;
+                          "
+                          >1</span
+                        ><span
+                          class="ms"
+                          style="
+                            position: absolute;
+                            right: -6px;
+                            top: -6px;
+                            font-size: 18px;
+                            background: #fff;
+                            border-radius: 10px;
+                            color: #6b665c;
+                          "
+                          >cancel</span
+                        >
+                      </div>
+                      <div
+                        style="
+                          width: 72px;
+                          height: 92px;
+                          border-radius: 8px;
+                          border: 1px solid #d6d0c3;
+                          background: repeating-linear-gradient(0deg, #fff 0 8px, #efebe2 8px 9px);
+                          position: relative;
+                        "
+                      >
+                        <span
+                          style="
+                            position: absolute;
+                            left: 4px;
+                            top: 4px;
+                            font:
+                              600 10px 'IBM Plex Mono',
+                              monospace;
+                            background: #1f1d1a;
+                            color: #fff;
+                            padding: 1px 5px;
+                            border-radius: 3px;
+                          "
+                          >2</span
+                        ><span
+                          class="ms"
+                          style="
+                            position: absolute;
+                            right: -6px;
+                            top: -6px;
+                            font-size: 18px;
+                            background: #fff;
+                            border-radius: 10px;
+                            color: #6b665c;
+                          "
+                          >cancel</span
+                        >
+                      </div>
+                      <div
+                        style="
+                          width: 72px;
+                          height: 92px;
+                          border-radius: 8px;
+                          border: 1.5px dashed #a8a194;
+                          display: flex;
+                          flex-direction: column;
+                          align-items: center;
+                          justify-content: center;
+                          gap: 4px;
+                          font-size: 11px;
+                          color: #4a463e;
+                        "
+                      >
+                        <span class="ms">add_a_photo</span>追加
+                      </div>
+                    </div>
+                  </div>
+                  <div style="background: #fff; border: 1px solid #e4dfd3; border-radius: 14px">
+                    <div style="padding: 10px 14px; border-bottom: 1px solid #efebe2">
+                      <div style="font-size: 11px; color: #6b665c">タイトル</div>
+                      <div
+                        style="
+                          display: flex;
+                          justify-content: space-between;
+                          font-size: 15px;
+                          margin-top: 2px;
+                        "
+                      >
+                        <span>運動会のお知らせ</span
+                        ><span
+                          style="
+                            font:
+                              400 11px 'IBM Plex Mono',
+                              monospace;
+                            color: #8a857a;
+                            align-self: center;
+                          "
+                          >8/50</span
+                        >
+                      </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr">
+                      <div style="padding: 10px 14px; border-right: 1px solid #efebe2">
+                        <div style="font-size: 11px; color: #6b665c">受け取った日</div>
+                        <div
+                          style="
+                            font:
+                              500 14px 'IBM Plex Mono',
+                              monospace;
+                            margin-top: 3px;
+                          "
+                        >
+                          2026.09.28
+                        </div>
+                      </div>
+                      <div style="padding: 10px 14px">
+                        <div style="font-size: 11px; color: #6b665c">期限・行事の日</div>
+                        <div
+                          style="
+                            font:
+                              500 14px 'IBM Plex Mono',
+                              monospace;
+                            margin-top: 3px;
+                            color: #a8a194;
+                          "
+                        >
+                          未設定
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 8px">
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        font-size: 12px;
+                        font-weight: 700;
+                        color: #6b665c;
+                      "
+                    >
+                      <span>トピック</span
+                      ><span style="font-family: 'IBM Plex Mono'; font-weight: 500">1/5</span>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px">
+                      <span
+                        style="
+                          height: 32px;
+                          padding: 0 12px;
+                          border-radius: 16px;
+                          background: #1f1d1a;
+                          color: #fff;
+                          display: flex;
+                          align-items: center;
+                          font-size: 13px;
+                        "
+                        >運動会</span
+                      ><span
+                        style="
+                          height: 32px;
+                          padding: 0 12px;
+                          border-radius: 16px;
+                          border: 1px solid #d6d0c3;
+                          display: flex;
+                          align-items: center;
+                          font-size: 13px;
+                        "
+                        >持ち物</span
+                      ><span
+                        style="
+                          height: 32px;
+                          padding: 0 12px;
+                          border-radius: 16px;
+                          border: 1px solid #d6d0c3;
+                          display: flex;
+                          align-items: center;
+                          font-size: 13px;
+                        "
+                        >給食</span
+                      ><span
+                        style="
+                          height: 32px;
+                          padding: 0 10px;
+                          border-radius: 16px;
+                          border: 1px dashed #a8a194;
+                          display: flex;
+                          align-items: center;
+                          gap: 2px;
+                          font-size: 13px;
+                          color: #4a463e;
+                        "
+                        ><span class="ms" style="font-size: 16px">add</span>新規</span
+                      >
+                    </div>
+                  </div>
+                  <div style="display: flex; flex-direction: column; gap: 8px">
+                    <div style="font-size: 12px; font-weight: 700; color: #6b665c">対応状態</div>
+                    <div
+                      style="
+                        display: grid;
+                        grid-template-columns: repeat(3, 1fr);
+                        background: #ece8de;
+                        border-radius: 10px;
+                        padding: 3px;
+                        font-size: 13px;
+                        text-align: center;
+                      "
+                    >
+                      <div style="padding: 7px">不要</div>
+                      <div
+                        style="
+                          padding: 7px;
+                          background: #fff;
+                          border-radius: 8px;
+                          font-weight: 700;
+                          color: #7a5200;
+                        "
+                      >
+                        未対応
+                      </div>
+                      <div style="padding: 7px">対応済</div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style="
+                    padding: 12px 16px 30px;
+                    border-top: 1px solid #e4dfd3;
+                    background: #fbf9f4;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                  "
+                >
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font:
+                        400 11px 'IBM Plex Mono',
+                        monospace;
+                      color: #6b665c;
+                    "
+                  >
+                    <span>容量 62.4 / 100 MB</span><span>+0.9 MB</span>
+                  </div>
+                  <div
+                    style="
+                      height: 50px;
+                      border-radius: 25px;
+                      background: #1f1d1a;
+                      color: #fff;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 15px;
+                      font-weight: 700;
+                    "
+                  >
+                    登録する
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・必須はこども＋写真1枚のみ。ホームから来たら
+              <a href="#4b">4b</a>
+              を先に開き、撮影直後にこのフォーム<br />・受け取った日は今日を初期値に（任意・消せる）<br />・「新規」でトピックをその場で作成。変更時は同フォーム＋「写真をすべて撮り直す」
+            </div>
+          </div>
+
+          <div class="dv-opt" id="4b">
+            <div class="dv-olabel"><a class="dv-oid" href="#4b">4b</a>写真の取り込み方法</div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #f6f3ec;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div style="position: absolute; inset: 0; background: rgba(20, 18, 15, 0.45)"></div>
+                <div
+                  style="
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: #fbf9f4;
+                    border-radius: 24px 24px 0 0;
+                    padding: 10px 16px 32px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                  "
+                >
+                  <div
+                    style="
+                      width: 36px;
+                      height: 4px;
+                      border-radius: 2px;
+                      background: #d6d0c3;
+                      align-self: center;
+                    "
+                  ></div>
+                  <div style="font-size: 18px; font-weight: 700; padding: 4px 4px 6px">
+                    写真を追加
+                  </div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px">
+                    <div
+                      style="
+                        background: #1f1d1a;
+                        color: #fff;
+                        border-radius: 18px;
+                        padding: 22px 16px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 10px;
+                      "
+                    >
+                      <span class="ms" style="font-size: 30px">photo_camera</span
+                      ><span style="font-size: 15px; font-weight: 700">カメラで撮影</span>
+                    </div>
+                    <div
+                      style="
+                        background: #fff;
+                        border: 1px solid #e4dfd3;
+                        border-radius: 18px;
+                        padding: 22px 16px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 10px;
+                      "
+                    >
+                      <span class="ms" style="font-size: 30px">photo_library</span
+                      ><span style="font-size: 15px; font-weight: 700">写真から選ぶ</span>
+                    </div>
+                  </div>
+                  <div style="font-size: 11.5px; color: #6b665c; line-height: 1.6; padding: 4px">
+                    複数ページは続けて撮影できます（最大5枚）。位置情報などは削除して保存します。
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・端末で長辺1920px・JPEG80%に変換、EXIF削除<br />・撮り直しも同じシート
+            </div>
+          </div>
+
+          <div class="dv-opt" id="4c">
+            <div class="dv-olabel"><a class="dv-oid" href="#4c">4c</a>アクション ⋯ ／ 削除確認</div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #2a2824;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div
+                  style="
+                    position: absolute;
+                    right: 14px;
+                    top: 92px;
+                    width: 220px;
+                    background: #fbf9f4;
+                    border-radius: 14px;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+                    overflow: hidden;
+                    font-size: 14.5px;
+                    color: #1f1d1a;
+                  "
+                >
+                  <div style="display: flex; gap: 12px; align-items: center; padding: 13px 16px">
+                    <span class="ms" style="font-size: 20px">edit</span>変更
+                  </div>
+                  <div style="display: flex; gap: 12px; align-items: center; padding: 13px 16px">
+                    <span class="ms" style="font-size: 20px">swap_horiz</span>こどもを付け替え
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      gap: 12px;
+                      align-items: center;
+                      padding: 13px 16px;
+                      border-top: 1px solid #e4dfd3;
+                      color: #b3261e;
+                    "
+                  >
+                    <span class="ms" style="font-size: 20px">delete</span>削除
+                  </div>
+                </div>
+                <div
+                  style="
+                    position: absolute;
+                    inset: 0;
+                    background: rgba(10, 9, 8, 0.55);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 28px;
+                    margin-top: 260px;
+                    background: transparent;
+                  "
+                >
+                  <div
+                    style="
+                      width: 100%;
+                      background: #fbf9f4;
+                      border-radius: 24px;
+                      padding: 22px 22px 14px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 12px;
+                      color: #1f1d1a;
+                      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+                    "
+                  >
+                    <div style="font-size: 18px; font-weight: 700">
+                      このプリントを削除しますか？
+                    </div>
+                    <div style="font-size: 13.5px; line-height: 1.7; color: #4a463e">
+                      はなこのプリント（<span style="font-family: 'IBM Plex Mono'">00012</span
+                      >）「運動会のお知らせ」と写真3枚を削除します。元に戻せません。
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: flex-end;
+                        gap: 4px;
+                        font-size: 14.5px;
+                        font-weight: 700;
+                      "
+                    >
+                      <span style="padding: 10px 14px">キャンセル</span
+                      ><span style="padding: 10px 14px; color: #b3261e">削除する</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・（重ねて表示）メニュー＋確認ダイアログ<br />・付け替え：こども選択ダイアログ
+              →「たろうのプリント（00006）になります」と新連番を事前表示
+            </div>
+          </div>
+
+          <div class="dv-opt" id="4d">
+            <div class="dv-olabel"><a class="dv-oid" href="#4d">4d</a>容量超過エラー</div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #f6f3ec;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div
+                  style="
+                    position: absolute;
+                    inset: 0;
+                    background: rgba(20, 18, 15, 0.45);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 28px;
+                  "
+                >
+                  <div
+                    style="
+                      width: 100%;
+                      background: #fbf9f4;
+                      border-radius: 24px;
+                      padding: 24px 22px 14px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 14px;
+                    "
+                  >
+                    <span class="ms" style="font-size: 30px; color: #b3261e">cloud_off</span>
+                    <div style="font-size: 18px; font-weight: 700">容量がいっぱいです</div>
+                    <div style="display: flex; flex-direction: column; gap: 6px">
+                      <div
+                        style="
+                          height: 10px;
+                          border-radius: 5px;
+                          background: #ece8de;
+                          overflow: hidden;
+                          display: flex;
+                        "
+                      >
+                        <div style="width: 96%; background: #1f1d1a"></div>
+                        <div style="width: 4%; background: #b3261e"></div>
+                      </div>
+                      <div
+                        style="
+                          display: flex;
+                          justify-content: space-between;
+                          font:
+                            400 11px 'IBM Plex Mono',
+                            monospace;
+                          color: #6b665c;
+                        "
+                      >
+                        <span>98.6 + 2.1 MB</span><span>100 MB</span>
+                      </div>
+                    </div>
+                    <div style="font-size: 13.5px; line-height: 1.7; color: #4a463e">
+                      このプリントは登録されませんでした。古いプリントを削除して容量を空けてください。
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: flex-end;
+                        gap: 4px;
+                        font-size: 14.5px;
+                        font-weight: 700;
+                      "
+                    >
+                      <span style="padding: 10px 14px">閉じる</span
+                      ><span style="padding: 10px 14px; color: #b8431f">古いプリントを削除</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・登録全体をエラー。入力内容はフォームに残す<br />・撮り直し時は「元の写真は残っています」と文言差し替え<br />・→
+              <a href="#5d">5d</a>
+            </div>
+          </div>
+        </div>
+        <p class="dv-next">
+          Try next: "撮影→即保存のクイック登録モードも" · "変更画面を独立して描いて"
+        </p>
+      </section>
+
+      <!-- 5 設定 -->
+      <section class="dv-turn" id="t5">
+        <div class="dv-thd">
+          <a class="dv-tid" href="#t5">5</a><span class="dv-tname">設定・家族管理</span>
+        </div>
+        <div class="dv-opts">
+          <div class="dv-opt" id="5a">
+            <div class="dv-olabel"><a class="dv-oid" href="#5a">5a</a>設定（オーナー）</div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #f6f3ec;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div
+                  style="
+                    height: 40px;
+                    flex: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 26px;
+                    font:
+                      600 13px 'IBM Plex Mono',
+                      monospace;
+                  "
+                >
+                  <span>9:41</span
+                  ><span style="display: flex; gap: 4px"
+                    ><span class="ms" style="font-size: 16px">signal_cellular_alt</span
+                    ><span class="ms" style="font-size: 16px">wifi</span
+                    ><span class="ms" style="font-size: 16px">battery_full</span></span
+                  >
+                </div>
+                <div style="padding: 4px 24px 2px; font-size: 26px; font-weight: 900">設定</div>
+                <div
+                  style="
+                    flex: 1;
+                    overflow: hidden;
+                    padding: 4px 16px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                  "
+                >
+                  <div style="flex: none; display: flex; flex-direction: column; gap: 6px">
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        font-size: 12px;
+                        font-weight: 700;
+                        color: #6b665c;
+                        padding: 0 4px;
+                      "
+                    >
+                      <span>家族のメンバー</span
+                      ><span style="font-family: 'IBM Plex Mono'">2/3</span>
+                    </div>
+                    <div
+                      style="
+                        background: #fff;
+                        border: 1px solid #e4dfd3;
+                        border-radius: 14px;
+                        overflow: hidden;
+                      "
+                    >
+                      <div
+                        style="
+                          display: flex;
+                          align-items: center;
+                          gap: 12px;
+                          padding: 12px 14px;
+                          border-bottom: 1px solid #efebe2;
+                        "
+                      >
+                        <span
+                          style="
+                            width: 34px;
+                            height: 34px;
+                            border-radius: 17px;
+                            background: #1f1d1a;
+                            color: #fff;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-weight: 700;
+                          "
+                          >一</span
+                        ><span style="flex: 1; font-size: 15px"
+                          >一郎
+                          <span style="font-size: 11px; color: #6b665c"
+                            >（あなた・オーナー）</span
+                          ></span
+                        ><span class="ms" style="font-size: 20px; color: #6b665c">edit</span>
+                      </div>
+                      <div
+                        style="
+                          display: flex;
+                          align-items: center;
+                          gap: 12px;
+                          padding: 12px 14px;
+                          border-bottom: 1px solid #efebe2;
+                        "
+                      >
+                        <span
+                          style="
+                            width: 34px;
+                            height: 34px;
+                            border-radius: 17px;
+                            background: #ece8de;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-weight: 700;
+                          "
+                          >二</span
+                        ><span style="flex: 1; font-size: 15px">二郎</span
+                        ><span class="ms" style="font-size: 20px; color: #6b665c"
+                          >person_remove</span
+                        >
+                      </div>
+                      <div
+                        style="
+                          display: flex;
+                          align-items: center;
+                          gap: 12px;
+                          padding: 12px 14px;
+                          color: #b8431f;
+                          font-weight: 700;
+                          font-size: 14.5px;
+                        "
+                      >
+                        <span class="ms" style="width: 34px; text-align: center">qr_code_2</span
+                        >メンバーを招待
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      flex: none;
+                      background: #fff;
+                      border: 1px solid #e4dfd3;
+                      border-radius: 14px;
+                      overflow: hidden;
+                      font-size: 15px;
+                    "
+                  >
+                    <div style="display: flex; align-items: center; gap: 12px; padding: 10px 14px">
+                      <span class="ms" style="color: #6b665c">child_care</span
+                      ><span style="flex: 1">こども</span
+                      ><span style="font-size: 13px; color: #6b665c">2人</span
+                      ><span class="ms" style="color: #a8a194">chevron_right</span>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        padding: 10px 14px;
+                        border-top: 1px solid #efebe2;
+                      "
+                    >
+                      <span class="ms" style="color: #6b665c">sell</span
+                      ><span style="flex: 1">トピック</span
+                      ><span style="font-size: 13px; color: #6b665c">9件</span
+                      ><span class="ms" style="color: #a8a194">chevron_right</span>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      flex: none;
+                      background: #fff;
+                      border: 1px solid #e4dfd3;
+                      border-radius: 14px;
+                      padding: 10px 14px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 8px;
+                    "
+                  >
+                    <div
+                      style="display: flex; justify-content: space-between; align-items: baseline"
+                    >
+                      <span style="font-size: 15px">容量</span
+                      ><span
+                        style="
+                          font:
+                            500 12px 'IBM Plex Mono',
+                            monospace;
+                        "
+                        ><b style="font-size: 15px">62.4</b> / 100 MB</span
+                      >
+                    </div>
+                    <div
+                      style="height: 8px; border-radius: 4px; background: #ece8de; overflow: hidden"
+                    >
+                      <div style="width: 62%; height: 100%; background: #1f1d1a"></div>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                        color: #b8431f;
+                        font-size: 13.5px;
+                        font-weight: 700;
+                      "
+                    >
+                      <span class="ms" style="font-size: 18px">auto_delete</span
+                      >古いプリントを一括削除
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      flex: none;
+                      background: #fff;
+                      border: 1px solid #e4dfd3;
+                      border-radius: 14px;
+                      overflow: hidden;
+                      font-size: 14.5px;
+                    "
+                  >
+                    <div style="display: flex; justify-content: space-between; padding: 10px 14px">
+                      ヘルプ<span class="ms" style="color: #a8a194">chevron_right</span>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        padding: 10px 14px;
+                        border-top: 1px solid #efebe2;
+                      "
+                    >
+                      利用規約・プライバシーポリシー<span class="ms" style="color: #a8a194"
+                        >chevron_right</span
+                      >
+                    </div>
+                    <div style="padding: 10px 14px; border-top: 1px solid #efebe2; color: #b3261e">
+                      退会する（家族のデータをすべて削除）
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style="
+                    height: 80px;
+                    flex: none;
+                    border-top: 1px solid #e4dfd3;
+                    background: #fbf9f4;
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    padding-bottom: 12px;
+                  "
+                >
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 5px;
+                      font-size: 11px;
+                      color: #6b665c;
+                    "
+                  >
+                    <span class="ms">family_restroom</span>こども
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 5px;
+                      font-size: 11px;
+                      color: #6b665c;
+                    "
+                  >
+                    <span class="ms">history</span>履歴
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 5px;
+                      font-size: 11px;
+                      color: #6b665c;
+                    "
+                  >
+                    <span class="ms">bar_chart</span>集計
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 2px;
+                      font-size: 11px;
+                      font-weight: 700;
+                    "
+                  >
+                    <span style="padding: 3px 18px; border-radius: 14px; background: #f2d9cd"
+                      ><span class="ms" style="font-variation-settings: 'FILL' 1; color: #b8431f"
+                        >settings</span
+                      ></span
+                    >設定
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・メンバー向けは招待・削除を非表示、「退会」→「この家族から抜ける（脱退）」<br />・上限3人に達していたら「招待」を無効化し理由を表示
+            </div>
+          </div>
+
+          <div class="dv-opt" id="5b">
+            <div class="dv-olabel"><a class="dv-oid" href="#5b">5b</a>招待QRの表示（オーナー）</div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #f6f3ec;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div
+                  style="
+                    height: 40px;
+                    flex: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 26px;
+                    font:
+                      600 13px 'IBM Plex Mono',
+                      monospace;
+                  "
+                >
+                  <span>9:41</span
+                  ><span style="display: flex; gap: 4px"
+                    ><span class="ms" style="font-size: 16px">signal_cellular_alt</span
+                    ><span class="ms" style="font-size: 16px">wifi</span
+                    ><span class="ms" style="font-size: 16px">battery_full</span></span
+                  >
+                </div>
+                <div
+                  style="
+                    height: 56px;
+                    display: flex;
+                    align-items: center;
+                    padding: 0 12px;
+                    gap: 6px;
+                  "
+                >
+                  <span class="ms" style="padding: 8px">close</span
+                  ><span style="font-size: 18px; font-weight: 700">メンバーを招待</span>
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    padding: 16px 28px;
+                    gap: 20px;
+                  "
+                >
+                  <div
+                    style="font-size: 14px; line-height: 1.8; color: #4a463e; text-align: center"
+                  >
+                    招待する人のアプリで<br />「招待QRコードで参加」から読み取ってください
+                  </div>
+                  <div
+                    style="
+                      width: 240px;
+                      height: 240px;
+                      background: #fff;
+                      border-radius: 20px;
+                      border: 1px solid #e4dfd3;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      box-shadow: 8px 8px 0 #1f1d1a;
+                    "
+                  >
+                    <div
+                      style="
+                        width: 180px;
+                        height: 180px;
+                        background: repeating-conic-gradient(#1f1d1a 0 25%, #fff 0 50%) 0 0/20px
+                          20px;
+                        opacity: 0.9;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                      "
+                    >
+                      <span
+                        style="
+                          background: #fff;
+                          font:
+                            600 10px 'IBM Plex Mono',
+                            monospace;
+                          padding: 4px 6px;
+                        "
+                        >QR</span
+                      >
+                    </div>
+                  </div>
+                  <div style="display: flex; flex-direction: column; align-items: center; gap: 4px">
+                    <span
+                      style="
+                        font:
+                          600 32px 'IBM Plex Mono',
+                          monospace;
+                      "
+                      >09:42</span
+                    ><span style="font-size: 12px; color: #6b665c"
+                      >この時間内なら何台でも参加できます</span
+                    >
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 8px;
+                      font-size: 13px;
+                      background: #ece8de;
+                      padding: 8px 14px;
+                      border-radius: 18px;
+                    "
+                  >
+                    <span class="ms" style="font-size: 18px">group</span>あと
+                    <b style="font-family: 'IBM Plex Mono'">1</b> 人参加できます
+                  </div>
+                </div>
+                <div style="padding: 0 24px 36px">
+                  <div
+                    style="
+                      height: 50px;
+                      border-radius: 25px;
+                      border: 1.5px solid #1f1d1a;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 6px;
+                      font-size: 15px;
+                      font-weight: 700;
+                    "
+                  >
+                    <span class="ms" style="font-size: 20px">refresh</span>QRコードを作り直す
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・残り時間をカウントダウン。0で「期限切れ」表示＋作り直しボタン強調<br />・参加を検知したらメンバー数を更新（ポーリング）
+            </div>
+          </div>
+
+          <div class="dv-opt" id="5c">
+            <div class="dv-olabel">
+              <a class="dv-oid" href="#5c">5c</a>こどもの削除（2回目の確認）
+            </div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #f6f3ec;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div
+                  style="
+                    position: absolute;
+                    inset: 0;
+                    background: rgba(20, 18, 15, 0.45);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 24px;
+                  "
+                >
+                  <div
+                    style="
+                      width: 100%;
+                      background: #fbf9f4;
+                      border-radius: 24px;
+                      padding: 24px 22px 14px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 14px;
+                    "
+                  >
+                    <div
+                      style="
+                        font:
+                          600 11px 'IBM Plex Mono',
+                          monospace;
+                        color: #b3261e;
+                        letter-spacing: 0.08em;
+                      "
+                    >
+                      STEP 2 / 2
+                    </div>
+                    <div style="font-size: 18px; font-weight: 700">
+                      本当に「はなこ」を削除しますか？
+                    </div>
+                    <div style="font-size: 13.5px; line-height: 1.7; color: #4a463e">
+                      はなこのプリント
+                      <b style="font-family: 'IBM Plex Mono'">24</b>
+                      件と写真もすべて削除されます。確認のため、こどもの名前を入力してください。
+                    </div>
+                    <div
+                      style="
+                        background: #fff;
+                        border: 2px solid #b3261e;
+                        border-radius: 12px;
+                        padding: 12px 14px;
+                        font-size: 16px;
+                      "
+                    >
+                      はなこ<span
+                        style="
+                          display: inline-block;
+                          width: 2px;
+                          height: 18px;
+                          background: #b3261e;
+                          vertical-align: -3px;
+                          margin-left: 1px;
+                        "
+                      ></span>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: flex-end;
+                        gap: 8px;
+                        font-size: 14.5px;
+                        font-weight: 700;
+                        align-items: center;
+                      "
+                    >
+                      <span style="padding: 10px 14px">キャンセル</span
+                      ><span
+                        style="
+                          padding: 10px 18px;
+                          border-radius: 20px;
+                          background: #b3261e;
+                          color: #fff;
+                        "
+                        >削除する</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・1回目は通常の確認ダイアログ（件数表示）<br />・名前が一致するまで「削除する」は無効
+            </div>
+          </div>
+
+          <div class="dv-opt" id="5d">
+            <div class="dv-olabel"><a class="dv-oid" href="#5d">5d</a>古いプリントの一括削除</div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #f6f3ec;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div
+                  style="
+                    height: 40px;
+                    flex: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 26px;
+                    font:
+                      600 13px 'IBM Plex Mono',
+                      monospace;
+                  "
+                >
+                  <span>9:41</span
+                  ><span style="display: flex; gap: 4px"
+                    ><span class="ms" style="font-size: 16px">signal_cellular_alt</span
+                    ><span class="ms" style="font-size: 16px">wifi</span
+                    ><span class="ms" style="font-size: 16px">battery_full</span></span
+                  >
+                </div>
+                <div
+                  style="
+                    height: 56px;
+                    display: flex;
+                    align-items: center;
+                    padding: 0 12px;
+                    gap: 6px;
+                  "
+                >
+                  <span class="ms" style="padding: 8px">arrow_back</span
+                  ><span style="font-size: 18px; font-weight: 700">古いプリントを一括削除</span>
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    padding: 8px 16px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 14px;
+                  "
+                >
+                  <div style="font-size: 13.5px; line-height: 1.8; color: #4a463e; padding: 0 4px">
+                    すべてのこどもと家族共通から、登録日時が選んだ期間より前のプリントを削除します。
+                  </div>
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid #e4dfd3;
+                      border-radius: 14px;
+                      overflow: hidden;
+                    "
+                  >
+                    <sc-for list="{{ bulkOpts }}" as="b" hint-placeholder-count="3">
+                      <div
+                        style="display:flex;align-items:center;gap:12px;padding:15px 16px;border-bottom:1px solid #EFEBE2;background:{{ b.bg }}"
+                      >
+                        <span
+                          style="width:20px;height:20px;border-radius:10px;border:{{ b.radio }};box-sizing:border-box"
+                        ></span
+                        ><span style="flex:1;font-size:15px;font-weight:{{ b.w }}"
+                          >{{ b.label }}より前</span
+                        ><span
+                          style="
+                            font:
+                              500 12px 'IBM Plex Mono',
+                              monospace;
+                            color: #6b665c;
+                          "
+                          >{{ b.count }}件 · {{ b.mb }}MB</span
+                        >
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid #e4dfd3;
+                      border-radius: 14px;
+                      padding: 14px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 8px;
+                    "
+                  >
+                    <div style="font-size: 12px; color: #6b665c">削除後の容量</div>
+                    <div
+                      style="
+                        height: 8px;
+                        border-radius: 4px;
+                        background: #ece8de;
+                        overflow: hidden;
+                        display: flex;
+                      "
+                    >
+                      <div style="width: 44%; background: #1f1d1a"></div>
+                      <div
+                        style="
+                          width: 18%;
+                          background: repeating-linear-gradient(
+                            135deg,
+                            #d9542b 0 4px,
+                            #f2d9cd 4px 8px
+                          );
+                        "
+                      ></div>
+                    </div>
+                    <div
+                      style="
+                        font:
+                          500 12px 'IBM Plex Mono',
+                          monospace;
+                      "
+                    >
+                      62.4 → <b>44.1</b> MB
+                    </div>
+                  </div>
+                </div>
+                <div style="padding: 0 16px 32px">
+                  <div
+                    style="
+                      height: 50px;
+                      border-radius: 25px;
+                      background: #b3261e;
+                      color: #fff;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 15px;
+                      font-weight: 700;
+                    "
+                  >
+                    38件を削除…
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・選択肢はリミット値（3か月／6か月／1年）<br />・ボタン押下で件数入り確認ダイアログ →
+              履歴「一括削除（38件）」
+            </div>
+          </div>
+
+          <div class="dv-opt" id="5e">
+            <div class="dv-olabel"><a class="dv-oid" href="#5e">5e</a>トピック管理</div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #f6f3ec;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div
+                  style="
+                    height: 40px;
+                    flex: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 26px;
+                    font:
+                      600 13px 'IBM Plex Mono',
+                      monospace;
+                  "
+                >
+                  <span>9:41</span
+                  ><span style="display: flex; gap: 4px"
+                    ><span class="ms" style="font-size: 16px">signal_cellular_alt</span
+                    ><span class="ms" style="font-size: 16px">wifi</span
+                    ><span class="ms" style="font-size: 16px">battery_full</span></span
+                  >
+                </div>
+                <div
+                  style="
+                    height: 56px;
+                    display: flex;
+                    align-items: center;
+                    padding: 0 12px;
+                    gap: 6px;
+                  "
+                >
+                  <span class="ms" style="padding: 8px">arrow_back</span
+                  ><span style="font-size: 18px; font-weight: 700; flex: 1">トピック</span>
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    overflow: hidden;
+                    padding: 8px 16px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                  "
+                >
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid #e4dfd3;
+                      border-radius: 14px;
+                      overflow: hidden;
+                    "
+                  >
+                    <sc-for list="{{ topics }}" as="t" hint-placeholder-count="6">
+                      <div
+                        style="
+                          display: flex;
+                          align-items: center;
+                          gap: 12px;
+                          padding: 13px 14px;
+                          border-bottom: 1px solid #efebe2;
+                        "
+                      >
+                        <span class="ms" style="font-size: 18px; color: #a8a194">sell</span
+                        ><span style="flex: 1; font-size: 15px">{{ t.name }}</span
+                        ><span
+                          style="
+                            font:
+                              400 12px 'IBM Plex Mono',
+                              monospace;
+                            color: #6b665c;
+                          "
+                          >{{ t.n }}</span
+                        ><span class="ms" style="font-size: 20px; color: #6b665c">more_horiz</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+                <div
+                  style="
+                    position: absolute;
+                    right: 20px;
+                    bottom: 30px;
+                    height: 56px;
+                    padding: 0 20px 0 16px;
+                    border-radius: 18px;
+                    background: #1f1d1a;
+                    color: #fff;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-size: 15px;
+                    font-weight: 700;
+                    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+                  "
+                >
+                  <span class="ms">add</span>トピックを追加
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・右の数字＝付いているプリント件数。削除確認で「12件のプリントから外れます」<br />・こども管理（名前変更・追加・削除）も同じリスト構成
+            </div>
+          </div>
+        </div>
+        <p class="dv-next">
+          Try next: "メンバー視点の設定画面も描いて" · "退会フローの確認画面を追加"
+        </p>
+      </section>
+
+      <!-- 6 履歴・集計 -->
+      <section class="dv-turn" id="t6">
+        <div class="dv-thd">
+          <a class="dv-tid" href="#t6">6</a><span class="dv-tname">履歴・集計</span>
+        </div>
+        <div class="dv-opts">
+          <div class="dv-opt" id="6a">
+            <div class="dv-olabel"><a class="dv-oid" href="#6a">6a</a>履歴</div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #f6f3ec;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div
+                  style="
+                    height: 40px;
+                    flex: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 26px;
+                    font:
+                      600 13px 'IBM Plex Mono',
+                      monospace;
+                  "
+                >
+                  <span>9:41</span
+                  ><span style="display: flex; gap: 4px"
+                    ><span class="ms" style="font-size: 16px">signal_cellular_alt</span
+                    ><span class="ms" style="font-size: 16px">wifi</span
+                    ><span class="ms" style="font-size: 16px">battery_full</span></span
+                  >
+                </div>
+                <div style="padding: 12px 24px 8px; font-size: 26px; font-weight: 900">履歴</div>
+                <div style="flex: 1; overflow: hidden; padding: 4px 16px 0">
+                  <sc-for list="{{ history }}" as="h" hint-placeholder-count="8">
+                    <div
+                      style="
+                        display: grid;
+                        grid-template-columns: 44px 14px minmax(0, 1fr);
+                        gap: 8px;
+                        min-height: 56px;
+                      "
+                    >
+                      <div
+                        style="
+                          font:
+                            500 11px/1.3 'IBM Plex Mono',
+                            monospace;
+                          color: #6b665c;
+                          padding-top: 3px;
+                          text-align: right;
+                        "
+                      >
+                        {{ h.date }}<br /><span style="color: #1f1d1a">{{ h.time }}</span>
+                      </div>
+                      <div style="display: flex; flex-direction: column; align-items: center">
+                        <span
+                          style="width:10px;height:10px;border-radius:5px;background:{{ h.dot }};margin-top:5px;flex:none"
+                        ></span
+                        ><span style="flex: 1; width: 1px; background: #d6d0c3"></span>
+                      </div>
+                      <div
+                        style="
+                          font-size: 13px;
+                          line-height: 1.6;
+                          padding-bottom: 12px;
+                          text-wrap: pretty;
+                        "
+                      >
+                        <b>{{ h.who }}</b>が{{ h.text }}<sc-if
+                          value="{{ h.hasDetail }}"
+                          hint-placeholder-val="{{ false }}"
+                          ><div style="font-size: 11.5px; color: #6b665c; margin-top: 2px">
+                            {{ h.detail }}
+                          </div></sc-if
+                        >
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+                <div
+                  style="
+                    height: 80px;
+                    flex: none;
+                    border-top: 1px solid #e4dfd3;
+                    background: #fbf9f4;
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    padding-bottom: 12px;
+                  "
+                >
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 5px;
+                      font-size: 11px;
+                      color: #6b665c;
+                    "
+                  >
+                    <span class="ms">family_restroom</span>こども
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 2px;
+                      font-size: 11px;
+                      font-weight: 700;
+                    "
+                  >
+                    <span style="padding: 3px 18px; border-radius: 14px; background: #f2d9cd"
+                      ><span class="ms" style="color: #b8431f">history</span></span
+                    >履歴
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 5px;
+                      font-size: 11px;
+                      color: #6b665c;
+                    "
+                  >
+                    <span class="ms">bar_chart</span>集計
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 5px;
+                      font-size: 11px;
+                      color: #6b665c;
+                    "
+                  >
+                    <span class="ms">settings</span>設定
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・文言は仕様の表示例どおり。詳細（トピック・日付・対応・写真枚数）は2行目に分離<br />・点の色：登録=墨／変更=藍／削除=赤。50件ずつ無限スクロール<br />・履歴からプリントへのリンクは張らない（削除済みもあるため）
+            </div>
+          </div>
+
+          <div class="dv-opt" id="6b">
+            <div class="dv-olabel"><a class="dv-oid" href="#6b">6b</a>集計</div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #f6f3ec;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div
+                  style="
+                    height: 40px;
+                    flex: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 26px;
+                    font:
+                      600 13px 'IBM Plex Mono',
+                      monospace;
+                  "
+                >
+                  <span>9:41</span
+                  ><span style="display: flex; gap: 4px"
+                    ><span class="ms" style="font-size: 16px">signal_cellular_alt</span
+                    ><span class="ms" style="font-size: 16px">wifi</span
+                    ><span class="ms" style="font-size: 16px">battery_full</span></span
+                  >
+                </div>
+                <div style="padding: 12px 24px 8px; font-size: 26px; font-weight: 900">集計</div>
+                <div
+                  style="
+                    flex: 1;
+                    overflow: hidden;
+                    padding: 4px 16px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 14px;
+                  "
+                >
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid #e4dfd3;
+                      border-radius: 18px;
+                      padding: 16px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 14px;
+                    "
+                  >
+                    <div style="display: flex; justify-content: space-between; align-items: center">
+                      <span style="font-size: 15px; font-weight: 700">登録数</span>
+                      <div
+                        style="
+                          display: grid;
+                          grid-template-columns: 1fr 1fr;
+                          background: #ece8de;
+                          border-radius: 9px;
+                          padding: 2px;
+                          font-size: 12px;
+                          font-weight: 700;
+                        "
+                      >
+                        <span style="background: #fff; border-radius: 7px; padding: 5px 12px"
+                          >週</span
+                        ><span style="padding: 5px 12px; color: #6b665c">月</span>
+                      </div>
+                    </div>
+                    <div
+                      style="
+                        height: 170px;
+                        display: flex;
+                        align-items: flex-end;
+                        gap: 5px;
+                        border-bottom: 1px solid #d6d0c3;
+                        padding-bottom: 1px;
+                      "
+                    >
+                      <sc-for list="{{ weeks }}" as="w" hint-placeholder-count="12">
+                        <div
+                          style="
+                            flex: 1;
+                            display: flex;
+                            flex-direction: column-reverse;
+                            gap: 1px;
+                            height: 100%;
+                            justify-content: flex-start;
+                          "
+                        >
+                          <sc-for list="{{ w.segs }}" as="s" hint-placeholder-count="3"
+                            ><div
+                              style="height:{{ s.h }}px;background:{{ s.c }};border-radius:2px"
+                            ></div
+                          ></sc-for>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        font:
+                          400 10px 'IBM Plex Mono',
+                          monospace;
+                        color: #6b665c;
+                        margin-top: -8px;
+                      "
+                    >
+                      <span>07.07</span><span>08.04</span><span>09.01</span
+                      ><span style="color: #1f1d1a; font-weight: 600">今週</span>
+                    </div>
+                    <div style="display: flex; gap: 14px; font-size: 12px">
+                      <span style="display: flex; align-items: center; gap: 5px"
+                        ><span
+                          style="width: 10px; height: 10px; border-radius: 3px; background: #d9542b"
+                        ></span
+                        >はなこ</span
+                      ><span style="display: flex; align-items: center; gap: 5px"
+                        ><span
+                          style="width: 10px; height: 10px; border-radius: 3px; background: #2f5d8a"
+                        ></span
+                        >たろう</span
+                      ><span style="display: flex; align-items: center; gap: 5px"
+                        ><span
+                          style="width: 10px; height: 10px; border-radius: 3px; background: #a8a194"
+                        ></span
+                        >家族共通</span
+                      >
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid #e4dfd3;
+                      border-radius: 18px;
+                      padding: 16px;
+                      display: flex;
+                      align-items: center;
+                      gap: 18px;
+                    "
+                  >
+                    <div
+                      style="
+                        width: 96px;
+                        height: 96px;
+                        border-radius: 48px;
+                        background: conic-gradient(#1f1d1a 0 62%, #ece8de 62% 100%);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex: none;
+                      "
+                    >
+                      <div
+                        style="
+                          width: 70px;
+                          height: 70px;
+                          border-radius: 35px;
+                          background: #fff;
+                          display: flex;
+                          align-items: center;
+                          justify-content: center;
+                          font:
+                            600 20px 'IBM Plex Mono',
+                            monospace;
+                        "
+                      >
+                        62%
+                      </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px">
+                      <span style="font-size: 15px; font-weight: 700">容量使用率</span
+                      ><span
+                        style="
+                          font:
+                            500 13px 'IBM Plex Mono',
+                            monospace;
+                        "
+                        >62.4 / 100 MB</span
+                      ><span
+                        style="font-size: 12px; color: #b8431f; font-weight: 700; margin-top: 4px"
+                        >古いプリントを一括削除 ›</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style="
+                    height: 80px;
+                    flex: none;
+                    border-top: 1px solid #e4dfd3;
+                    background: #fbf9f4;
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    padding-bottom: 12px;
+                  "
+                >
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 5px;
+                      font-size: 11px;
+                      color: #6b665c;
+                    "
+                  >
+                    <span class="ms">family_restroom</span>こども
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 5px;
+                      font-size: 11px;
+                      color: #6b665c;
+                    "
+                  >
+                    <span class="ms">history</span>履歴
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 2px;
+                      font-size: 11px;
+                      font-weight: 700;
+                    "
+                  >
+                    <span style="padding: 3px 18px; border-radius: 14px; background: #f2d9cd"
+                      ><span class="ms" style="color: #b8431f">bar_chart</span></span
+                    >集計
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 5px;
+                      font-size: 11px;
+                      color: #6b665c;
+                    "
+                  >
+                    <span class="ms">settings</span>設定
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・直近12週／12か月、こどもごと積み上げ。バータップで内訳ツールチップ<br />・現存プリントのみを数える旨をグラフ下に注記（実装時）
+            </div>
+          </div>
+        </div>
+        <p class="dv-next">
+          Try next: "履歴をこども・操作で絞り込めるように" · "集計をこどもごとの小さなグラフに分割"
+        </p>
+      </section>
+
+      <!-- 7 状態 -->
+      <section class="dv-turn" id="t7">
+        <div class="dv-thd">
+          <a class="dv-tid" href="#t7">7</a><span class="dv-tname">共通の状態</span>
+        </div>
+        <div class="dv-opts">
+          <div class="dv-opt" id="7a">
+            <div class="dv-olabel"><a class="dv-oid" href="#7a">7a</a>オフライン</div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #f6f3ec;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div
+                  style="
+                    height: 40px;
+                    flex: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 26px;
+                    font:
+                      600 13px 'IBM Plex Mono',
+                      monospace;
+                  "
+                >
+                  <span>9:41</span
+                  ><span style="display: flex; gap: 4px"
+                    ><span class="ms" style="font-size: 16px">signal_cellular_alt</span
+                    ><span class="ms" style="font-size: 16px">wifi_off</span
+                    ><span class="ms" style="font-size: 16px">battery_full</span></span
+                  >
+                </div>
+                <div
+                  style="
+                    margin: 6px 12px 0;
+                    padding: 10px 14px;
+                    border-radius: 12px;
+                    background: #1f1d1a;
+                    color: #fff;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    font-size: 13.5px;
+                    font-weight: 700;
+                  "
+                >
+                  <span class="ms" style="font-size: 20px">cloud_off</span>オフラインです<span
+                    style="flex: 1"
+                  ></span
+                  ><span style="font-weight: 400; font-size: 12px; color: #b5afa2"
+                    >再接続を待っています…</span
+                  >
+                </div>
+                <div
+                  style="padding: 12px 24px 8px; font-size: 26px; font-weight: 900; opacity: 0.4"
+                >
+                  こども
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    padding: 12px 16px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                    opacity: 0.4;
+                    pointer-events: none;
+                  "
+                >
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid #e4dfd3;
+                      border-radius: 18px;
+                      height: 84px;
+                    "
+                  ></div>
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid #e4dfd3;
+                      border-radius: 18px;
+                      height: 84px;
+                    "
+                  ></div>
+                  <div
+                    style="
+                      background: #fff;
+                      border: 1px solid #e4dfd3;
+                      border-radius: 18px;
+                      height: 84px;
+                    "
+                  ></div>
+                </div>
+                <div
+                  style="
+                    position: absolute;
+                    right: 20px;
+                    bottom: 100px;
+                    height: 56px;
+                    padding: 0 22px 0 18px;
+                    border-radius: 18px;
+                    background: #c9c2b2;
+                    color: #fff;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 15px;
+                    font-weight: 700;
+                  "
+                >
+                  <span class="ms">photo_camera</span>プリントを登録
+                </div>
+                <div
+                  style="
+                    height: 80px;
+                    flex: none;
+                    border-top: 1px solid #e4dfd3;
+                    background: #fbf9f4;
+                    opacity: 0.4;
+                  "
+                ></div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・全画面共通の上部バナー。操作系（FAB・保存・シート）はすべて無効<br />・端末への永続保存はしない仕様のため、画面は薄く表示
+            </div>
+          </div>
+
+          <div class="dv-opt" id="7b">
+            <div class="dv-olabel">
+              <a class="dv-oid" href="#7b">7b</a>鍵ファイル無効（削除・退会後）
+            </div>
+            <div
+              style="
+                width: 360px;
+                height: 760px;
+                border-radius: 44px;
+                background: #1f1d1a;
+                padding: 8px;
+                box-sizing: border-box;
+                box-shadow: 0 20px 40px rgba(40, 30, 10, 0.18);
+              "
+            >
+              <div
+                style="
+                  position: relative;
+                  width: 100%;
+                  height: 100%;
+                  border-radius: 36px;
+                  overflow: hidden;
+                  background: #f6f3ec;
+                  display: flex;
+                  flex-direction: column;
+                "
+              >
+                <div
+                  style="
+                    height: 40px;
+                    flex: none;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0 26px;
+                    font:
+                      600 13px 'IBM Plex Mono',
+                      monospace;
+                  "
+                >
+                  <span>9:41</span
+                  ><span style="display: flex; gap: 4px"
+                    ><span class="ms" style="font-size: 16px">signal_cellular_alt</span
+                    ><span class="ms" style="font-size: 16px">wifi</span
+                    ><span class="ms" style="font-size: 16px">battery_full</span></span
+                  >
+                </div>
+                <div
+                  style="
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    padding: 0 32px;
+                    gap: 16px;
+                  "
+                >
+                  <span class="ms" style="font-size: 40px; color: #6b665c">key_off</span>
+                  <div style="font-size: 22px; font-weight: 900; line-height: 1.4">
+                    この家族から<br />外れました
+                  </div>
+                  <div style="font-size: 13.5px; line-height: 1.8; color: #4a463e">
+                    オーナーによる削除、または家族の退会により、この端末では利用できなくなりました。もう一度参加するには、オーナーに招待してもらってください。
+                  </div>
+                </div>
+                <div style="padding: 0 24px 36px">
+                  <div
+                    style="
+                      height: 52px;
+                      border-radius: 26px;
+                      border: 1.5px solid #1f1d1a;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 8px;
+                      font-size: 15px;
+                      font-weight: 700;
+                    "
+                  >
+                    <span class="ms">qr_code_scanner</span>招待QRコードで参加
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
+              ・起動時に鍵が拒否されたら表示し、端末の鍵を破棄<br />・オーナーのセッション切れ（30日）は
+              <a href="#1a">1a</a> に戻す
+            </div>
+          </div>
+        </div>
+        <p class="dv-next">
+          Try next: "空状態（こども0人・プリント0件）を追加" · "ダークモード対応を検討"
+        </p>
+      </section>
+    </x-dc>
+    <script type="text/x-dc" data-dc-script="">
+      class Component extends DCLogic {
+        renderVals() {
+          const children = [
+            { name: 'はなこ', initial: 'は', color: '#D9542B', week: 3, mitene: 2 },
+            { name: 'たろう', initial: 'た', color: '#2F5D8A', week: 1, mitene: 0 },
+            { name: '家族共通', initial: '家', color: '#6B665C', week: 2, mitene: 1 },
+          ].map(c => ({ ...c, hasMitene: c.mitene > 0 }));
+          const raw = [
+            { seq: '00014', created: '09.28 07:55', title: '', pages: 1, unread: true, due: '', st: 'none', mitene: '二郎' },
+            { seq: '00013', created: '09.26 18:20', title: '遠足のお知らせ', pages: 2, unread: true, due: '10.08', st: 'todo', mitene: '二郎' },
+            { seq: '00012', created: '09.25 19:02', title: '運動会のお知らせ', pages: 3, unread: false, due: '10.03', st: 'todo' },
+            { seq: '00011', created: '09.22 17:40', title: '10月の給食こんだて', pages: 1, unread: false, due: '', st: 'none' },
+            { seq: '00010', created: '09.19 16:05', title: '学級だより 9月号', pages: 2, unread: false, due: '', st: 'none' },
+            { seq: '00009', created: '09.12 18:30', title: '保護者会の出欠', pages: 1, unread: false, due: '09.20', st: 'done' },
+          ];
+          const prints = raw.map(p => ({
+            ...p, title: p.title || 'タイトルなし', titleColor: p.title ? '#1F1D1A' : '#8A857A',
+            weight: p.unread ? 700 : 500, bg: p.unread ? '#FFFDF8' : 'transparent',
+            hasDue: !!p.due, todo: p.st === 'todo', done: p.st === 'done', mitene: !!p.mitene, miteneFrom: p.mitene,
+          }));
+          const st = { todo: ['未対応', '#FBEBC8', '#7A5200'], none: ['不要', '#ECE8DE', '#6B665C'], done: ['対応済', '#DDEDE2', '#2A5E40'] };
+          const mk = (seq, title, month, day, wd, s) => ({ seq, title, month, day, wd, st: st[s][0], stBg: st[s][1], stFg: st[s][2] });
+          const dueGroups = [
+            { label: '期限切れ・未対応', color: '#B3261E', items: [mk('00008', '夏休みの宿題 提出表', 'SEP', '26', '土', 'todo')] },
+            { label: '今週', color: '#1F1D1A', items: [mk('00012', '運動会のお知らせ', 'OCT', '03', '土', 'todo'), mk('00007', '個人面談の日程', 'OCT', '02', '金', 'done')] },
+            { label: 'それ以降', color: '#1F1D1A', items: [mk('00013', '遠足のお知らせ', 'OCT', '08', '木', 'todo'), mk('00006', '音楽発表会', 'NOV', '14', '土', 'none')] },
+          ];
+          const topicNames = ['運動会', '持ち物', '給食', '学級だより', '遠足', '保護者会', 'サッカークラブ', '試合', '提出'];
+          const sel = ['運動会', '持ち物'];
+          const topicChips = topicNames.map(n => sel.includes(n)
+            ? { name: n, bg: '#1F1D1A', fg: '#fff', bd: '#1F1D1A' } : { name: n, bg: 'transparent', fg: '#1F1D1A', bd: '#D6D0C3' });
+          const topics = topicNames.map((n, i) => ({ name: n, n: [6, 4, 12, 9, 2, 3, 8, 5, 7][i] }));
+          const stM = { requested: ['見てね', '#D9542B', '#fff'], seen: ['見たよ', '#DDEDE2', '#2A5E40'], none: ['—', 'transparent', '#A8A194'] };
+          const miteneTargets = [{ name: '二郎', s: 'seen', on: true }, { name: 'はる', s: 'none', on: false }].map(m => ({
+            name: m.name, st: stM[m.s][0], stBg: stM[m.s][1], stFg: stM[m.s][2],
+            boxBg: m.on ? '#1F1D1A' : '#fff', check: m.on ? 'check' : '',
+          }));
+          const bulkOpts = [['3か月', 38, 18.3, true], ['6か月', 21, 10.2, false], ['1年', 4, 2.0, false]].map(([label, count, mb, on]) => ({
+            label, count, mb: mb.toFixed(1), bg: on ? '#FFF6F2' : '#fff', w: on ? 700 : 400,
+            radio: on ? '6px solid #D9542B' : '2px solid #C9C2B2',
+          }));
+          const dot = { c: '#1F1D1A', u: '#2F5D8A', d: '#B3261E' };
+          const history = [
+            ['09.28', '07:55', '一郎', 'はなこのプリント（00014）を登録', '', 'c'],
+            ['09.27', '12:51', '二郎', '表示名を二朗に変更', '', 'u'],
+            ['09.27', '12:50', '一郎', '1年以上前に登録したプリントを一括削除（20件）', '', 'd'],
+            ['09.27', '12:49', '一郎', 'たろうのプリント（00005）を登録', '「遠足のお知らせ」', 'c'],
+            ['09.27', '12:49', '一郎', 'はなこのプリント（00002）を削除', '', 'd'],
+            ['09.27', '12:47', '二郎', 'はなこのプリント（00012）を変更', '「運動会のお知らせ」、対応=対応済、写真=3枚', 'u'],
+            ['09.27', '12:46', '一郎', 'はなこのプリント（00012）を登録', '[ 運動会, 持ち物 ]、2026.09.25受取、2026.10.03まで', 'c'],
+            ['09.27', '12:43', '一郎', '[ サッカー ] トピックを登録', '', 'c'],
+            ['09.27', '12:40', '一郎', 'はなこを登録', '', 'c'],
+          ].map(([date, time, who, text, detail, k]) => ({ date, time, who, text, detail, hasDetail: !!detail, dot: dot[k] }));
+          const data = [[2,1,1],[3,0,1],[1,1,0],[4,2,1],[2,0,2],[0,1,0],[1,0,0],[5,2,1],[3,1,2],[2,2,0],[4,1,1],[3,1,2]];
+          const cols = ['#D9542B', '#2F5D8A', '#A8A194'];
+          const weeks = data.map(d => ({ segs: d.map((v, i) => ({ h: v * 18, c: cols[i] })).filter(s => s.h > 0) }));
+          return { children, prints, dueGroups, topicChips, topics, miteneTargets, bulkOpts, history, weeks };
+        }
+      }
+    </script>
+  </body>
+</html>
