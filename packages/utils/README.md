@@ -3,6 +3,7 @@
 Shared runtime utilities used by `apps/backend` and `apps/frontend`.
 
 - `date` — date formatting (`formatDate`) and calculation (`addDays`, `addMonths`, `addYears`, `startOfDay`, `endOfDay`, `isSameDay`, `diffInDays`) helpers, built on the native `Date` API only.
+- `limits` — `LIMITS`, the app-wide limits (storage quota, family members, photos/topics per print, photo resize size).
 - `logger` — `createLogger()`, a thin wrapper over `console.*` with level filtering and an optional prefix.
 
 Consumed directly from source (`apps/backend`, `apps/frontend` resolve `utils` to `src/index.ts`) — no build step needed.
