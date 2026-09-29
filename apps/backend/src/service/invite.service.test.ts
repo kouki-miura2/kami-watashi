@@ -54,7 +54,7 @@ test('createInvite refuses when the family is full', async () => {
   await expect(service.createInvite(ownerUser)).rejects.toMatchObject({ code: 'member_limit' })
 })
 
-test('redeem creates the member with the hash of the returned key', async () => {
+test('redeem creates the member with the hash of the returned key and records the join', async () => {
   const { service, repository } = createService()
 
   const { memberKey } = await service.redeem({
@@ -64,15 +64,18 @@ test('redeem creates the member with the hash of the returned key', async () => 
   })
 
   expect(isMemberKey(memberKey)).toBe(true)
-  expect(repository.createInvited).toHaveBeenCalledWith({
-    id: expect.any(String),
-    familyId: 'f1',
-    name: '二郎',
-    keyHash: await hashMemberKey(memberKey),
-    termsVersion: 'v1',
-    now: expect.any(Number),
-    maxMembers: LIMITS.familyMembers,
-  })
+  expect(repository.createInvited).toHaveBeenCalledWith(
+    {
+      id: expect.any(String),
+      familyId: 'f1',
+      name: '二郎',
+      keyHash: await hashMemberKey(memberKey),
+      termsVersion: 'v1',
+      now: expect.any(Number),
+      maxMembers: LIMITS.familyMembers,
+    },
+    { memberName: '二郎', target: 'member', action: 'create', name: '二郎' },
+  )
 })
 
 test('redeem tells an expired invite from an invalid one', async () => {

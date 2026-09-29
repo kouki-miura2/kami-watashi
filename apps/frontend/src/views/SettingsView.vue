@@ -18,10 +18,12 @@ import { useTopicsQuery } from '../composables/useTopics.ts'
 import { formatMegabytes } from '../lib/format.ts'
 import { useAuthStore } from '../stores/auth.ts'
 import { useConfirmStore } from '../stores/confirm.ts'
+import { useInstallStore } from '../stores/install.ts'
 import { termsLinks } from '../terms.ts'
 
 const auth = useAuthStore()
 const confirm = useConfirmStore()
+const install = useInstallStore()
 const members = useMembersQuery()
 const children = useChildrenQuery()
 const topics = useTopicsQuery()
@@ -56,6 +58,12 @@ const remove = async (member: { id: string; name: string }) => {
     danger: true,
   })
   if (confirmed) removeMember.mutate(member.id)
+}
+
+// Chrome installs from its own dialog; elsewhere (Safari has no install API) show the steps.
+const installStepsOpen = ref(false)
+const installApp = async () => {
+  if (!(await install.install())) installStepsOpen.value = true
 }
 
 /** The owner's withdrawal, past the first confirmation, awaiting 「退会する」 typed (spec). */
@@ -198,6 +206,18 @@ const leave = async () => {
         />
       </v-card>
 
+      <v-card v-if="!install.installed">
+        <v-list>
+          <v-list-item
+            title="アプリをインストール"
+            subtitle="ホーム画面から全画面で開けます"
+            prepend-icon="mdi-cellphone-arrow-down"
+            base-color="link"
+            @click="installApp"
+          />
+        </v-list>
+      </v-card>
+
       <v-card>
         <v-list>
           <v-list-item
@@ -247,6 +267,22 @@ const leave = async () => {
     :error="renameError"
     @submit="rename"
   />
+  <v-dialog v-model="installStepsOpen" max-width="400">
+    <v-card title="ホーム画面に追加する">
+      <v-card-text v-if="install.isIos">
+        Safari の共有ボタン（<v-icon icon="mdi-export-variant" size="small" />）をタップし、
+        「ホーム画面に追加」を選んでください。「Webアプリとして開く」はオンのままにします。
+      </v-card-text>
+      <v-card-text v-else>
+        ブラウザのメニュー（<v-icon icon="mdi-dots-vertical" size="small" />）から
+        「アプリをインストール」または「ホーム画面に追加」を選んでください。
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn text="閉じる" @click="installStepsOpen = false" />
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
   <TypeToConfirmDialog
     v-model="withdrawOpen"
     title="本当に退会しますか？"

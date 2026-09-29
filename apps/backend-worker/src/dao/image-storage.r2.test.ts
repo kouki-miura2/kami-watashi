@@ -24,18 +24,19 @@ test('delete removes the given objects only, ignoring missing keys', async () =>
   ])
 })
 
-test('put stores a JPEG that get returns with its size; get of a missing key is null', async () => {
+test('put stores a photo that get returns with its size and format; get of a missing key is null', async () => {
   const storage = createR2ImageStorage(testEnv.images)
-  const data = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 1, 2]).buffer
+  const data = new Uint8Array([0x52, 0x49, 0x46, 0x46, 1, 2]).buffer
 
-  await storage.put('f2/p1/i1', data)
+  await storage.put('f2/p1/i1', data, 'image/webp')
   const stored = await storage.get('f2/p1/i1')
 
   expect(stored?.size).toBe(6)
+  expect(stored?.contentType).toBe('image/webp')
   expect(new Uint8Array(await new Response(stored?.body).arrayBuffer())).toEqual(
     new Uint8Array(data),
   )
-  expect((await testEnv.images.head('f2/p1/i1'))?.httpMetadata?.contentType).toBe('image/jpeg')
+  expect((await testEnv.images.head('f2/p1/i1'))?.httpMetadata?.contentType).toBe('image/webp')
   expect(await storage.get('f2/p1/missing')).toBeNull()
 })
 

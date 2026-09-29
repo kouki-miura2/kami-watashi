@@ -107,13 +107,17 @@ test('agreeTerms records agreement to the current version only', async () => {
   })
 })
 
-test('removeMember deletes an invited member of the family', async () => {
+test('removeMember deletes an invited member of the family and records it', async () => {
   const { service, repository } = createService()
   const owner = { ...user, id: 'm1', name: '一郎', isOwner: true }
 
   await service.removeMember(owner, 'm2')
 
-  expect(repository.delete).toHaveBeenCalledWith('m2')
+  expect(repository.delete).toHaveBeenCalledWith(
+    expect.objectContaining({ id: 'm2', familyId: 'f1' }),
+    { memberName: '一郎', target: 'member', action: 'delete', name: 'たろう' },
+    now,
+  )
 })
 
 test('removeMember refuses the owner and answers not_found outside the family', async () => {
@@ -125,11 +129,15 @@ test('removeMember refuses the owner and answers not_found outside the family', 
   expect(repository.delete).not.toHaveBeenCalled()
 })
 
-test('leave deletes the calling invited member; the owner cannot leave', async () => {
+test('leave deletes and records the calling invited member; the owner cannot leave', async () => {
   const { service, repository } = createService()
 
   await service.leave(user)
-  expect(repository.delete).toHaveBeenCalledWith('m3')
+  expect(repository.delete).toHaveBeenCalledWith(
+    user,
+    { memberName: user.name, target: 'member', action: 'delete', name: user.name },
+    now,
+  )
 
   await expect(service.leave({ ...user, isOwner: true })).rejects.toMatchObject({
     code: 'forbidden',

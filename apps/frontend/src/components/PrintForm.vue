@@ -69,29 +69,35 @@ const addTopic = (name: string) =>
       <span>トピック</span>
       <span>{{ form.topicIds.length }}/{{ LIMITS.printTopics }}</span>
     </div>
-    <v-chip-group
-      v-model="form.topicIds"
-      multiple
-      :max="LIMITS.printTopics"
-      selected-class="bg-primary"
-      column
-    >
+    <!-- 「新規」 flows on the same lines as the topics: the group's own box is dropped (`contents`)
+         so its chips and 「新規」 wrap together here. 「新規」 stays outside the group so tapping
+         it doesn't select it; `my-1 me-2` matches the group's chip spacing. -->
+    <div class="d-flex flex-wrap py-1">
+      <v-chip-group
+        v-model="form.topicIds"
+        multiple
+        :max="LIMITS.printTopics"
+        selected-class="bg-primary"
+        column
+        class="contents"
+      >
+        <v-chip
+          v-for="topic in topics.data.value"
+          :key="topic.id"
+          :value="topic.id"
+          :text="topic.name"
+          variant="outlined"
+        />
+      </v-chip-group>
       <v-chip
-        v-for="topic in topics.data.value"
-        :key="topic.id"
-        :value="topic.id"
-        :text="topic.name"
+        prepend-icon="mdi-plus"
+        text="新規"
         variant="outlined"
+        class="border-dashed my-1 me-2"
+        :disabled="topicsFull"
+        @click="openTopicDialog"
       />
-    </v-chip-group>
-    <v-chip
-      prepend-icon="mdi-plus"
-      text="新規"
-      variant="outlined"
-      class="border-dashed"
-      :disabled="topicsFull"
-      @click="openTopicDialog"
-    />
+    </div>
   </section>
 
   <section>
@@ -121,3 +127,9 @@ const addTopic = (name: string) =>
     @submit="addTopic"
   />
 </template>
+
+<style scoped>
+.contents {
+  display: contents;
+}
+</style>

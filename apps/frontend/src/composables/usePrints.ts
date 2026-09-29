@@ -19,7 +19,7 @@ const isListQuery = ({ queryKey }: { queryKey: readonly unknown[] }) =>
   queryKey[0] === queryKeys.prints[0] && queryKey[1] !== 'detail'
 
 const toPhotoFiles = (photos: Blob[]) =>
-  photos.map((photo, index) => new File([photo], `page-${index + 1}.jpg`, { type: 'image/jpeg' }))
+  photos.map((photo, index) => new File([photo], `page-${index + 1}.webp`, { type: 'image/webp' }))
 
 /** `GET /prints`: a slot's prints in the filter's order. */
 export const usePrintsQuery = (
@@ -68,7 +68,7 @@ export interface NewPrint {
   dueOn: string | null
   topicIds: string[]
   responseStatus: ResponseStatus
-  /** Optimized JPEGs, in page order. */
+  /** Optimized WebP photos, in page order. */
   photos: Blob[]
 }
 

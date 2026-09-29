@@ -63,6 +63,27 @@ test('enforces unique display names within a family', async () => {
   ).rejects.toThrow(/UNIQUE/)
 })
 
+const memberHistory = (
+  id: string,
+  familyId: string,
+  name: string,
+  action: 'create' | 'delete',
+) => ({
+  id,
+  family_id: familyId,
+  member_name: name,
+  target: 'member' as const,
+  action,
+  name,
+  new_name: null,
+  print_seq: null,
+  details: null,
+  created_at: 9000,
+})
+
+const historyById = async (id: string) =>
+  testD1.db.prepare('SELECT * FROM histories WHERE id = ?').bind(id).first()
+
 const invitedInput = (id: string, name: string, familyId = 'f2') => ({
   id,
   familyId,
@@ -73,10 +94,13 @@ const invitedInput = (id: string, name: string, familyId = 'f2') => ({
   maxMembers: 3,
 })
 
-test('createInvited adds a member while there is room and records the family access', async () => {
+test('createInvited adds a member while there is room, with its history and the family access', async () => {
   const dao = createMemberD1Dao(testD1.db)
+  const history = memberHistory('h-join-1', 'f2', '四郎', 'create')
 
-  expect(await dao.createInvited(invitedInput('new-1', '四郎'))).toBe(true)
+  expect(await dao.createInvited(invitedInput('new-1', '四郎'), history)).toBe(true)
+
+  expect(await historyById('h-join-1')).toEqual(history)
 
   expect(await dao.findByKeyHash('hash-new-1')).toMatchObject({
     id: 'new-1',
@@ -93,19 +117,34 @@ test('createInvited adds a member while there is room and records the family acc
   ).toBe(9000)
 })
 
-test('createInvited inserts nothing once the family is full', async () => {
+test('createInvited inserts nothing, history included, once the family is full', async () => {
   const dao = createMemberD1Dao(testD1.db)
   // f1 already has 2 members; the third fills it.
-  expect(await dao.createInvited(invitedInput('new-2', '五郎', 'f1'))).toBe(true)
+  expect(
+    await dao.createInvited(
+      invitedInput('new-2', '五郎', 'f1'),
+      memberHistory('h-join-2', 'f1', '五郎', 'create'),
+    ),
+  ).toBe(true)
 
-  expect(await dao.createInvited(invitedInput('new-3', '六郎', 'f1'))).toBe(false)
+  expect(
+    await dao.createInvited(
+      invitedInput('new-3', '六郎', 'f1'),
+      memberHistory('h-join-3', 'f1', '六郎', 'create'),
+    ),
+  ).toBe(false)
   expect(await dao.findById('new-3')).toBeNull()
+  expect(await historyById('h-join-3')).toBeNull()
 })
 
 test('createInvited throws UniqueConstraintError for a name taken in the family', async () => {
   await expect(
-    createMemberD1Dao(testD1.db).createInvited(invitedInput('new-4', '三郎')),
+    createMemberD1Dao(testD1.db).createInvited(
+      invitedInput('new-4', '三郎'),
+      memberHistory('h-join-4', 'f2', '三郎', 'create'),
+    ),
   ).rejects.toBeInstanceOf(UniqueConstraintError)
+  expect(await historyById('h-join-4')).toBeNull()
 })
 
 test('rename updates the name and writes the history row in one batch', async () => {
@@ -161,7 +200,7 @@ test('agreeTerms records the version and time', async () => {
   expect(await dao.findById('invited')).toMatchObject({ terms_version: 'v2', terms_agreed_at: 777 })
 })
 
-test('delete withdraws the mitene the member sent and removes their own states', async () => {
+test('delete withdraws the mitene the member sent, removes their own states, and records it', async () => {
   const { db } = testD1
   await db.batch([
     db.prepare(
@@ -180,9 +219,11 @@ test('delete withdraws the mitene the member sent and removes their own states',
     ),
   ])
 
-  await createMemberD1Dao(db).delete('d-leaver')
+  const history = memberHistory('h-leave', 'f2', '去る人', 'delete')
+  await createMemberD1Dao(db).delete('d-leaver', history)
 
   expect(await createMemberD1Dao(db).findById('d-leaver')).toBeNull()
+  expect(await historyById('h-leave')).toEqual(history)
   expect(
     (
       await db

@@ -230,7 +230,7 @@ test('bulk delete counts and deletes for an allowed period only', async () => {
   expect(await deleted.json()).toEqual({ count: 4 })
   expect(deleteOld.mock.calls[0][1]).toBe(12)
 
-  expect((await app.request('/prints/bulk-delete?olderThanMonths=1', authorized)).status).toBe(400)
+  expect((await app.request('/prints/bulk-delete?olderThanMonths=2', authorized)).status).toBe(400)
 })
 
 test('POST /prints/:id/mitene sends mitene to the given members', async () => {

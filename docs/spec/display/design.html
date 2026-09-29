@@ -178,7 +178,7 @@
           >
             <div style="font-weight: 700">ナビゲーション</div>
             <div style="color: #4a463e">
-              下部タブ4つ：<b>こども</b>（ホーム）／<b>履歴</b>／<b>集計</b>／<b>設定</b>。プリント一覧・詳細・登録はこども配下にプッシュ遷移。見てね送信・対応状態・情報・絞り込みはボトムシート。削除系はすべてダイアログ確認。
+              下部タブ4つ：<b>プリント</b>（ホーム）／<b>履歴</b>／<b>集計</b>／<b>設定</b>。プリント一覧・詳細・登録はこども配下にプッシュ遷移。見てね送信・対応状態・情報・絞り込みはボトムシート。削除系はすべてダイアログ確認。
             </div>
           </div>
           <div
@@ -942,7 +942,7 @@
                     >
                       2026.09.28 月
                     </div>
-                    <div style="font-size: 26px; font-weight: 900; margin-top: 2px">こども</div>
+                    <div style="font-size: 26px; font-weight: 900; margin-top: 2px">プリント</div>
                   </div>
                 </div>
                 <div
@@ -1060,9 +1060,9 @@
                   >
                     <span style="padding: 3px 18px; border-radius: 14px; background: #f2d9cd"
                       ><span class="ms" style="font-variation-settings: 'FILL' 1; color: #b8431f"
-                        >family_restroom</span
+                        >description</span
                       ></span
-                    >こども
+                    >プリント
                   </div>
                   <div
                     style="
@@ -2806,7 +2806,7 @@
                       color: #6b665c;
                     "
                   >
-                    <span>容量 62.4 / 100 MB</span><span>+0.9 MB</span>
+                    <span>容量 62.4 / 300 MB</span><span>+0.9 MB</span>
                   </div>
                   <div
                     style="
@@ -3111,7 +3111,7 @@
                           color: #6b665c;
                         "
                       >
-                        <span>98.6 + 2.1 MB</span><span>100 MB</span>
+                        <span>298.6 + 2.1 MB</span><span>300 MB</span>
                       </div>
                     </div>
                     <div style="font-size: 13.5px; line-height: 1.7; color: #4a463e">
@@ -3352,7 +3352,7 @@
                             500 12px 'IBM Plex Mono',
                             monospace;
                         "
-                        ><b style="font-size: 15px">62.4</b> / 100 MB</span
+                        ><b style="font-size: 15px">62.4</b> / 300 MB</span
                       >
                     </div>
                     <div
@@ -3426,7 +3426,7 @@
                       color: #6b665c;
                     "
                   >
-                    <span class="ms">family_restroom</span>こども
+                    <span class="ms">description</span>プリント
                   </div>
                   <div
                     style="
@@ -3919,8 +3919,8 @@
               </div>
             </div>
             <div style="width: 360px; font-size: 11.5px; line-height: 1.7; color: #4a463e">
-              ・選択肢はリミット値（3か月／6か月／1年）<br />・ボタン押下で件数入り確認ダイアログ →
-              履歴「一括削除（38件）」
+              ・選択肢はリミット値（1か月／3か月／6か月／1年）<br />・ボタン押下で件数入り確認ダイアログ
+              → 履歴「一括削除（38件）」
             </div>
           </div>
 
@@ -4177,7 +4177,7 @@
                       color: #6b665c;
                     "
                   >
-                    <span class="ms">family_restroom</span>こども
+                    <span class="ms">description</span>プリント
                   </div>
                   <div
                     style="
@@ -4423,7 +4423,7 @@
                             500 13px 'IBM Plex Mono',
                             monospace;
                         "
-                        >62.4 / 100 MB</span
+                        >62.4 / 300 MB</span
                       ><span
                         style="font-size: 12px; color: #b8431f; font-weight: 700; margin-top: 4px"
                         >古いプリントを一括削除 ›</span
@@ -4453,7 +4453,7 @@
                       color: #6b665c;
                     "
                   >
-                    <span class="ms">family_restroom</span>こども
+                    <span class="ms">description</span>プリント
                   </div>
                   <div
                     style="
@@ -4790,7 +4790,7 @@
             name: m.name, st: stM[m.s][0], stBg: stM[m.s][1], stFg: stM[m.s][2],
             boxBg: m.on ? '#1F1D1A' : '#fff', check: m.on ? 'check' : '',
           }));
-          const bulkOpts = [['3か月', 38, 18.3, true], ['6か月', 21, 10.2, false], ['1年', 4, 2.0, false]].map(([label, count, mb, on]) => ({
+          const bulkOpts = [['1か月', 52, 25.1, true], ['3か月', 38, 18.3, false], ['6か月', 21, 10.2, false], ['1年', 4, 2.0, false]].map(([label, count, mb, on]) => ({
             label, count, mb: mb.toFixed(1), bg: on ? '#FFF6F2' : '#fff', w: on ? 700 : 400,
             radio: on ? '6px solid #D9542B' : '2px solid #C9C2B2',
           }));

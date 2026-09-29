@@ -15,14 +15,16 @@ test('stores, reads and deletes images by their family/print/image key', async (
   const repository = createImageRepository(storage)
   const data = new ArrayBuffer(3)
 
-  await repository.putImages('f1', [{ printId: 'p1', imageId: 'i1', data }])
+  await repository.putImages('f1', [
+    { printId: 'p1', imageId: 'i1', data, contentType: 'image/webp' },
+  ])
   await repository.getImage('f1', { printId: 'p1', imageId: 'i1' })
   await repository.deleteImages('f1', [
     { printId: 'p1', imageId: 'i1' },
     { printId: 'p1', imageId: 'i2' },
   ])
 
-  expect(storage.put).toHaveBeenCalledWith('f1/p1/i1', data)
+  expect(storage.put).toHaveBeenCalledWith('f1/p1/i1', data, 'image/webp')
   expect(storage.get).toHaveBeenCalledWith('f1/p1/i1')
   expect(storage.delete).toHaveBeenCalledWith(['f1/p1/i1', 'f1/p1/i2'])
 })

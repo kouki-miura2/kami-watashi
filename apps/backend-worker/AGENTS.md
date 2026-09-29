@@ -43,8 +43,8 @@ The auth guard stays on locally. Sign in through `POST /dev/login`, which exists
 5. Register a print (multipart: repeat `images` per page, in page order; `childId=common` for the family-common slot). Images are served only through the API, with the same cookie:
 
    ```bash
-   curl -b cookies.txt -X POST http://localhost:8787/api/prints -H 'origin: http://localhost:5173' -F childId=common -F 'title=<title.txt' -F 'images=@page1.jpg;type=image/jpeg'
-   curl -b cookies.txt http://localhost:8787/api/images/<imageId> -o page1.jpg
+   curl -b cookies.txt -X POST http://localhost:8787/api/prints -H 'origin: http://localhost:5173' -F childId=common -F 'title=<title.txt' -F 'images=@page1.webp;type=image/webp'
+   curl -b cookies.txt http://localhost:8787/api/images/<imageId> -o page1.webp
    ```
 
 6. Run the daily auto-deletion (Cron Trigger → `scheduled` in `src/worker.ts`) by hand: start with `npx wrangler dev --test-scheduled`, then `curl 'http://localhost:8787/__scheduled?cron=0+18+*+*+*'`. To make a family eligible, set its `families.last_accessed_at` more than `LIMITS.autoDeleteDays` back with `npx wrangler d1 execute kami-watashi --local --command "..."`.

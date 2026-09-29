@@ -58,15 +58,18 @@ export const createInviteService = (deps: {
     const memberKey = generateMemberKey()
     let created: boolean
     try {
-      created = await deps.memberRepository.createInvited({
-        id: crypto.randomUUID(),
-        familyId: invite.familyId,
-        name,
-        keyHash: await hashMemberKey(memberKey),
-        termsVersion,
-        now: Date.now(),
-        maxMembers: LIMITS.familyMembers,
-      })
+      created = await deps.memberRepository.createInvited(
+        {
+          id: crypto.randomUUID(),
+          familyId: invite.familyId,
+          name,
+          keyHash: await hashMemberKey(memberKey),
+          termsVersion,
+          now: Date.now(),
+          maxMembers: LIMITS.familyMembers,
+        },
+        { memberName: name, target: 'member', action: 'create', name },
+      )
     } catch (error) {
       if (error instanceof UniqueConstraintError) throw new AppError('name_taken')
       throw error

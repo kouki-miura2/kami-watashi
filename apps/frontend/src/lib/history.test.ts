@@ -79,6 +79,9 @@ test.each([
     { target: 'member', action: 'update', name: '一郎', newName: '一朗' },
     '一郎が表示名を一朗に変更',
   ],
+  [{ memberName: '二郎', target: 'member', action: 'create', name: '二郎' }, '二郎が家族に参加'],
+  [{ memberName: '二郎', target: 'member', action: 'delete', name: '二郎' }, '二郎が家族から離脱'],
+  [{ target: 'member', action: 'delete', name: '二郎' }, '一郎が二郎を家族から削除'],
 ] as [Partial<HistoryItem>, string][])('%o reads 「%s」', (fields, expected) => {
   expect(sentence(fields)).toBe(expected)
 })

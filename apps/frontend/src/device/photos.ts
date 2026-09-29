@@ -2,9 +2,25 @@ import { LIMITS } from 'utils'
 
 import { fitLongEdge } from '../lib/photos.ts'
 
+const WEBP = 'image/webp'
+
+/**
+ * Encodes the canvas as WebP. Browsers that can't (Safari, so every iPhone browser) silently hand
+ * back a PNG instead, so those fall back to libwebp compiled to WebAssembly, loaded only then.
+ */
+const toWebp = async (canvas: HTMLCanvasElement): Promise<Blob> => {
+  const native = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob(resolve, WEBP, LIMITS.imageQuality),
+  )
+  if (native?.type === WEBP) return native
+  const { default: encode } = await import('@jsquash/webp/encode')
+  const pixels = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height)
+  return new Blob([await encode(pixels, { quality: LIMITS.imageQuality * 100 })], { type: WEBP })
+}
+
 /**
  * Re-encodes a photo the way the spec stores it: downscaled to `LIMITS.imageLongEdgePx` on the long
- * edge (only if larger), JPEG at `LIMITS.imageJpegQuality`. Drawing it onto a canvas drops the EXIF
+ * edge (only if larger), WebP at `LIMITS.imageQuality`. Drawing it onto a canvas drops the EXIF
  * data (location and all), and `createImageBitmap` applies the EXIF orientation first.
  */
 export const optimizePhoto = async (source: Blob): Promise<Blob> => {
@@ -15,13 +31,7 @@ export const optimizePhoto = async (source: Blob): Promise<Blob> => {
   canvas.height = height
   canvas.getContext('2d')!.drawImage(bitmap, 0, 0, width, height)
   bitmap.close()
-  return new Promise((resolve, reject) =>
-    canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new Error('Could not encode the photo'))),
-      'image/jpeg',
-      LIMITS.imageJpegQuality,
-    ),
-  )
+  return toWebp(canvas)
 }
 
 /**

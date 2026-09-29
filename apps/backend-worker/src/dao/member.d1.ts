@@ -24,7 +24,10 @@ export const createMemberD1Dao = (db: D1Database): MemberDao => {
           .all<MemberRecord>()
       ).results,
 
-    createInvited: async ({ id, familyId, name, keyHash, termsVersion, now, maxMembers }) => {
+    createInvited: async (
+      { id, familyId, name, keyHash, termsVersion, now, maxMembers },
+      history,
+    ) => {
       const [insert] = await db
         .batch([
           // The count is checked inside the INSERT itself, so two devices joining at once can't
@@ -36,6 +39,13 @@ export const createMemberD1Dao = (db: D1Database): MemberDao => {
                WHERE (SELECT COUNT(*) FROM members WHERE family_id = ?) < ?`,
             )
             .bind(id, familyId, name, keyHash, termsVersion, now, familyId, maxMembers),
+          insertHistory(db, history),
+          // ...and taken back if the family was full and the member didn't make it in.
+          db
+            .prepare(
+              'DELETE FROM histories WHERE id = ? AND NOT EXISTS (SELECT 1 FROM members WHERE id = ?)',
+            )
+            .bind(history.id, id),
           db.prepare('UPDATE families SET last_accessed_at = ? WHERE id = ?').bind(now, familyId),
         ])
         .catch(rethrowUniqueConstraint)
@@ -58,7 +68,7 @@ export const createMemberD1Dao = (db: D1Database): MemberDao => {
         .run()
     },
 
-    delete: async (memberId) => {
+    delete: async (memberId, history) => {
       await db.batch([
         // Withdraw the mitene this member sent; the recipients keep their read state.
         db
@@ -68,6 +78,7 @@ export const createMemberD1Dao = (db: D1Database): MemberDao => {
           .bind(memberId),
         // Their own read/mitene states go with them (ON DELETE CASCADE).
         db.prepare('DELETE FROM members WHERE id = ?').bind(memberId),
+        insertHistory(db, history),
       ])
     },
   }

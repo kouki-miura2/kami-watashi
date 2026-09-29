@@ -41,7 +41,7 @@ const formArray = <T extends z.ZodType>(item: T) =>
     z.array(item),
   )
 
-const imagesSchema = formArray(z.file().mime('image/jpeg')).pipe(
+const imagesSchema = formArray(z.file().mime(['image/webp', 'image/jpeg'])).pipe(
   z.array(z.file()).min(1).max(LIMITS.printImages),
 )
 
@@ -122,7 +122,7 @@ export const createPrintsRoutes = (deps: {
           dueOn: optionalFormDate,
           topicIds: formArray(z.string().min(1)).pipe(topicIdsSchema),
           responseStatus: responseStatusSchema.default('none'),
-          /** JPEG photos in page order (repeat the field). */
+          /** WebP (or JPEG) photos in page order (repeat the field). */
           images: imagesSchema,
         }),
         invalidInput,

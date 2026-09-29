@@ -27,7 +27,7 @@ const topicTag = (name: string | null) => `[ ${name ?? ''} ]`
 // The spec spaces a topic tag off from the text before it, `が` included: 「一郎が [ サッカー ] …」.
 const topicText = (text: string) => ` ${text}`
 
-/** `1年` / `6か月` / `3か月`, as the spec words the bulk-deletion periods. */
+/** `1年` / `6か月` / `3か月` / `1か月`, as the spec words the bulk-deletion periods. */
 const periodLabel = (months: number) => (months % 12 === 0 ? `${months / 12}年` : `${months}か月`)
 
 /** A print's items in the spec's order and format, each only when recorded. */
@@ -86,6 +86,11 @@ export const formatHistory = (item: HistoryItem): HistoryLine => {
       }
       return line(topicText(`${topicTag(item.name)} トピックを登録`))
     case 'member':
+      if (item.action === 'create') return line('家族に参加')
+      if (item.action === 'delete') {
+        // Leaving records the member's own name; the owner removing someone records theirs.
+        return line(item.name === item.memberName ? '家族から離脱' : `${item.name}を家族から削除`)
+      }
       return line(`表示名を${item.newName}に変更`)
     case 'print': {
       if (item.action === 'bulk_delete') {

@@ -9,11 +9,14 @@ import { loadSignIn } from './composables/useLaunchQuery.ts'
 import { vuetify } from './plugins/vuetify.ts'
 import { router } from './router/index.ts'
 import { useAuthStore } from './stores/auth.ts'
+import { useInstallStore } from './stores/install.ts'
 import { useNotificationStore } from './stores/notification.ts'
 
 const pinia = createPinia()
 const auth = useAuthStore(pinia)
 const notification = useNotificationStore(pinia)
+// Now, before any `await`: the browser offers the install right after the page loads.
+useInstallStore(pinia)
 
 const queryClient: QueryClient = new QueryClient({
   queryCache: new QueryCache({ onError: (error, query) => handleApiError(error, query.meta) }),

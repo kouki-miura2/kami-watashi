@@ -31,15 +31,17 @@ export interface MemberDao {
   /**
    * Inserts an invited member (and records the family access) atomically, with the member-count
    * check done in the same statement so concurrent joins can't exceed `maxMembers`.
+   * Writes its history row in the same batch, only when the member was inserted.
    * Resolves `false` if the family was already full. Throws `UniqueConstraintError` if the name is taken.
    */
-  createInvited: (input: CreateInvitedMemberInput) => Promise<boolean>
+  createInvited: (input: CreateInvitedMemberInput, history: HistoryRecord) => Promise<boolean>
   /** Renames a member and writes its history row atomically. Throws `UniqueConstraintError` if the name is taken. */
   rename: (memberId: string, name: string, history: HistoryRecord) => Promise<void>
   agreeTerms: (memberId: string, termsVersion: string, now: number) => Promise<void>
   /**
    * Removes a member (deletion or leaving) atomically with the spec's cleanup: mitene they sent
    * are withdrawn (recipients back to `none`, read state kept); their own states go by cascade.
+   * Writes its history row in the same batch.
    */
-  delete: (memberId: string) => Promise<void>
+  delete: (memberId: string, history: HistoryRecord) => Promise<void>
 }

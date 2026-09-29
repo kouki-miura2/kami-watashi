@@ -18,10 +18,13 @@ export interface MemberService {
   agreeTerms: (user: AuthenticatedUser, termsVersion: string) => Promise<void>
   /**
    * The owner removes an invited member (owner-only — enforced by the route). The member's key
-   * stops working immediately and the mitene they sent are withdrawn.
+   * stops working immediately and the mitene they sent are withdrawn. Recorded in the history.
    */
   removeMember: (user: AuthenticatedUser, memberId: string) => Promise<void>
-  /** An invited member leaves the family. The owner can't: they withdraw instead (`DELETE /family`). */
+  /**
+   * An invited member leaves the family, recorded in the history (its `name` is their own, which
+   * tells it apart from a removal). The owner can't: they withdraw instead (`DELETE /family`).
+   */
   leave: (user: AuthenticatedUser) => Promise<void>
 }
 
@@ -74,11 +77,19 @@ export const createMemberService = (deps: {
     const member = members.find((candidate) => candidate.id === memberId)
     if (!member) throw new AppError('not_found')
     if (member.isOwner) throw new AppError('forbidden')
-    await deps.memberRepository.delete(member.id)
+    await deps.memberRepository.delete(
+      member,
+      { memberName: user.name, target: 'member', action: 'delete', name: member.name },
+      Date.now(),
+    )
   },
 
   leave: async (user) => {
     if (user.isOwner) throw new AppError('forbidden')
-    await deps.memberRepository.delete(user.id)
+    await deps.memberRepository.delete(
+      user,
+      { memberName: user.name, target: 'member', action: 'delete', name: user.name },
+      Date.now(),
+    )
   },
 })

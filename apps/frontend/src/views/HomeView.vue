@@ -26,7 +26,7 @@ const openSlot = (slot: string, onlyMitene = false) =>
 
 <!-- 2a: one card per child, and the family-common slot last. -->
 <template>
-  <TabPage title="こども" :note="today">
+  <TabPage title="プリント" :note="today">
     <div v-if="children.isPending.value" class="d-flex justify-center py-8">
       <v-progress-circular indeterminate />
     </div>

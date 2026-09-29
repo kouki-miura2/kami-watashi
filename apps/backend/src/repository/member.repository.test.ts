@@ -80,7 +80,7 @@ test('rename passes the history entry as a row of the member family', async () =
   )
 })
 
-test('passes createInvited, agreeTerms and delete through', async () => {
+test('passes createInvited, agreeTerms and delete through, with their history rows', async () => {
   const input = {
     id: 'm4',
     familyId: 'f1',
@@ -91,12 +91,39 @@ test('passes createInvited, agreeTerms and delete through', async () => {
     maxMembers: 3,
   }
 
-  expect(await repository.createInvited(input)).toBe(true)
-  expect(dao.createInvited).toHaveBeenCalledWith(input)
+  expect(
+    await repository.createInvited(input, {
+      memberName: '四郎',
+      target: 'member',
+      action: 'create',
+      name: '四郎',
+    }),
+  ).toBe(true)
+  expect(dao.createInvited).toHaveBeenCalledWith(
+    input,
+    expect.objectContaining({
+      family_id: 'f1',
+      member_name: '四郎',
+      action: 'create',
+      created_at: 1,
+    }),
+  )
 
   await repository.agreeTerms('m2', 'v2', 5)
   expect(dao.agreeTerms).toHaveBeenCalledWith('m2', 'v2', 5)
 
-  await repository.delete('m2')
-  expect(dao.delete).toHaveBeenCalledWith('m2')
+  await repository.delete(
+    { id: 'm2', familyId: 'f1' },
+    { memberName: '二郎', target: 'member', action: 'delete', name: '二郎' },
+    7,
+  )
+  expect(dao.delete).toHaveBeenCalledWith(
+    'm2',
+    expect.objectContaining({
+      family_id: 'f1',
+      member_name: '二郎',
+      action: 'delete',
+      created_at: 7,
+    }),
+  )
 })

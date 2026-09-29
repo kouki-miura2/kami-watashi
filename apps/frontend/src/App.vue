@@ -23,7 +23,7 @@ watch(
 )
 
 const tabs = [
-  { name: 'home', text: 'こども', icon: 'mdi-human-male-female-child' },
+  { name: 'home', text: 'プリント', icon: 'mdi-file-document-outline' },
   { name: 'histories', text: '履歴', icon: 'mdi-history' },
   { name: 'stats', text: '集計', icon: 'mdi-chart-bar' },
   { name: 'settings', text: '設定', icon: 'mdi-cog-outline' },

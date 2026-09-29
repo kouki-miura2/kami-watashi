@@ -26,7 +26,7 @@ export interface MemberRepository {
   findByGoogleSub: (googleSub: string) => Promise<Member | null>
   listByFamily: (familyId: string) => Promise<Member[]>
   /** `false` if the family was already full. Throws `UniqueConstraintError` if the name is taken. */
-  createInvited: (member: NewInvitedMember) => Promise<boolean>
+  createInvited: (member: NewInvitedMember, history: HistoryEntry) => Promise<boolean>
   /** Throws `UniqueConstraintError` if the name is taken. */
   rename: (
     member: Pick<Member, 'id' | 'familyId'>,
@@ -35,7 +35,11 @@ export interface MemberRepository {
     now: number,
   ) => Promise<void>
   agreeTerms: (memberId: string, termsVersion: string, now: number) => Promise<void>
-  delete: (memberId: string) => Promise<void>
+  delete: (
+    member: Pick<Member, 'id' | 'familyId'>,
+    history: HistoryEntry,
+    now: number,
+  ) => Promise<void>
 }
 
 const toMember = (record: MemberRecord): Member => ({
@@ -54,9 +58,11 @@ export const createMemberRepository = (dao: MemberDao): MemberRepository => ({
   findByKeyHash: async (keyHash) => toMemberOrNull(await dao.findByKeyHash(keyHash)),
   findByGoogleSub: async (googleSub) => toMemberOrNull(await dao.findByGoogleSub(googleSub)),
   listByFamily: async (familyId) => (await dao.listByFamily(familyId)).map(toMember),
-  createInvited: async (member) => dao.createInvited(member),
+  createInvited: async (member, history) =>
+    dao.createInvited(member, toHistoryRecord(member.familyId, history, member.now)),
   rename: async (member, name, history, now) =>
     dao.rename(member.id, name, toHistoryRecord(member.familyId, history, now)),
   agreeTerms: async (memberId, termsVersion, now) => dao.agreeTerms(memberId, termsVersion, now),
-  delete: async (memberId) => dao.delete(memberId),
+  delete: async (member, history, now) =>
+    dao.delete(member.id, toHistoryRecord(member.familyId, history, now)),
 })

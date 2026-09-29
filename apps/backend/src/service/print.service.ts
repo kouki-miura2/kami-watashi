@@ -1,6 +1,6 @@
 import { LIMITS, addJstMonths, createLogger, toJstDateString } from 'utils'
 
-import type { StoredImage } from '../dao/image-storage.interface.ts'
+import type { ImageContentType, StoredImage } from '../dao/image-storage.interface.ts'
 import type { AuthenticatedUser } from '../repository/auth-guard.interface.ts'
 import type { ChildRepository } from '../repository/child.repository.ts'
 import type { ImageRef, ImageRepository } from '../repository/image.repository.ts'
@@ -28,7 +28,7 @@ export interface PrintFieldsInput {
 export interface CreatePrintInput extends PrintFieldsInput {
   /** `null` is the family-common slot. */
   childId: string | null
-  /** JPEG photos in page order. */
+  /** WebP (or JPEG) photos in page order. */
   images: Blob[]
 }
 
@@ -90,7 +90,25 @@ export interface PrintService {
 
 const logger = createLogger({ format: 'json' })
 
-const JPEG_SIGNATURE = [0xff, 0xd8, 0xff]
+const ascii = (text: string): number[] => Array.from(text, (char) => char.charCodeAt(0))
+
+/** The photo formats accepted, told apart by their first bytes (`null`: any byte). */
+const IMAGE_SIGNATURES: { contentType: ImageContentType; bytes: (number | null)[] }[] = [
+  // `RIFF`, the file size, then `WEBP`.
+  {
+    contentType: 'image/webp',
+    bytes: [...ascii('RIFF'), null, null, null, null, ...ascii('WEBP')],
+  },
+  // Photos were JPEG before the switch to WebP; a page loaded before it may still send one.
+  { contentType: 'image/jpeg', bytes: [0xff, 0xd8, 0xff] },
+]
+
+const contentTypeOf = (data: ArrayBuffer): ImageContentType | undefined => {
+  const head = new Uint8Array(data.slice(0, 12))
+  return IMAGE_SIGNATURES.find(({ bytes }) =>
+    bytes.every((byte, i) => i < head.length && (byte === null || head[i] === byte)),
+  )?.contentType
+}
 
 const unique = (ids: string[]): string[] => [...new Set(ids)]
 
@@ -140,16 +158,22 @@ export const createPrintService = (deps: {
       })
   }
 
-  /** Reads the uploads, rejecting anything that isn't a JPEG by its first bytes. */
-  const readJpegs = async (blobs: Blob[]): Promise<(PrintImage & { data: ArrayBuffer })[]> =>
+  /** Reads the uploads, rejecting anything that isn't a WebP or JPEG by its first bytes. */
+  const readImages = async (
+    blobs: Blob[],
+  ): Promise<(PrintImage & { data: ArrayBuffer; contentType: ImageContentType })[]> =>
     Promise.all(
       blobs.map(async (blob, index) => {
         const data = await blob.arrayBuffer()
-        const head = new Uint8Array(data.slice(0, JPEG_SIGNATURE.length))
-        if (!JPEG_SIGNATURE.every((byte, i) => head[i] === byte)) {
-          throw new AppError('invalid_input', { field: 'images', page: index + 1 })
+        const contentType = contentTypeOf(data)
+        if (!contentType) throw new AppError('invalid_input', { field: 'images', page: index + 1 })
+        return {
+          id: crypto.randomUUID(),
+          page: index + 1,
+          size: data.byteLength,
+          data,
+          contentType,
         }
-        return { id: crypto.randomUUID(), page: index + 1, size: data.byteLength, data }
       }),
     )
 
@@ -230,7 +254,7 @@ export const createPrintService = (deps: {
       const [name, topicNames, images] = await Promise.all([
         slotName(user, input.childId),
         loadTopicNames(user),
-        readJpegs(input.images),
+        readImages(input.images),
       ])
       const topics = topicNames(topicIds)
       await assertStorage(user.familyId, totalSize(images))
@@ -249,7 +273,11 @@ export const createPrintService = (deps: {
       const refs = refsOf(print.id, images)
       await deps.imageRepository.putImages(
         user.familyId,
-        images.map((image, index) => ({ ...refs[index], data: image.data })),
+        images.map((image, index) => ({
+          ...refs[index],
+          data: image.data,
+          contentType: image.contentType,
+        })),
       )
       try {
         const seq = await deps.printRepository.create(
@@ -341,7 +369,7 @@ export const createPrintService = (deps: {
     replaceImages: async (user, id, blobs) => {
       const print = await findPrint(user, id)
       const [images, oldImages, name] = await Promise.all([
-        readJpegs(blobs),
+        readImages(blobs),
         deps.printRepository.listImages(id),
         slotName(user, print.childId),
       ])
@@ -350,7 +378,11 @@ export const createPrintService = (deps: {
       const refs = refsOf(id, images)
       await deps.imageRepository.putImages(
         user.familyId,
-        images.map((image, index) => ({ ...refs[index], data: image.data })),
+        images.map((image, index) => ({
+          ...refs[index],
+          data: image.data,
+          contentType: image.contentType,
+        })),
       )
       try {
         await deps.printRepository.replaceImages(

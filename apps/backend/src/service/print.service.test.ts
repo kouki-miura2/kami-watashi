@@ -16,6 +16,11 @@ const jpeg = (size = 10) => {
   bytes.set([0xff, 0xd8, 0xff, 0xe0])
   return new Blob([bytes], { type: 'image/jpeg' })
 }
+const webp = (size = 16) => {
+  const bytes = new Uint8Array(size)
+  bytes.set([0x52, 0x49, 0x46, 0x46, 8, 0, 0, 0, 0x57, 0x45, 0x42, 0x50])
+  return new Blob([bytes], { type: 'image/webp' })
+}
 const png = () => new Blob([new Uint8Array([0x89, 0x50, 0x4e, 0x47])], { type: 'image/jpeg' })
 
 const print: Print = {
@@ -232,7 +237,18 @@ test('create records the family-common slot by its name', async () => {
   expect(printRepository.create.mock.calls[0][0].history.name).toBe('家族共通')
 })
 
-test('create rejects a non-JPEG upload before storing anything', async () => {
+test('create stores each photo with the format its bytes show', async () => {
+  const { service, imageRepository } = createService()
+
+  await service.create(invitedUser, { ...newPrint, images: [webp(), jpeg()] })
+
+  expect(imageRepository.putImages.mock.calls[0][1].map((image) => image.contentType)).toEqual([
+    'image/webp',
+    'image/jpeg',
+  ])
+})
+
+test('create rejects an upload that is neither WebP nor JPEG before storing anything', async () => {
   const { service, imageRepository } = createService()
 
   await expect(
@@ -467,7 +483,7 @@ test('deleteOld with nothing to delete writes no history', async () => {
 })
 
 test('getImage serves only an image of the family that exists in storage', async () => {
-  const stored = { body: new Blob(['x']).stream(), size: 1 }
+  const stored = { body: new Blob(['x']).stream(), size: 1, contentType: 'image/webp' as const }
   const { service, printRepository, imageRepository } = createService()
 
   await expect(service.getImage(invitedUser, 'i1')).rejects.toMatchObject({ code: 'not_found' })

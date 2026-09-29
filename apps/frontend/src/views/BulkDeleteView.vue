@@ -17,7 +17,7 @@ const stats = useStatsQuery()
 const counts = useBulkDeleteCountsQuery()
 const bulkDelete = useBulkDeleteMutation()
 
-/** `3か月` / `6か月` / `1年`, as the spec words the choices. */
+/** `1か月` / `3か月` / `6か月` / `1年`, as the spec words the choices. */
 const periodLabel = (months: number) => (months % 12 === 0 ? `${months / 12}年` : `${months}か月`)
 
 const options = computed(() => counts.value.flatMap((query) => (query.data ? [query.data] : [])))

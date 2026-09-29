@@ -51,7 +51,7 @@ beforeEach(() => {
   )
 })
 
-test('posts the form with the photos as JPEG pages, in order', async () => {
+test('posts the form with the photos as WebP pages, in order', async () => {
   const { mutation } = setup()
 
   await mutation.mutateAsync(print)
@@ -69,8 +69,8 @@ test('posts the form with the photos as JPEG pages, in order', async () => {
   })
   const files = images as File[]
   expect(files.map((file) => [file.name, file.type])).toEqual([
-    ['page-1.jpg', 'image/jpeg'],
-    ['page-2.jpg', 'image/jpeg'],
+    ['page-1.webp', 'image/webp'],
+    ['page-2.webp', 'image/webp'],
   ])
   expect(await files[1]!.text()).toBe('page 2')
   // Uploads get their own, longer timeout.

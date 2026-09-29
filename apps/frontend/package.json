@@ -11,6 +11,7 @@
     "preview": "vp preview"
   },
   "dependencies": {
+    "@jsquash/webp": "catalog:",
     "@mdi/font": "catalog:",
     "@panzoom/panzoom": "catalog:",
     "@tanstack/vue-query": "catalog:",

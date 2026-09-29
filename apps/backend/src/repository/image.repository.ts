@@ -1,4 +1,4 @@
-import type { ImageStorage, StoredImage } from '../dao/image-storage.interface.ts'
+import type { ImageContentType, ImageStorage, StoredImage } from '../dao/image-storage.interface.ts'
 
 export interface ImageRef {
   printId: string
@@ -6,7 +6,10 @@ export interface ImageRef {
 }
 
 export interface ImageRepository {
-  putImages: (familyId: string, images: (ImageRef & { data: ArrayBuffer })[]) => Promise<void>
+  putImages: (
+    familyId: string,
+    images: (ImageRef & { data: ArrayBuffer; contentType: ImageContentType })[],
+  ) => Promise<void>
   getImage: (familyId: string, image: ImageRef) => Promise<StoredImage | null>
   deleteImages: (familyId: string, images: ImageRef[]) => Promise<void>
   /** Every photo of the family, by the `{family_id}/` key prefix. */
@@ -19,7 +22,9 @@ export const imageKey = (familyId: string, { printId, imageId }: ImageRef): stri
 
 export const createImageRepository = (storage: ImageStorage): ImageRepository => ({
   putImages: async (familyId, images) => {
-    await Promise.all(images.map((image) => storage.put(imageKey(familyId, image), image.data)))
+    await Promise.all(
+      images.map((image) => storage.put(imageKey(familyId, image), image.data, image.contentType)),
+    )
   },
   getImage: async (familyId, image) => storage.get(imageKey(familyId, image)),
   deleteImages: async (familyId, images) => {
