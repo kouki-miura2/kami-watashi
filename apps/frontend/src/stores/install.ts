@@ -14,10 +14,11 @@ interface BeforeInstallPromptEvent extends Event {
  * (`main.ts`): the event fires once, right after the page loads.
  */
 export const useInstallStore = defineStore('install', () => {
-  const installed = ref(
+  /** Opened from the home screen, full screen (not in a browser tab). */
+  const standalone =
     window.matchMedia('(display-mode: standalone)').matches ||
-      (navigator as { standalone?: boolean }).standalone === true,
-  )
+    (navigator as { standalone?: boolean }).standalone === true
+  const installed = ref(standalone)
   const promptEvent = shallowRef<BeforeInstallPromptEvent>()
   // iPadOS reports itself as a Mac, told apart by its touch screen.
   const isIos =
@@ -45,5 +46,11 @@ export const useInstallStore = defineStore('install', () => {
     return true
   }
 
-  return { installed, isIos, canPrompt: computed(() => promptEvent.value !== undefined), install }
+  return {
+    standalone,
+    installed,
+    isIos,
+    canPrompt: computed(() => promptEvent.value !== undefined),
+    install,
+  }
 })

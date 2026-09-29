@@ -8,6 +8,8 @@ declare module 'vue-router' {
     tab?: boolean
     /** Owners only (invite, member removal, withdrawal). */
     ownerOnly?: boolean
+    /** Hides the app bar (the welcome screen shows the app's name itself). */
+    noAppBar?: boolean
   }
 }
 
@@ -87,7 +89,7 @@ export const routes: RouteRecordRaw[] = [
     path: '/welcome',
     name: 'welcome',
     component: () => import('../views/WelcomeView.vue'),
-    meta: { public: true },
+    meta: { public: true, noAppBar: true },
   },
   {
     path: '/join',

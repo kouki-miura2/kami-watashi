@@ -246,7 +246,8 @@ const remove = async () => {
 .detail {
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  /* Below the app's bar (`App.vue`). */
+  height: calc(100dvh - var(--v-layout-top, 0px));
 }
 
 .detail__photos {

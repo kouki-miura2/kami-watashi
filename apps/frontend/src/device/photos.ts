@@ -35,6 +35,24 @@ export const optimizePhoto = async (source: Blob): Promise<Blob> => {
 }
 
 /**
+ * `photo` turned clockwise by `quarterTurns` × 90°, re-encoded like `optimizePhoto`. Rotate from
+ * the photo as first optimized, not from an already rotated one, so it's re-encoded only once.
+ */
+export const rotatePhoto = async (photo: Blob, quarterTurns: number): Promise<Blob> => {
+  const bitmap = await createImageBitmap(photo)
+  const sideways = quarterTurns % 2 === 1
+  const canvas = document.createElement('canvas')
+  canvas.width = sideways ? bitmap.height : bitmap.width
+  canvas.height = sideways ? bitmap.width : bitmap.height
+  const context = canvas.getContext('2d')!
+  context.translate(canvas.width / 2, canvas.height / 2)
+  context.rotate((quarterTurns * Math.PI) / 2)
+  context.drawImage(bitmap, -bitmap.width / 2, -bitmap.height / 2)
+  bitmap.close()
+  return toWebp(canvas)
+}
+
+/**
  * The browser's file picker for images (`[]` if the user backs out). `capture` opens the camera
  * instead, on phones. Call it right from a tap: browsers open pickers only on a user gesture.
  */

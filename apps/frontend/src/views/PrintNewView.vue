@@ -81,6 +81,7 @@ const submit = () =>
               :photos-left="photos.photosLeft.value"
               :loading="photos.loading.value"
               @add="sourceSheetOpen = true"
+              @rotate="photos.rotate"
               @remove="photos.remove"
             />
           </section>

@@ -5,7 +5,7 @@ import './app.css'
 import { createVuetify } from 'vuetify'
 
 /**
- * Theme from the screen design (`docs/spec/display/`): off-white paper, ink, and vermilion.
+ * The app's theme: off-white paper, ink, and vermilion.
  * Use these names (`color="secondary"`, `text-link`, ...) rather than raw hex values.
  */
 export const vuetify = createVuetify({

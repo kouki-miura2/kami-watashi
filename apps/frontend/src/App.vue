@@ -5,12 +5,18 @@ import { useRoute, useRouter } from 'vue-router'
 import ConfirmDialog from './components/ConfirmDialog.vue'
 import { useLaunchQuery } from './composables/useLaunchQuery.ts'
 import { useConnectivityStore } from './stores/connectivity.ts'
+import { useInstallStore } from './stores/install.ts'
 import { useNotificationStore } from './stores/notification.ts'
 
 const route = useRoute()
 const router = useRouter()
 const connectivity = useConnectivityStore()
 const notification = useNotificationStore()
+const install = useInstallStore()
+
+// Full screen from the home screen, the bottom navigation sits right at the screen's edge (by the
+// home indicator): taller there than in a browser tab (Vuetify's default 56px).
+const bottomNavigationHeight = install.standalone ? 76 : 56
 
 // `/launch` on startup and on every return to the foreground (while signed in). A member who
 // hasn't agreed to the current terms is sent to agree again.
@@ -32,6 +38,15 @@ const tabs = [
 
 <template>
   <v-app>
+    <!-- Always there, so it's clear which app this is, and as whom (signed in). -->
+    <v-app-bar v-if="!route.meta.noAppBar" density="compact" flat color="background" border="b">
+      <v-app-bar-title class="font-weight-black">かみわたし</v-app-bar-title>
+      <template v-if="launch.data.value" #append>
+        <span class="text-body-2 text-medium-emphasis text-truncate me-4 app-bar__me">
+          {{ launch.data.value.me.name }}
+        </span>
+      </template>
+    </v-app-bar>
     <v-main>
       <v-sheet
         v-if="!connectivity.online"
@@ -56,6 +71,7 @@ const tabs = [
     <v-bottom-navigation
       v-if="route.meta.tab"
       grow
+      :height="bottomNavigationHeight"
       :class="{ offline: !connectivity.online }"
       :inert="!connectivity.online"
     >
@@ -72,5 +88,9 @@ const tabs = [
 <style scoped>
 .offline {
   opacity: 0.4;
+}
+
+.app-bar__me {
+  max-width: 50vw;
 }
 </style>

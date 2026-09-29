@@ -1,14 +1,14 @@
 <script setup lang="ts">
 defineProps<{
-  photos: { url: string }[]
+  photos: { url: string; rotating?: boolean }[]
   /** How many more can be added; the add tile hides at 0. */
   photosLeft: number
   loading?: boolean
 }>()
-defineEmits<{ add: []; remove: [index: number] }>()
+defineEmits<{ add: []; rotate: [index: number]; remove: [index: number] }>()
 </script>
 
-<!-- New photos in page order, numbered, each removable, with a tile to add more (4a). -->
+<!-- New photos in page order, numbered, each rotatable and removable, with a tile to add more (4a). -->
 <template>
   <div class="d-flex flex-wrap ga-2">
     <div v-for="(photo, index) in photos" :key="photo.url" class="photo">
@@ -20,6 +20,14 @@ defineEmits<{ add: []; remove: [index: number] }>()
         size="x-small"
         :aria-label="`${index + 1}ページ目を外す`"
         @click="$emit('remove', index)"
+      />
+      <v-btn
+        class="photo__rotate"
+        icon="mdi-rotate-right"
+        size="x-small"
+        :loading="photo.rotating"
+        :aria-label="`${index + 1}ページ目を右に90°回転`"
+        @click="$emit('rotate', index)"
       />
     </div>
     <v-btn
@@ -61,6 +69,12 @@ defineEmits<{ add: []; remove: [index: number] }>()
   position: absolute;
   right: -6px;
   top: -6px;
+}
+
+.photo__rotate {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
 }
 
 .photo-add {

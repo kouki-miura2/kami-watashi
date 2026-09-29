@@ -45,8 +45,7 @@ A view can need none, either, or both of the first two.
 ### 3. Create the view
 
 - `src/views/<Name>View.vue` — `<script setup lang="ts">`, Vuetify components for layout
-  (`v-card`, `v-list`, ...), styled after the screen in `docs/spec/display/design.html` (find it by
-  its id, e.g. `id="2a"`; the index is in `docs/spec/display/README.md`). Use the theme's color
+  (`v-card`, `v-list`, ...), styled like the existing screens. Use the theme's color
   names, not hex values. Ask for confirmation with the `confirm` store, not a per-view dialog. Pull data from the composable/store from steps 1–2; don't fetch
   or hold server data in the component itself.
 - Don't destructure `props` or a `reactive()` object directly (breaks reactivity) — use
