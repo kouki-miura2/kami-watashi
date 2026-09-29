@@ -11,13 +11,15 @@ import {
   requireOwner,
   termsVersionSchema,
 } from './context.ts'
+import { setMemberKeyCookie } from './credential-cookie.ts'
 
 export const createInvitesRoutes = (deps: { inviteService: InviteService }) =>
   new Hono<AppEnv>()
     .post('/', requireOwner, async (c) =>
       c.json(await deps.inviteService.createInvite(currentUser(c))),
     )
-    // Public (listed in `PUBLIC_PATHS`): the joining device has no credential yet.
+    // Public (listed in `PUBLIC_PATHS`): the joining browser has no credential yet. The member key
+    // goes in the credential cookie.
     .post(
       '/redeem',
       zValidator(
@@ -29,5 +31,8 @@ export const createInvitesRoutes = (deps: { inviteService: InviteService }) =>
         }),
         invalidInput,
       ),
-      async (c) => c.json(await deps.inviteService.redeem(c.req.valid('json'))),
+      async (c) => {
+        setMemberKeyCookie(c, (await deps.inviteService.redeem(c.req.valid('json'))).memberKey)
+        return c.body(null, 204)
+      },
     )

@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { LIMITS } from 'utils'
 import { computed, ref } from 'vue'
 
-import ChildDeleteDialog from '../components/ChildDeleteDialog.vue'
 import NameDialog from '../components/NameDialog.vue'
 import NameList from '../components/NameList.vue'
 import SubPageBar from '../components/SubPageBar.vue'
+import TypeToConfirmDialog from '../components/TypeToConfirmDialog.vue'
 import { useBack } from '../composables/useBack.ts'
 import {
   useChildrenQuery,
@@ -31,6 +32,7 @@ const items = computed(() =>
   ),
 )
 const itemOf = (id: string) => items.value.find((item) => item.id === id)
+const full = computed(() => items.value.length >= LIMITS.familyChildren)
 
 const editor = useNameEditor({
   create: (name) => createChild.mutateAsync(name),
@@ -75,6 +77,9 @@ const finishDelete = () => {
 <template>
   <SubPageBar title="こども" icon="back" @navigate="back" />
   <div class="px-4 pt-2 pb-16">
+    <p v-if="full" class="text-caption text-medium-emphasis px-1 pb-2">
+      こどもは最大{{ LIMITS.familyChildren }}人です
+    </p>
     <div v-if="children.isPending.value" class="d-flex justify-center py-8">
       <v-progress-circular indeterminate />
     </div>
@@ -99,6 +104,7 @@ const finishDelete = () => {
     color="primary"
     prepend-icon="mdi-plus"
     text="こどもを追加"
+    :disabled="full"
     @click="editor.startAdd"
   />
 
@@ -112,12 +118,15 @@ const finishDelete = () => {
     :error="editor.error.value"
     @submit="editor.save"
   />
-  <ChildDeleteDialog
+  <TypeToConfirmDialog
     v-if="deleting"
     v-model="deleteDialogOpen"
-    :name="deleting.name"
-    :print-count="deleting.printCount"
+    :title="`本当に「${deleting.name}」を削除しますか？`"
+    :text="`${deleting.name}のプリント ${deleting.printCount} 件と写真もすべて削除されます。確認のため、こどもの名前を入力してください。`"
+    label="こどもの名前"
+    :expected="deleting.name"
+    confirm-text="削除する"
     :loading="deleteChild.isPending.value"
-    @delete="finishDelete"
+    @confirm="finishDelete"
   />
 </template>

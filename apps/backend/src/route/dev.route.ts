@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 import type { AuthService } from '../service/auth.service.ts'
 import { type AppEnv, invalidInput, nameSchema } from './context.ts'
+import { setSessionCookie } from './credential-cookie.ts'
 
 const LOCAL_HOSTNAMES = ['localhost', '127.0.0.1', '[::1]']
 
@@ -24,5 +25,8 @@ export const createDevRoutes = (deps: { authService: AuthService }) =>
         z.object({ googleSub: z.string().trim().min(1).max(255), name: nameSchema }),
         invalidInput,
       ),
-      async (c) => c.json(await deps.authService.devLogin(c.req.valid('json'))),
+      async (c) => {
+        setSessionCookie(c, await deps.authService.devLogin(c.req.valid('json')))
+        return c.body(null, 204)
+      },
     )

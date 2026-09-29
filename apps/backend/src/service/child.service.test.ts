@@ -1,3 +1,4 @@
+import { LIMITS } from 'utils'
 import { afterEach, beforeEach, expect, test, vi } from 'vite-plus/test'
 
 import { UniqueConstraintError } from '../dao/errors.ts'
@@ -85,6 +86,20 @@ test('create refuses a taken name and the reserved family-common name', async ()
   await expect(service.create(invitedUser, 'はなこ')).rejects.toMatchObject({ code: 'name_taken' })
   await expect(service.create(invitedUser, COMMON_SLOT_NAME)).rejects.toMatchObject({
     code: 'name_taken',
+  })
+  expect(childRepository.create).not.toHaveBeenCalled()
+})
+
+test('create refuses a child beyond the family limit', async () => {
+  const children = Array.from({ length: LIMITS.familyChildren }, (_, index) => ({
+    id: `c${index}`,
+    familyId: 'f1',
+    name: `こども${index}`,
+  }))
+  const { service, childRepository } = createService({ listByFamily: async () => children })
+
+  await expect(service.create(invitedUser, 'じろう')).rejects.toMatchObject({
+    code: 'child_limit',
   })
   expect(childRepository.create).not.toHaveBeenCalled()
 })

@@ -29,11 +29,12 @@ watch(page, () => {
         />
       </v-window-item>
     </v-window>
-    <div v-if="imageIds.length > 1" class="d-flex justify-center align-center ga-2 py-2">
+    <div v-if="imageIds.length > 1" class="d-flex justify-center align-center ga-2">
       <v-btn
         icon="mdi-chevron-left"
         variant="text"
         size="small"
+        density="compact"
         aria-label="前のページ"
         :disabled="page === 0"
         @click="page--"
@@ -43,6 +44,7 @@ watch(page, () => {
         icon="mdi-chevron-right"
         variant="text"
         size="small"
+        density="compact"
         aria-label="次のページ"
         :disabled="page === imageIds.length - 1"
         @click="page++"
@@ -61,7 +63,8 @@ watch(page, () => {
 .viewer__window {
   flex: 1;
   min-height: 0;
-  padding: 14px 24px;
+  /* Just enough to set the photo off the backdrop: the more room, the easier the print is to read. */
+  padding: 4px;
 }
 
 .viewer__window :deep(.v-window__container) {

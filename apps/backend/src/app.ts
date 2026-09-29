@@ -1,5 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { csrf } from 'hono/csrf'
+import { HTTPException } from 'hono/http-exception'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { createLogger } from 'utils'
 
@@ -7,6 +9,7 @@ import type { AuthGuard } from './repository/auth-guard.interface.ts'
 import { createAuthRoutes } from './route/auth.route.ts'
 import { createChildrenRoutes } from './route/children.route.ts'
 import { type AppEnv } from './route/context.ts'
+import { clearCredentialCookie, readCredential } from './route/credential-cookie.ts'
 import { createDevRoutes } from './route/dev.route.ts'
 import { createFamilyRoutes } from './route/family.route.ts'
 import { createHistoriesRoutes } from './route/histories.route.ts'
@@ -40,7 +43,11 @@ export interface AuthConfig {
 export interface AppConfig {
   /** Current terms/privacy policy version. Members who agreed to an older one get `terms_required`. */
   termsVersion: string
-  /** CORS allow-list (the Capacitor app origins, plus the Vite dev server locally). */
+  /**
+   * Origins besides the API's own that serve the web app: the CORS allow-list, and — with the API's
+   * own origin — the only origins whose requests may change state (CSRF, see `createApp`). Empty
+   * when the web app is served from the same origin as the API (as deployed).
+   */
   allowedOrigins: string[]
   /** Mounts `/dev/*` (local-only sign-in). Must never be on in a deployed Worker. */
   devLogin: boolean
@@ -85,6 +92,8 @@ const statusByErrorCode: Record<AppErrorCode, ContentfulStatusCode> = {
   already_registered: 409,
   name_taken: 409,
   member_limit: 409,
+  child_limit: 409,
+  topic_limit: 409,
   storage_limit: 413,
 }
 
@@ -100,7 +109,18 @@ export const createApp = (deps: AppDependencies) => {
   const logger = createLogger({ format: 'json' })
 
   const app = new Hono<AppEnv>()
-    .use('*', cors({ origin: deps.config.allowedOrigins }))
+    // The credential is a cookie (`route/credential-cookie.ts`), so the web app's other origins may
+    // send it (`credentials`). CSRF: a JSON request from another origin fails the CORS preflight;
+    // `csrf` refuses the rest (form-like bodies, or none), which need no preflight, unless they come
+    // from the API's own origin or an allowed one.
+    .use('*', cors({ origin: deps.config.allowedOrigins, credentials: true }))
+    .use(
+      '*',
+      csrf({
+        origin: (origin, c) =>
+          origin === new URL(c.req.url).origin || deps.config.allowedOrigins.includes(origin),
+      }),
+    )
     // Audit trail: start/end pair per request, joined by requestId (needed since concurrent
     // requests to the same method+path would otherwise be indistinguishable in the log stream).
     // Wraps the auth guard so a rejected (401) request is still logged, not just successful ones.
@@ -132,8 +152,13 @@ export const createApp = (deps: AppDependencies) => {
     })
     .use('*', async (c, next) => {
       if (deps.auth.enabled && !deps.auth.excludePaths.includes(c.req.path)) {
-        const user = await deps.auth.guard.authenticate(c.req.raw)
-        if (!user) return c.json({ error: 'unauthorized' }, 401)
+        const credential = readCredential(c)
+        const user = credential ? await deps.auth.guard.authenticate(credential) : null
+        if (!user) {
+          // A credential that no longer works (member removed, family deleted, session expired).
+          if (credential) clearCredentialCookie(c)
+          return c.json({ error: 'unauthorized' }, 401)
+        }
         c.set('user', user)
       } else {
         c.set('user', null)
@@ -166,6 +191,8 @@ export const createApp = (deps: AppDependencies) => {
 
   app.notFound((c) => c.json({ error: 'not_found' }, 404))
   app.onError((error, c) => {
+    // Hono's own refusals (`csrf`'s 403).
+    if (error instanceof HTTPException) return error.getResponse()
     if (error instanceof AppError) {
       return c.json(
         { error: error.code, ...(error.details ? { details: error.details } : {}) },

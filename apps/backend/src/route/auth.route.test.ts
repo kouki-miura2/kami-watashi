@@ -15,15 +15,20 @@ const post = (path: string, body: unknown) => ({
   },
 })
 
-test('POST /auth/google signs in without credentials', async () => {
+test('POST /auth/google signs in without credentials, setting the session cookie', async () => {
   const googleLogin = vi.fn<AuthService['googleLogin']>(async () => session)
   const app = createTestApp({ services: { authService: { googleLogin } } })
   const { path, init } = post('/auth/google', { idToken: 'id-token' })
 
   const res = await app.request(path, init)
 
-  expect(res.status).toBe(200)
-  expect(await res.json()).toEqual(session)
+  expect(res.status).toBe(204)
+  const cookie = res.headers.get('set-cookie')
+  expect(cookie).toMatch(/^__Host-credential=token;/)
+  expect(cookie).toContain('Expires=Thu, 01 Jan 1970 00:00:00 GMT')
+  for (const attribute of ['Path=/', 'HttpOnly', 'Secure', 'SameSite=Lax']) {
+    expect(cookie).toContain(attribute)
+  }
   expect(googleLogin).toHaveBeenCalledWith('id-token')
 })
 
@@ -56,7 +61,8 @@ test('POST /auth/google/register registers without credentials', async () => {
 
   const res = await app.request(path, init)
 
-  expect(res.status).toBe(200)
+  expect(res.status).toBe(204)
+  expect(res.headers.get('set-cookie')).toMatch(/^__Host-credential=token;/)
   expect(register).toHaveBeenCalledWith({ idToken: 'id-token', name: '一郎', termsVersion: 'v1' })
 })
 

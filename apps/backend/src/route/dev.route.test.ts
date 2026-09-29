@@ -28,8 +28,8 @@ test('POST /dev/login signs in without credentials when devLogin is on', async (
 
   const res = await app.request(url, init)
 
-  expect(res.status).toBe(200)
-  expect(await res.json()).toEqual(session)
+  expect(res.status).toBe(204)
+  expect(res.headers.get('set-cookie')).toMatch(/^__Host-credential=token;/)
   expect(authService.devLogin).toHaveBeenCalledWith({ googleSub: 'dev-owner-1', name: '一郎' })
 })
 

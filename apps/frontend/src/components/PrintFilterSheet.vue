@@ -56,7 +56,6 @@ const segments: {
     label: '見てね状態',
     options: [
       { value: 'all', text: 'すべて' },
-      { value: 'none', text: 'なし' },
       { value: 'requested', text: '見てね' },
       { value: 'seen', text: '見たよ' },
     ],

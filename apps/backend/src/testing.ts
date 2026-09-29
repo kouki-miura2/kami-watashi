@@ -5,6 +5,9 @@ import type { MemberRepository } from './repository/member.repository.ts'
 
 export const TERMS_VERSION = 'v1'
 
+/** The web app's origin in tests (`config.allowedOrigins`). */
+export const WEB_ORIGIN = 'http://localhost:5173'
+
 export const ownerUser: AuthenticatedUser = {
   id: 'owner',
   familyId: 'f1',
@@ -44,28 +47,29 @@ type Services = Omit<AppDependencies, 'config' | 'auth'>
 
 /**
  * `createApp` with the auth guard on, as in the Worker. `user` is who the fake guard
- * authenticates for any request carrying an `Authorization` header. Each test fakes only the
+ * authenticates for any request carrying a credential cookie (`authorized`). Each test fakes only the
  * service methods it exercises; every other method throws.
  */
 export const createTestApp = (
   options: {
-    user?: AuthenticatedUser
+    /** `null`: the guard rejects every credential (revoked or forged). */
+    user?: AuthenticatedUser | null
     config?: Partial<AppDependencies['config']>
     services?: { [Name in keyof Services]?: Partial<Services[Name]> }
   } = {},
 ) => {
-  const user = options.user ?? ownerUser
+  const user = options.user === undefined ? ownerUser : options.user
   const services = options.services ?? {}
   return createApp({
     config: {
       termsVersion: TERMS_VERSION,
-      allowedOrigins: ['http://localhost:5173'],
+      allowedOrigins: [WEB_ORIGIN],
       devLogin: false,
       ...options.config,
     },
     auth: {
       guard: {
-        authenticate: async (request) => (request.headers.get('authorization') ? user : null),
+        authenticate: async () => user,
       },
       enabled: true,
       excludePaths: PUBLIC_PATHS,
@@ -127,4 +131,5 @@ export const createTestApp = (
   })
 }
 
-export const authorized = { headers: { authorization: 'Bearer test' } }
+/** A request from the web app (`WEB_ORIGIN`) with a credential cookie, as a signed-in browser sends it. */
+export const authorized = { headers: { cookie: '__Host-credential=test', origin: WEB_ORIGIN } }

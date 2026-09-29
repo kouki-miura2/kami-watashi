@@ -1,7 +1,5 @@
-import { Camera } from '@capacitor/camera'
 import { LIMITS } from 'utils'
 
-import { isCancellation } from '../lib/cancellation.ts'
 import { fitLongEdge } from '../lib/photos.ts'
 
 /**
@@ -26,39 +24,38 @@ export const optimizePhoto = async (source: Blob): Promise<Blob> => {
   )
 }
 
-const load = async (webPath: string | undefined): Promise<Blob> => {
-  if (!webPath) throw new Error('The photo has no path')
-  return (await fetch(webPath)).blob()
-}
-
-/** Resolves `[]` when the user backs out of the camera or gallery. */
-const unlessCancelled = async (pick: () => Promise<Blob[]>): Promise<Blob[]> => {
-  try {
-    return await pick()
-  } catch (error) {
-    if (isCancellation(error)) return []
-    throw error
-  }
-}
-
-/** One photo from the device camera, optimized (`[]` if cancelled). */
-export const takePhoto = () =>
-  unlessCancelled(async () => {
-    // Full quality from the camera: `optimizePhoto` does the one lossy re-encode.
-    const photo = await Camera.takePhoto({ quality: 100, webUseInput: true })
-    return [await optimizePhoto(await load(photo.webPath))]
+/**
+ * The browser's file picker for images (`[]` if the user backs out). `capture` opens the camera
+ * instead, on phones. Call it right from a tap: browsers open pickers only on a user gesture.
+ */
+const pickImages = (options: { capture?: boolean; multiple?: boolean }): Promise<File[]> =>
+  new Promise((resolve) => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'image/*'
+    input.multiple = options.multiple ?? false
+    if (options.capture) input.setAttribute('capture', 'environment')
+    // Kept in the document until it answers: some mobile browsers drop a detached input's events.
+    input.hidden = true
+    const done = (files: File[]) => {
+      input.remove()
+      resolve(files)
+    }
+    input.addEventListener('change', () => done([...(input.files ?? [])]))
+    input.addEventListener('cancel', () => done([]))
+    document.body.append(input)
+    input.click()
   })
 
-/** Up to `limit` saved photos, in the order chosen, optimized (`[]` if cancelled). */
-export const choosePhotos = (limit: number) =>
-  unlessCancelled(async () => {
-    const { results } = await Camera.chooseFromGallery({
-      allowMultipleSelection: limit > 1,
-      limit,
-      webUseInput: true,
-    })
-    // `limit` isn't enforced everywhere (web, older Android), so cap it here too.
-    return Promise.all(
-      results.slice(0, limit).map(async (photo) => optimizePhoto(await load(photo.webPath))),
-    )
-  })
+/** One photo from the camera, optimized (`[]` if cancelled). */
+export const takePhoto = async (): Promise<Blob[]> => {
+  const [photo] = await pickImages({ capture: true })
+  return photo ? [await optimizePhoto(photo)] : []
+}
+
+/** Up to `limit` saved photos, in the order the browser lists them, optimized (`[]` if cancelled). */
+export const choosePhotos = async (limit: number): Promise<Blob[]> => {
+  // The picker can't cap how many are chosen, so the rest are left out here.
+  const photos = (await pickImages({ multiple: limit > 1 })).slice(0, limit)
+  return Promise.all(photos.map(optimizePhoto))
+}

@@ -1,12 +1,6 @@
 import { expect, test } from 'vite-plus/test'
 
-import {
-  calendarTile,
-  endOfWeek,
-  formatDateString,
-  formatPrintLabel,
-  groupByDue,
-} from './print-format.ts'
+import { endOfWeek, formatDateString, formatPrintLabel, groupByDue } from './print-format.ts'
 
 test('formatPrintLabel pads the number to five digits', () => {
   expect(formatPrintLabel('はなこ', 12)).toBe('はなこのプリント（00012）')
@@ -15,10 +9,6 @@ test('formatPrintLabel pads the number to five digits', () => {
 
 test('formatDateString uses dots', () => {
   expect(formatDateString('2026-09-25')).toBe('2026.09.25')
-})
-
-test('calendarTile splits a date for the due-order tile', () => {
-  expect(calendarTile('2026-10-03')).toEqual({ month: 'OCT', day: '03', weekday: '土' })
 })
 
 test('endOfWeek is the Sunday of the Monday-start week', () => {

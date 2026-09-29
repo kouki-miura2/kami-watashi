@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { toJstDateString } from 'utils'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 import TabPage from '../components/TabPage.vue'
 import { useChildrenQuery } from '../composables/useChildren.ts'
-import { formatJstDateWithWeekday } from '../lib/format.ts'
+import { formatMonthDayWithWeekday } from '../lib/format.ts'
 import { toSlotCards } from '../lib/slots.ts'
 
 const router = useRouter()
@@ -12,7 +13,7 @@ const children = useChildrenQuery()
 
 const cards = computed(() => toSlotCards(children.data.value ?? []))
 const hasChildren = computed(() => cards.value.some((card) => card.slot.id !== null))
-const today = formatJstDateWithWeekday(new Date())
+const today = formatMonthDayWithWeekday(toJstDateString(new Date()))
 
 /** A slot's prints; from the mitene badge, only the prints someone asked this member to see. */
 const openSlot = (slot: string, onlyMitene = false) =>
@@ -25,11 +26,12 @@ const openSlot = (slot: string, onlyMitene = false) =>
 
 <!-- 2a: one card per child, and the family-common slot last. -->
 <template>
-  <TabPage title="こども" :overline="today">
+  <TabPage title="こども" :note="today">
     <div v-if="children.isPending.value" class="d-flex justify-center py-8">
       <v-progress-circular indeterminate />
     </div>
-    <div v-else class="d-flex flex-column ga-3">
+    <!-- Bottom room for the camera button, so it never hides the last card. -->
+    <div v-else class="d-flex flex-column ga-3 pb-16">
       <v-card
         v-if="!hasChildren"
         :to="{ name: 'children' }"
@@ -64,13 +66,10 @@ const openSlot = (slot: string, onlyMitene = false) =>
       </v-card>
     </div>
   </TabPage>
-  <v-fab
-    app
-    location="bottom end"
-    extended
-    color="primary"
-    prepend-icon="mdi-camera-outline"
-    text="プリントを登録"
-    :to="{ name: 'print-new' }"
-  />
+  <!-- Over the content, above the bottom navigation: `order` places it after the navigation in the layout. -->
+  <v-fab app order="1" location="bottom end" color="primary" :to="{ name: 'print-new' }">
+    <!-- Icon-only; the hidden label names the link (an aria-label would land on the wrapper). -->
+    <v-icon icon="mdi-camera-outline" />
+    <span class="d-sr-only">プリントを登録</span>
+  </v-fab>
 </template>

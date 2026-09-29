@@ -1,3 +1,4 @@
+import { LIMITS } from 'utils'
 import { afterEach, beforeEach, expect, test, vi } from 'vite-plus/test'
 
 import { UniqueConstraintError } from '../dao/errors.ts'
@@ -73,6 +74,18 @@ test('create refuses a taken name, including a lost race', async () => {
     },
   })
   await expect(service.create(invitedUser, '遠足')).rejects.toMatchObject({ code: 'name_taken' })
+})
+
+test('create refuses a topic beyond the family limit', async () => {
+  const topics = Array.from({ length: LIMITS.familyTopics }, (_, index) => ({
+    id: `t${index}`,
+    familyId: 'f1',
+    name: `トピック${index}`,
+  }))
+  const { service, topicRepository } = createService({ listByFamily: async () => topics })
+
+  await expect(service.create(invitedUser, '遠足')).rejects.toMatchObject({ code: 'topic_limit' })
+  expect(topicRepository.create).not.toHaveBeenCalled()
 })
 
 test('rename records the old and new names', async () => {

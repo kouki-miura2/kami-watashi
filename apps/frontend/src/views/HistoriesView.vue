@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { formatJstDateTime } from 'utils'
 import { computed } from 'vue'
 
 import TabPage from '../components/TabPage.vue'
 import { useHistoriesQuery } from '../composables/useHistoriesQuery.ts'
+import { formatJstMonthDayTime } from '../lib/format.ts'
 import { formatHistory } from '../lib/history.ts'
 
 const histories = useHistoriesQuery()
@@ -11,9 +11,9 @@ const histories = useHistoriesQuery()
 const lines = computed(() =>
   (histories.data.value?.pages ?? []).flatMap((page) =>
     page.items.map((item) => {
-      // `2026.09.27 12:40` → date `09.27` over time `12:40` in the timeline's left column.
-      const [date, time] = formatJstDateTime(new Date(item.createdAt)).split(' ')
-      return { id: item.id, date: date!.slice(5), time: time!, ...formatHistory(item) }
+      // `9/27 12:40` → date `9/27` over time `12:40` in the timeline's left column.
+      const [date, time] = formatJstMonthDayTime(new Date(item.createdAt)).split(' ')
+      return { id: item.id, date: date!, time: time!, ...formatHistory(item) }
     }),
   ),
 )
@@ -40,7 +40,8 @@ const loadMore = async ({ done }: { done: (status: 'ok' | 'empty' | 'error') => 
       <v-progress-circular indeterminate />
     </div>
     <v-empty-state v-else-if="lines.length === 0" icon="mdi-history" text="まだ履歴はありません" />
-    <v-infinite-scroll v-else :items="lines" empty-text="" @load="loadMore">
+    <!-- Fills the page's content area and scrolls itself, so it loads more as its end comes into view. -->
+    <v-infinite-scroll v-else height="100%" :items="lines" empty-text="" @load="loadMore">
       <div v-for="line in lines" :key="line.id" class="entry">
         <div class="entry__time text-caption text-medium-emphasis">
           {{ line.date }}<br /><span class="text-high-emphasis">{{ line.time }}</span>
@@ -65,6 +66,8 @@ const loadMore = async ({ done }: { done: (status: 'ok' | 'empty' | 'error') => 
   grid-template-columns: 44px 14px minmax(0, 1fr);
   gap: 8px;
   min-height: 56px;
+  /* `v-infinite-scroll` is a fixed-height flex column: without this, entries shrink to fit it. */
+  flex-shrink: 0;
 }
 
 .entry__time {

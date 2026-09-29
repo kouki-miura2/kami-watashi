@@ -10,6 +10,9 @@ export interface AuthenticatedUser {
 }
 
 export interface AuthGuard {
-  /** Resolves the authenticated user from a request, or `null` if unauthenticated. */
-  authenticate: (request: Request) => Promise<AuthenticatedUser | null>
+  /**
+   * Resolves the user a credential (from the credential cookie, see `route/credential-cookie.ts`)
+   * belongs to, or `null` if it is invalid or revoked.
+   */
+  authenticate: (credential: string) => Promise<AuthenticatedUser | null>
 }

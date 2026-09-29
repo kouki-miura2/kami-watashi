@@ -1,17 +1,7 @@
-import { createPinia, setActivePinia } from 'pinia'
-import { afterEach, beforeEach, expect, test, vi } from 'vite-plus/test'
+import { afterEach, expect, test, vi } from 'vite-plus/test'
 
-import { useAuthStore } from '../stores/auth.ts'
 import { apiClient } from './client.ts'
 import { ApiError } from './errors.ts'
-
-vi.mock('./credential-storage.ts', () => ({
-  credentialStorage: { load: vi.fn(), save: vi.fn(), clear: vi.fn() },
-}))
-
-beforeEach(() => {
-  setActivePinia(createPinia())
-})
 
 afterEach(() => {
   vi.restoreAllMocks()
@@ -42,22 +32,12 @@ test("keeps the caller's own signal instead of the default timeout", async () =>
   expect(lastRequestInit(fetchSpy).signal).toBe(signal)
 })
 
-test('sends the saved credential as a bearer token', async () => {
-  const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('[]'))
-  await useAuthStore().signIn('mk_secret')
-
-  await apiClient.members.$get()
-
-  expect(new Headers(lastRequestInit(fetchSpy).headers).get('authorization')).toBe(
-    'Bearer mk_secret',
-  )
-})
-
-test('sends no authorization header when signed out', async () => {
+test('sends the credential cookie, and no authorization header', async () => {
   const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('[]'))
 
   await apiClient.members.$get()
 
+  expect(lastRequestInit(fetchSpy).credentials).toBe('include')
   expect(new Headers(lastRequestInit(fetchSpy).headers).has('authorization')).toBe(false)
 })
 

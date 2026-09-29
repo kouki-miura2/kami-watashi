@@ -8,24 +8,15 @@
     "check": "vp check",
     "test": "vp test",
     "build": "vue-tsc && vp build",
-    "preview": "vp preview",
-    "cap:sync": "vue-tsc && vp build && cap sync"
+    "preview": "vp preview"
   },
   "dependencies": {
-    "@aparajita/capacitor-secure-storage": "catalog:",
-    "@capacitor/android": "catalog:",
-    "@capacitor/app": "catalog:",
-    "@capacitor/barcode-scanner": "catalog:",
-    "@capacitor/camera": "catalog:",
-    "@capacitor/core": "catalog:",
-    "@capacitor/ios": "catalog:",
-    "@capacitor/network": "catalog:",
-    "@capgo/capacitor-social-login": "catalog:",
     "@mdi/font": "catalog:",
     "@panzoom/panzoom": "catalog:",
     "@tanstack/vue-query": "catalog:",
     "chart.js": "catalog:",
-    "hono": "^4.13.7",
+    "hono": "catalog:",
+    "jsqr": "catalog:",
     "pinia": "^4.0.3",
     "qrcode": "catalog:",
     "utils": "workspace:*",
@@ -35,7 +26,6 @@
     "vuetify": "^4.2.1"
   },
   "devDependencies": {
-    "@capacitor/cli": "catalog:",
     "@types/qrcode": "catalog:",
     "@vitejs/plugin-vue": "^6.0.9",
     "backend": "workspace:*",

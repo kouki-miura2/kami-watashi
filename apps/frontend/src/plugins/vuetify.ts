@@ -41,6 +41,9 @@ export const vuetify = createVuetify({
   },
   defaults: {
     VBtn: { rounded: 'pill' },
+    // Inside a button group (`v-btn-toggle`), the group rounds its ends; a pill on every button
+    // would split it into separate pills instead of one divided control.
+    VBtnGroup: { VBtn: { rounded: false } },
     VCard: { rounded: 'lg', variant: 'flat', border: true },
     VBottomNavigation: { bgColor: 'surface-bright', border: 't', elevation: 0 },
   },

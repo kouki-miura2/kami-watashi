@@ -95,8 +95,21 @@ const app = createApp({
   familyService,
 })
 
+/**
+ * This Worker also serves the web app (`assets` in wrangler.jsonc): the API lives under `/api`, on
+ * the same origin, so the browser sends the sign-in cookie as a first-party one (spec
+ * "アーキテクチャ"). Only `/api/*` reaches this code; everything else is a static asset. The prefix
+ * is taken off before the app sees the request, so its routes (and path lists like `PUBLIC_PATHS`)
+ * stay prefix-free.
+ */
+const API_PREFIX = '/api'
+
 export default {
-  fetch: app.fetch,
+  fetch: (request, workerEnv, ctx) => {
+    const url = new URL(request.url)
+    url.pathname = url.pathname.slice(API_PREFIX.length) || '/'
+    return app.fetch(new Request(url, request), workerEnv, ctx)
+  },
   // The Cron Trigger in wrangler.jsonc: auto-deletion of inactive families.
   scheduled: async (_controller, _env, ctx) => {
     ctx.waitUntil(familyService.deleteInactive())

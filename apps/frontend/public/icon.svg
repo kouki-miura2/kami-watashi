@@ -1,0 +1,17 @@
+<!--
+  App icon (provisional): a school notice with a folded corner, in the design's colors
+  (vermilion, paper, ink). Full-bleed with the notice inside the central safe zone, so it also
+  works masked (Android's round/squircle icons). The PNGs next to it are rendered from this file:
+  see "PWA icons" in apps/frontend/AGENTS.md.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#D9542B" />
+  <path
+    d="M166 120h132l68 68v204a12 12 0 0 1-12 12H166a12 12 0 0 1-12-12V132a12 12 0 0 1 12-12z"
+    fill="#FBF9F4"
+  />
+  <path d="M298 120v56a12 12 0 0 0 12 12h56z" fill="#ECE8DE" />
+  <rect x="198" y="236" width="116" height="16" rx="8" fill="#1F1D1A" />
+  <rect x="198" y="276" width="116" height="16" rx="8" fill="#1F1D1A" />
+  <rect x="198" y="316" width="76" height="16" rx="8" fill="#1F1D1A" />
+</svg>

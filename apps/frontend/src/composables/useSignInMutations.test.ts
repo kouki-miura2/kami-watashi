@@ -5,7 +5,6 @@ import { effectScope } from 'vue'
 
 import { apiClient, apiFetch } from '../api/client.ts'
 import { ApiError } from '../api/errors.ts'
-import { googleSignIn } from '../api/google-sign-in.ts'
 import { useAuthStore } from '../stores/auth.ts'
 import { TERMS_VERSION } from '../terms.ts'
 import {
@@ -23,12 +22,6 @@ vi.mock('../api/client.ts', () => ({
     invites: { redeem: { $post: vi.fn() } },
   },
 }))
-vi.mock('../api/google-sign-in.ts', () => ({
-  googleSignIn: { available: true, getIdToken: vi.fn(async () => 'id-token') },
-}))
-vi.mock('../api/credential-storage.ts', () => ({
-  credentialStorage: { load: vi.fn(), save: vi.fn(), clear: vi.fn() },
-}))
 
 const queryClient = new QueryClient()
 const inScope = <T>(create: (client: QueryClient) => T): T =>
@@ -41,14 +34,14 @@ beforeEach(() => {
 
 test('Google login signs in when the account has a family', async () => {
   vi.mocked(apiClient.auth.google.$post).mockResolvedValue(
-    Response.json({ sessionToken: 'session', expiresAt: 1 }) as never,
+    new Response(null, { status: 204 }) as never,
   )
   const login = inScope(useGoogleLoginMutation)
 
-  await expect(login.mutateAsync()).resolves.toEqual({ status: 'signed-in' })
+  await expect(login.mutateAsync('id-token')).resolves.toEqual({ status: 'signed-in' })
 
   expect(apiClient.auth.google.$post).toHaveBeenCalledWith({ json: { idToken: 'id-token' } })
-  expect(useAuthStore().credential).toBe('session')
+  expect(useAuthStore().isOwner).toBe(true)
 })
 
 test('Google login hands back a pending registration when the account has no family', async () => {
@@ -57,31 +50,16 @@ test('Google login hands back a pending registration when the account has no fam
   )
   const login = inScope(useGoogleLoginMutation)
 
-  await expect(login.mutateAsync()).resolves.toEqual({
+  await expect(login.mutateAsync('id-token')).resolves.toEqual({
     status: 'not-registered',
     registration: { idToken: 'id-token', suggestedName: '一郎' },
   })
   expect(useAuthStore().isSignedIn).toBe(false)
 })
 
-test('Google login backed out of on the device just reports cancelled', async () => {
-  vi.mocked(googleSignIn.getIdToken).mockResolvedValueOnce(null)
-  const login = inScope(useGoogleLoginMutation)
-
-  await expect(login.mutateAsync()).resolves.toEqual({ status: 'cancelled' })
-  expect(apiClient.auth.google.$post).not.toHaveBeenCalled()
-})
-
-test('Google login fails when sign-in on the device fails', async () => {
-  vi.mocked(googleSignIn.getIdToken).mockRejectedValueOnce(new Error('network down'))
-  const login = inScope(useGoogleLoginMutation)
-
-  await expect(login.mutateAsync()).rejects.toThrow('network down')
-})
-
 test('registering an owner agrees to the current terms and signs in', async () => {
   vi.mocked(apiClient.auth.google.register.$post).mockResolvedValue(
-    Response.json({ sessionToken: 'session', expiresAt: 1 }) as never,
+    new Response(null, { status: 204 }) as never,
   )
   const register = inScope(useRegisterOwnerMutation)
 
@@ -90,12 +68,12 @@ test('registering an owner agrees to the current terms and signs in', async () =
   expect(apiClient.auth.google.register.$post).toHaveBeenCalledWith({
     json: { idToken: 'id-token', name: '一郎', termsVersion: TERMS_VERSION },
   })
-  expect(useAuthStore().credential).toBe('session')
+  expect(useAuthStore().isOwner).toBe(true)
 })
 
-test('redeeming an invite keeps the member key as the credential', async () => {
+test('redeeming an invite signs in as a member', async () => {
   vi.mocked(apiClient.invites.redeem.$post).mockResolvedValue(
-    Response.json({ memberKey: 'mk_secret' }) as never,
+    new Response(null, { status: 204 }) as never,
   )
   const redeem = inScope(useRedeemInviteMutation)
 
@@ -110,7 +88,7 @@ test('redeeming an invite keeps the member key as the credential', async () => {
 })
 
 test('dev login posts to /dev/login and signs in', async () => {
-  vi.mocked(apiFetch).mockResolvedValue(Response.json({ sessionToken: 'dev', expiresAt: 1 }))
+  vi.mocked(apiFetch).mockResolvedValue(new Response(null, { status: 204 }))
   const devLogin = inScope(useDevLoginMutation)
 
   await devLogin.mutateAsync({ googleSub: 'dev-owner-1', name: '一郎' })
@@ -118,5 +96,5 @@ test('dev login posts to /dev/login and signs in', async () => {
   const [url, init] = vi.mocked(apiFetch).mock.calls[0]!
   expect(url).toBe('http://api.test/dev/login')
   expect(init?.body).toBe(JSON.stringify({ googleSub: 'dev-owner-1', name: '一郎' }))
-  expect(useAuthStore().credential).toBe('dev')
+  expect(useAuthStore().isOwner).toBe(true)
 })

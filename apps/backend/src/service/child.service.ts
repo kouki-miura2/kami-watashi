@@ -1,4 +1,4 @@
-import { createLogger, startOfJstWeek } from 'utils'
+import { createLogger, LIMITS, startOfJstWeek } from 'utils'
 
 import type { AuthenticatedUser } from '../repository/auth-guard.interface.ts'
 import type { Child, ChildRepository, SlotCount } from '../repository/child.repository.ts'
@@ -68,7 +68,9 @@ export const createChildService = (deps: {
     },
 
     create: async (user, name) => {
-      assertChildNameAvailable(await deps.childRepository.listByFamily(user.familyId), name)
+      const children = await deps.childRepository.listByFamily(user.familyId)
+      if (children.length >= LIMITS.familyChildren) throw new AppError('child_limit')
+      assertChildNameAvailable(children, name)
       const child = { id: crypto.randomUUID(), familyId: user.familyId, name }
       await withNameTaken(
         deps.childRepository.create(

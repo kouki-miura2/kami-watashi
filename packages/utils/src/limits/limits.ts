@@ -7,6 +7,10 @@ export const LIMITS = {
   familyStorageBytes: 100 * 1024 * 1024,
   /** Max members per family, including the owner. */
   familyMembers: 3,
+  /** Max children per family (the family-common slot not counted). Checked in both the UI and the API. */
+  familyChildren: 3,
+  /** Max topics (the topic master) per family. Checked in both the UI and the API. */
+  familyTopics: 5,
   /** Max photos (pages) per print. Checked in both the UI and the API, not by a DB constraint. */
   printImages: 5,
   /** Max topics per print. Checked in both the UI and the API, not by a DB constraint. */

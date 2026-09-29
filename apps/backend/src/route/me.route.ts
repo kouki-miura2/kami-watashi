@@ -10,6 +10,7 @@ import {
   nameSchema,
   termsVersionSchema,
 } from './context.ts'
+import { clearCredentialCookie } from './credential-cookie.ts'
 
 export const createMeRoutes = (deps: { memberService: MemberService }) =>
   new Hono<AppEnv>()
@@ -24,8 +25,9 @@ export const createMeRoutes = (deps: { memberService: MemberService }) =>
         return c.body(null, 204)
       },
     )
-    // Leaving the family (invited members only). Afterwards this device's key no longer works.
+    // Leaving the family (invited members only). Afterwards this browser's key no longer works.
     .delete('/', async (c) => {
       await deps.memberService.leave(currentUser(c))
+      clearCredentialCookie(c)
       return c.body(null, 204)
     })

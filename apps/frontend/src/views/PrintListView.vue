@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { formatJstDateTime, toJstDateString } from 'utils'
+import { toJstDateString } from 'utils'
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -10,6 +10,7 @@ import { useBack } from '../composables/useBack.ts'
 import { useChildrenQuery } from '../composables/useChildren.ts'
 import { usePrintsQuery } from '../composables/usePrints.ts'
 import { useTopicsQuery } from '../composables/useTopics.ts'
+import { formatJstMonthDayTime, formatMonthDay } from '../lib/format.ts'
 import {
   activeConditions,
   type FilterCondition,
@@ -19,7 +20,7 @@ import {
   responseLabel,
   withoutCondition,
 } from '../lib/print-filter.ts'
-import { calendarTile, formatDateString, groupByDue } from '../lib/print-format.ts'
+import { groupByDue } from '../lib/print-format.ts'
 import { slotParam } from '../lib/slots.ts'
 
 const route = useRoute()
@@ -49,7 +50,19 @@ const removeCondition = (condition: FilterCondition) =>
   setFilter(withoutCondition(filter.value, condition))
 const filterSheetOpen = ref(false)
 
-const dueGroups = computed(() => groupByDue(prints.data.value ?? [], toJstDateString(new Date())))
+/** Newest first as one section, or by due date in 期限切れ・未対応 / 今週 / それ以降 (2c). */
+const sections = computed(() =>
+  sort.value === 'created'
+    ? [{ kind: 'all', label: '', items: prints.data.value ?? [] }]
+    : groupByDue(prints.data.value ?? [], toJstDateString(new Date())),
+)
+
+/** A print's topic names, shown as chips after its title. */
+const topicNames = (topicIds: string[]) =>
+  topicIds.flatMap((id) => {
+    const name = topics.data.value?.find((topic) => topic.id === id)?.name
+    return name ? [name] : []
+  })
 
 const openPrint = (id: string) => router.push({ name: 'print', params: { id } })
 </script>
@@ -103,90 +116,73 @@ const openPrint = (id: string) => router.push({ name: 'print', params: { id } })
       "
     />
 
-    <!-- 2b -->
-    <v-list v-else-if="sort === 'created'" class="py-0" bg-color="transparent">
-      <template v-for="print in prints.data.value" :key="print.id">
-        <v-divider />
-        <v-list-item class="py-3" :class="{ unread: !print.isRead }" @click="openPrint(print.id)">
-          <template #prepend>
-            <PrintThumb :image-id="print.coverImageId" :pages="print.imageCount" class="mr-3" />
-          </template>
-          <div class="d-flex align-center ga-2 text-caption text-medium-emphasis">
-            <span v-if="!print.isRead" class="unread-dot" aria-label="未読" />
-            <span>{{ String(print.seq).padStart(5, '0') }}</span>
-            <span>{{ formatJstDateTime(new Date(print.createdAt)).slice(5) }}</span>
-          </div>
-          <div
-            class="text-body-1 text-truncate"
-            :class="print.title ? (print.isRead ? '' : 'font-weight-bold') : 'text-disabled'"
-          >
-            {{ print.title ?? 'タイトルなし' }}
-          </div>
-          <div class="d-flex flex-wrap align-center ga-1 mt-1">
-            <span v-if="print.dueOn" class="text-caption">
-              <v-icon icon="mdi-calendar-outline" size="14" />
-              {{ formatDateString(print.dueOn).slice(5) }}まで
-            </span>
-            <v-chip
-              v-if="print.responseStatus !== 'none'"
-              :color="print.responseStatus"
-              variant="flat"
-              size="x-small"
-              label
-              :text="responseLabel(print.responseStatus)"
-            />
-            <v-chip
-              v-if="print.miteneStatus === 'requested'"
-              color="secondary"
-              variant="flat"
-              size="x-small"
-              label
-              :text="print.miteneFromName ? `見てね・${print.miteneFromName}` : '見てね'"
-            />
-          </div>
-        </v-list-item>
-      </template>
-    </v-list>
-
-    <!-- 2c -->
-    <div v-else class="px-4 d-flex flex-column ga-2">
-      <template v-for="group in dueGroups" :key="group.kind">
+    <v-list v-else class="py-0" bg-color="transparent">
+      <template v-for="section in sections" :key="section.kind">
         <div
-          class="d-flex align-center ga-2 mt-2 text-caption font-weight-bold"
-          :class="{ 'text-error': group.kind === 'overdue' }"
+          v-if="section.label"
+          class="d-flex align-center ga-2 px-4 pt-4 pb-2 text-caption font-weight-bold"
+          :class="{ 'text-error': section.kind === 'overdue' }"
         >
-          <span class="text-no-wrap">{{ group.label }}</span>
+          <span class="text-no-wrap">{{ section.label }}</span>
           <v-divider />
         </div>
-        <v-card v-for="print in group.items" :key="print.id" @click="openPrint(print.id)">
-          <div class="d-flex align-center ga-3 pa-3">
-            <div class="due-tile" :class="{ 'text-error': group.kind === 'overdue' }">
-              <span class="text-caption">{{ calendarTile(print.dueOn!).month }}</span>
-              <span class="text-h6 font-weight-bold">{{ calendarTile(print.dueOn!).day }}</span>
-              <span class="text-caption">{{ calendarTile(print.dueOn!).weekday }}</span>
+        <template v-for="(print, index) in section.items" :key="print.id">
+          <v-divider v-if="!section.label || index > 0" />
+          <v-list-item class="py-3" :class="{ unread: !print.isRead }" @click="openPrint(print.id)">
+            <template #prepend>
+              <PrintThumb :image-id="print.coverImageId" :pages="print.imageCount" class="mr-3" />
+            </template>
+            <div class="d-flex align-center ga-2 text-caption text-medium-emphasis">
+              <span v-if="!print.isRead" class="unread-dot" aria-label="未読" />
+              <span>{{ String(print.seq).padStart(5, '0') }}</span>
+              <span>{{ formatJstMonthDayTime(new Date(print.createdAt)) }}</span>
             </div>
-            <div class="flex-grow-1" style="min-width: 0">
-              <div class="text-caption text-medium-emphasis">
-                {{ String(print.seq).padStart(5, '0') }}
-              </div>
-              <div
-                class="font-weight-bold text-truncate"
-                :class="{ 'text-disabled': !print.title }"
+            <!-- The topics follow the title, wrapping onto the next line when they don't fit. -->
+            <div class="d-flex flex-wrap align-center ga-1">
+              <span
+                class="text-body-1 text-truncate mr-1"
+                style="max-width: 100%"
+                :class="print.title ? (print.isRead ? '' : 'font-weight-bold') : 'text-disabled'"
+                >{{ print.title ?? 'タイトルなし' }}</span
               >
-                {{ print.title ?? 'タイトルなし' }}
-              </div>
+              <v-chip
+                v-for="name in topicNames(print.topicIds)"
+                :key="name"
+                :text="name"
+                variant="outlined"
+                size="x-small"
+              />
             </div>
-            <v-chip
-              :color="print.responseStatus === 'none' ? 'surface-light' : print.responseStatus"
-              variant="flat"
-              size="x-small"
-              label
-              :text="responseLabel(print.responseStatus)"
-            />
-          </div>
-        </v-card>
+            <div class="d-flex flex-wrap align-center ga-1 mt-1">
+              <span
+                v-if="print.dueOn"
+                class="text-caption"
+                :class="{ 'text-error font-weight-bold': section.kind === 'overdue' }"
+              >
+                <v-icon icon="mdi-calendar-outline" size="14" />
+                {{ formatMonthDay(print.dueOn) }}まで
+              </span>
+              <v-chip
+                v-if="print.responseStatus !== 'none'"
+                :color="print.responseStatus"
+                variant="flat"
+                size="x-small"
+                label
+                :text="responseLabel(print.responseStatus)"
+              />
+              <v-chip
+                v-if="print.miteneStatus === 'requested'"
+                color="secondary"
+                variant="flat"
+                size="x-small"
+                label
+                :text="print.miteneFromName ? `見てね・${print.miteneFromName}` : '見てね'"
+              />
+            </div>
+          </v-list-item>
+        </template>
       </template>
-    </div>
+    </v-list>
   </div>
 
   <v-fab app location="bottom end" color="primary" :to="{ name: 'print-new', query: { slot } }">
@@ -208,16 +204,5 @@ const openPrint = (id: string) => router.push({ name: 'print', params: { id } })
   height: 8px;
   border-radius: 4px;
   background: rgb(var(--v-theme-secondary));
-}
-
-.due-tile {
-  width: 48px;
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  line-height: 1.1;
-  padding-right: 10px;
-  border-right: 1px dashed rgba(var(--v-border-color), var(--v-border-opacity));
 }
 </style>

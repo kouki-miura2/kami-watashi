@@ -1,3 +1,5 @@
+import { LIMITS } from 'utils'
+
 import type { AuthenticatedUser } from '../repository/auth-guard.interface.ts'
 import type { Topic, TopicRepository } from '../repository/topic.repository.ts'
 import { AppError, assertNameAvailable, withNameTaken } from './errors.ts'
@@ -35,7 +37,9 @@ export const createTopicService = (deps: { topicRepository: TopicRepository }): 
         .map(({ id, name, printCount }) => ({ id, name, printCount })),
 
     create: async (user, name) => {
-      assertNameAvailable(await deps.topicRepository.listByFamily(user.familyId), name)
+      const topics = await deps.topicRepository.listByFamily(user.familyId)
+      if (topics.length >= LIMITS.familyTopics) throw new AppError('topic_limit')
+      assertNameAvailable(topics, name)
       const topic = { id: crypto.randomUUID(), familyId: user.familyId, name }
       await withNameTaken(
         deps.topicRepository.create(

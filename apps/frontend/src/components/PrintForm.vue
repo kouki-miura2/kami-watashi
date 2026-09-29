@@ -16,6 +16,7 @@ const children = useChildrenQuery()
 const topics = useTopicsQuery()
 const createTopic = useCreateTopicMutation()
 const slots = computed(() => toSlotCards(children.data.value ?? []))
+const topicsFull = computed(() => (topics.data.value?.length ?? 0) >= LIMITS.familyTopics)
 
 // A topic created here is selected right away.
 const topicDialogOpen = ref(false)
@@ -88,6 +89,7 @@ const addTopic = (name: string) =>
       text="新規"
       variant="outlined"
       class="border-dashed"
+      :disabled="topicsFull"
       @click="openTopicDialog"
     />
   </section>

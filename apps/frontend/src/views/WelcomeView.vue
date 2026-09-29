@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { googleSignIn } from '../api/google-sign-in.ts'
@@ -13,6 +13,7 @@ import {
   useGoogleLoginMutation,
   useRegisterOwnerMutation,
 } from '../composables/useSignInMutations.ts'
+import { useNotificationStore } from '../stores/notification.ts'
 
 const router = useRouter()
 const googleLogin = useGoogleLoginMutation()
@@ -28,8 +29,8 @@ const devAccount = ref({ googleSub: 'dev-owner-1', name: '一郎' })
 const goHome = () => router.replace({ name: 'home' })
 
 // Failures are reported app-wide (snackbar); only success moves on.
-const signInWithGoogle = () =>
-  googleLogin.mutate(undefined, {
+const signInWithGoogle = (idToken: string) =>
+  googleLogin.mutate(idToken, {
     onSuccess: (outcome) => {
       if (outcome.status === 'signed-in') return goHome()
       if (outcome.status === 'not-registered') {
@@ -45,6 +46,17 @@ const register = (name: string) => {
 }
 
 const signInForDev = () => devLogin.mutate(devAccount.value, { onSuccess: goHome })
+
+// Google's own button (only it hands out an ID token on the web), drawn again whenever this step
+// is shown again.
+const notification = useNotificationStore()
+const googleButton = ref<HTMLElement>()
+watch(googleButton, (element) => {
+  if (!element) return
+  googleSignIn
+    .renderButton(element, signInWithGoogle)
+    .catch(() => notification.show('Googleログインを読み込めませんでした'))
+})
 </script>
 
 <template>
@@ -66,32 +78,35 @@ const signInForDev = () => devLogin.mutate(devAccount.value, { onSuccess: goHome
   <!-- 1a -->
   <StepLayout v-else centered>
     <div>
-      <div class="text-caption font-weight-bold text-link">KAMI-WATASHI</div>
+      <div class="text-caption font-weight-bold text-link">かみわたし</div>
       <h1 class="text-h4 font-weight-black">学校のプリントを、<br />家族みんなで。</h1>
     </div>
     <p class="text-body-2 text-medium-emphasis">
       写真に撮って、こどもごとに整理。<br />「見てね」で家族に声をかけられます。
     </p>
     <template #actions>
+      <div
+        v-if="googleSignIn.available"
+        ref="googleButton"
+        class="google-button"
+        :class="{ 'google-button--pending': googleLogin.isPending.value }"
+      />
       <v-btn
+        v-else
         color="primary"
-        size="x-large"
-        block
         prepend-icon="mdi-google"
         text="Googleでログイン"
-        :disabled="!googleSignIn.available"
-        :loading="googleLogin.isPending.value"
-        @click="signInWithGoogle"
+        class="google-like"
+        disabled
       />
-      <div class="text-caption text-center text-medium-emphasis">
+      <div class="text-caption text-center text-medium-emphasis mb-6">
         家族を作る人（オーナー）はこちら
       </div>
       <v-btn
         variant="outlined"
-        size="x-large"
-        block
         prepend-icon="mdi-qrcode-scan"
         text="招待QRコードで参加"
+        class="google-like"
         :to="{ name: 'join' }"
       />
 
@@ -107,3 +122,37 @@ const signInForDev = () => devLogin.mutate(devAccount.value, { onSuccess: goHome
     </template>
   </StepLayout>
 </template>
+
+<style scoped>
+/* Google's button is at most 400px wide: centered in the wider layouts. */
+.google-button {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+}
+
+.google-button--pending {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/*
+ * The other buttons are set like Google's (`size: large`, pill: 40px high, at most 400px wide,
+ * 14px medium text centered, the icon at the left edge), so the pair reads as one set.
+ */
+.google-like {
+  /* Not `block`: Vuetify's block buttons get `min-width: 100%`, which beats this `max-width`. */
+  width: 100%;
+  height: 40px;
+  max-width: 400px;
+  margin-inline: auto;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.25px;
+}
+
+.google-like :deep(.v-btn__prepend) {
+  position: absolute;
+  left: 12px;
+}
+</style>

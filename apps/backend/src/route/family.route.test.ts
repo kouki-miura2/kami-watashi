@@ -10,6 +10,7 @@ test('DELETE /family withdraws the owner’s family', async () => {
   const res = await app.request('/family', { method: 'DELETE', ...authorized })
 
   expect(res.status).toBe(204)
+  expect(res.headers.get('set-cookie')).toMatch(/^__Host-credential=; Max-Age=0;/)
   expect(withdraw).toHaveBeenCalledWith(ownerUser)
 })
 

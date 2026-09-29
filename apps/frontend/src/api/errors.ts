@@ -43,6 +43,8 @@ const messages: Record<ApiErrorCode, string> = {
   already_registered: 'このGoogleアカウントはすでに家族のオーナーです',
   name_taken: '同じ名前がすでにあります',
   member_limit: '家族のメンバー数が上限に達しています',
+  child_limit: 'こどもの人数が上限に達しています',
+  topic_limit: 'トピックの数が上限に達しています',
   storage_limit: '容量の上限を超えます',
   internal_error: 'エラーが発生しました。時間をおいてもう一度お試しください',
   network_error: '通信できませんでした。接続を確認してください',

@@ -1,21 +1,14 @@
-import { App as CapacitorApp } from '@capacitor/app'
-import {
-  focusManager,
-  MutationCache,
-  QueryCache,
-  QueryClient,
-  VueQueryPlugin,
-} from '@tanstack/vue-query'
+import { MutationCache, QueryCache, QueryClient, VueQueryPlugin } from '@tanstack/vue-query'
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 
 import { createApiErrorHandler } from './api/error-handler.ts'
 import App from './App.vue'
 import { revokeImageUrlsOnRemoval } from './composables/useImageQuery.ts'
+import { loadSignIn } from './composables/useLaunchQuery.ts'
 import { vuetify } from './plugins/vuetify.ts'
 import { router } from './router/index.ts'
 import { useAuthStore } from './stores/auth.ts'
-import { useConnectivityStore } from './stores/connectivity.ts'
 import { useNotificationStore } from './stores/notification.ts'
 
 const pinia = createPinia()
@@ -39,18 +32,9 @@ const handleApiError = createApiErrorHandler({
 })
 revokeImageUrlsOnRemoval(queryClient)
 
-// "Focus" is the app coming back to the foreground (`appStateChange` also covers the browser's
-// tab visibility): queries marked `refetchOnWindowFocus` (launch, mitene counts) refetch then.
-focusManager.setEventListener((setFocused) => {
-  const listener = CapacitorApp.addListener('appStateChange', ({ isActive }) =>
-    setFocused(isActive),
-  )
-  return () => void listener.then((handle) => handle.remove())
-})
-
-// Before `use(router)`: its first navigation runs the auth guard, which needs the saved credential.
-await auth.restore()
-await useConnectivityStore(pinia).start()
+// Before `use(router)`: its first navigation runs the auth guard, which needs to know whether this
+// browser is signed in.
+await loadSignIn(queryClient, auth)
 
 createApp(App)
   .use(pinia)

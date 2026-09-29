@@ -21,9 +21,6 @@ vi.mock('../api/client.ts', () => ({
     family: { $delete: vi.fn() },
   },
 }))
-vi.mock('../api/credential-storage.ts', () => ({
-  credentialStorage: { load: vi.fn(), save: vi.fn(), clear: vi.fn() },
-}))
 
 const setup = () => {
   const queryClient = new QueryClient()
@@ -68,7 +65,7 @@ test('removing a member deletes them by id', async () => {
 test('an invited member leaves: signs out, back to welcome, cache cleared', async () => {
   const { queryClient, inScope } = setup()
   queryClient.setQueryData(queryKeys.children, [])
-  await useAuthStore().signIn('mk_secret')
+  useAuthStore().signIn('member')
 
   await inScope(useLeaveFamilyMutation).mutateAsync()
 
@@ -81,7 +78,7 @@ test('an invited member leaves: signs out, back to welcome, cache cleared', asyn
 
 test('the owner withdraws, deleting the family', async () => {
   const { inScope } = setup()
-  await useAuthStore().signIn('owner-session')
+  useAuthStore().signIn('owner')
 
   await inScope(useLeaveFamilyMutation).mutateAsync()
 

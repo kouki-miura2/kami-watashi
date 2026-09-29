@@ -16,7 +16,7 @@ declare module '@tanstack/vue-query' {
 }
 
 interface ErrorHandlerDeps {
-  auth: { readonly isSignedIn: boolean; readonly isMember: boolean; signOut: () => Promise<void> }
+  auth: { readonly isSignedIn: boolean; readonly isMember: boolean; signOut: () => void }
   router: Pick<Router, 'replace'>
   /** Drops every cached query: nothing fetched with the old credential may outlive it. */
   clearCache: () => void
@@ -26,7 +26,7 @@ interface ErrorHandlerDeps {
 /**
  * The one place a failed query or mutation is reported (wired into the `QueryCache` /
  * `MutationCache` in `main.ts`):
- * - A rejected credential signs this device out. An invited member's key only stops working when
+ * - A rejected credential signs this browser out (the API has already cleared its cookie). An invited member's key only stops working when
  *   they were removed or the family was deleted, so they get the "removed" screen; an owner
  *   (expired session) goes back to the welcome screen to sign in with Google again.
  * - `terms_required` (the terms were revised) opens the terms screen to agree again.
@@ -37,7 +37,7 @@ export const createApiErrorHandler =
   async (error: unknown, meta: RequestMeta | undefined): Promise<void> => {
     if (error instanceof ApiError && error.code === 'unauthorized' && deps.auth.isSignedIn) {
       const wasMember = deps.auth.isMember
-      await deps.auth.signOut()
+      deps.auth.signOut()
       await deps.router.replace({ name: wasMember ? 'removed' : 'welcome' })
       deps.clearCache()
       return

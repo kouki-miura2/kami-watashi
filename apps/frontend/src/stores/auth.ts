@@ -1,33 +1,59 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
-import { credentialStorage } from '../api/credential-storage.ts'
+export type SignedInAs = 'owner' | 'member'
 
-/** Invited members' device keys start with this; owners' session tokens don't. */
-const MEMBER_KEY_PREFIX = 'mk_'
+/**
+ * Who this browser last signed in as, for when the API can't be asked at startup (offline,
+ * `loadSignIn`). Not a credential: that is the API's HttpOnly cookie, which this app never sees.
+ */
+const STORAGE_KEY = 'kami-watashi.signed-in-as'
 
-/** The API credential this device signs in with, kept in memory and in `credentialStorage`. */
+// Storage can be missing or refuse access (private browsing, Node in tests): the hint is optional.
+const loadSignedInAs = (): SignedInAs | null => {
+  try {
+    const value = localStorage.getItem(STORAGE_KEY)
+    return value === 'owner' || value === 'member' ? value : null
+  } catch {
+    return null
+  }
+}
+const saveSignedInAs = (value: SignedInAs | null): void => {
+  try {
+    if (value) localStorage.setItem(STORAGE_KEY, value)
+    else localStorage.removeItem(STORAGE_KEY)
+  } catch {
+    // Nothing to do: the hint is optional.
+  }
+}
+
+/**
+ * Whether this browser is signed in, and as the owner or an invited member — as the API last
+ * answered (`loadSignIn` / the launch query in `useLaunchQuery.ts`, sign-in, leaving).
+ */
 export const useAuthStore = defineStore('auth', () => {
-  const credential = ref<string | null>(null)
+  const signedInAs = ref<SignedInAs | null>(null)
 
-  const isSignedIn = computed(() => credential.value !== null)
-  const isMember = computed(() => credential.value?.startsWith(MEMBER_KEY_PREFIX) ?? false)
-  const isOwner = computed(() => isSignedIn.value && !isMember.value)
+  const isSignedIn = computed(() => signedInAs.value !== null)
+  const isOwner = computed(() => signedInAs.value === 'owner')
+  const isMember = computed(() => signedInAs.value === 'member')
 
-  /** Loads the saved credential. Call once at startup, before the router's first navigation. */
-  const restore = async () => {
-    credential.value = await credentialStorage.load()
+  /** After the API set the credential cookie (sign-in, joining) or confirmed it (launch). */
+  const signIn = (as: SignedInAs) => {
+    signedInAs.value = as
+    saveSignedInAs(as)
   }
 
-  const signIn = async (next: string) => {
-    await credentialStorage.save(next)
-    credential.value = next
+  /** After the API rejected or cleared the credential cookie. */
+  const signOut = () => {
+    signedInAs.value = null
+    saveSignedInAs(null)
   }
 
-  const signOut = async () => {
-    await credentialStorage.clear()
-    credential.value = null
+  /** When the API couldn't be asked: go by the last sign-in (the launch query asks again later). */
+  const resumeLastSignIn = () => {
+    signedInAs.value = loadSignedInAs()
   }
 
-  return { credential, isSignedIn, isMember, isOwner, restore, signIn, signOut }
+  return { isSignedIn, isOwner, isMember, signIn, signOut, resumeLastSignIn }
 })

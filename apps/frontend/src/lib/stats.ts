@@ -1,3 +1,5 @@
+import { formatMonthDay } from './format.ts'
+
 export interface StatsPeriod {
   /** First day of the week or month, `YYYY-MM-DD`. */
   start: string
@@ -26,7 +28,7 @@ export const toRegistrationChart = (
         ? '今週'
         : '今月'
       : unit === 'week'
-        ? period.start.slice(5).replace('-', '.')
+        ? formatMonthDay(period.start)
         : `${Number(period.start.slice(5, 7))}月`,
   ),
   datasets: slots.map((slot) => ({

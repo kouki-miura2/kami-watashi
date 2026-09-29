@@ -1,20 +1,9 @@
-import { weekdayOf } from './format.ts'
-
 /** A print's name everywhere it's shown (and in history): `はなこのプリント（00012）`. */
 export const formatPrintLabel = (slotName: string, seq: number): string =>
   `${slotName}のプリント（${String(seq).padStart(5, '0')}）`
 
 /** A `YYYY-MM-DD` date in the app's display format: `2026.09.25`. */
 export const formatDateString = (dateString: string): string => dateString.replaceAll('-', '.')
-
-const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
-
-/** A due date as the due-order list's calendar tile: `{ month: 'OCT', day: '03', weekday: '土' }`. */
-export const calendarTile = (dateString: string) => ({
-  month: MONTHS[Number(dateString.slice(5, 7)) - 1]!,
-  day: dateString.slice(8, 10),
-  weekday: weekdayOf(dateString),
-})
 
 const addDays = (dateString: string, days: number): string => {
   const date = new Date(`${dateString}T00:00:00Z`)

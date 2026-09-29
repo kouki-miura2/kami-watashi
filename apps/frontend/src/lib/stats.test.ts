@@ -17,7 +17,7 @@ test('weekly bars are labeled by their Monday, the latest as 今週', () => {
     'week',
   )
 
-  expect(chart.labels).toEqual(['09.21', '今週'])
+  expect(chart.labels).toEqual(['9/21', '今週'])
   expect(chart.datasets).toEqual([
     { label: 'はなこ', backgroundColor: '#D9542B', data: [2, 0] },
     { label: '家族共通', backgroundColor: '#6B665C', data: [1, 3] },

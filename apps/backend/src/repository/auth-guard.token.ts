@@ -2,11 +2,9 @@ import { hashMemberKey, isMemberKey, verifySessionToken } from '../service/token
 import type { AuthGuard } from './auth-guard.interface.ts'
 import type { Member, MemberRepository } from './member.repository.ts'
 
-const BEARER_PREFIX = 'Bearer '
-
 /**
- * `Authorization: Bearer <credential>`, where the credential is either an owner's session token
- * (signed JWT) or an invited member's key (`mk_...`). Either way the member row is looked up on
+ * The credential is either an owner's session token (signed JWT) or an invited member's key
+ * (`mk_...`). Either way the member row is looked up on
  * every request, so deleting a member (or the whole family) revokes their credential immediately.
  */
 export const createTokenAuthGuard = (deps: {
@@ -25,12 +23,7 @@ export const createTokenAuthGuard = (deps: {
   }
 
   return {
-    authenticate: async (request) => {
-      const header = request.headers.get('authorization')
-      if (!header?.startsWith(BEARER_PREFIX)) return null
-      const credential = header.slice(BEARER_PREFIX.length).trim()
-      if (!credential) return null
-
+    authenticate: async (credential) => {
       const member = await findMember(credential)
       return member
         ? {

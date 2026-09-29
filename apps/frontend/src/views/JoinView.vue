@@ -1,51 +1,55 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 import { ApiError, errorMessage } from '../api/errors.ts'
 import DisplayNameForm from '../components/DisplayNameForm.vue'
+import QrScanner from '../components/QrScanner.vue'
 import StepLayout from '../components/StepLayout.vue'
 import SubPageBar from '../components/SubPageBar.vue'
 import TermsAgreement from '../components/TermsAgreement.vue'
 import { useRedeemInviteMutation } from '../composables/useSignInMutations.ts'
-import { qrScanner } from '../device/qr-scanner.ts'
+import { inviteTokenFromQuery, inviteTokenFromScan } from '../lib/invite.ts'
 
+const route = useRoute()
 const router = useRouter()
 const redeem = useRedeemInviteMutation()
 
-/** Joining a family: 1d invite QR code → 1b terms → 1c name → this device's member key is saved. */
-const step = ref<'code' | 'terms' | 'name'>('code')
-const inviteToken = ref('')
-/** Why the invite code was not accepted (expired, family full, ...), shown on the code step. */
+/**
+ * The invite token: from the invite URL when it was opened directly (the phone's own camera read
+ * the owner's QR code), or read here by the app's scanner (1d). Taken out of the address bar right
+ * away, so it isn't left in the history.
+ */
+const inviteToken = ref(inviteTokenFromQuery(route.query))
+if (inviteToken.value) void router.replace({ name: 'join' })
+
+/** Joining a family: invite QR code → 1b terms → 1c name → the API keeps this browser's member key. */
+const step = ref<'code' | 'terms' | 'name'>(inviteToken.value ? 'terms' : 'code')
+/** Why the invite was not accepted (expired, family full, ...), shown on the first step. */
 const codeError = ref<string>()
 const nameError = ref<string>()
 
-// On the device the camera opens right away (the invite is always in person); pasting the code
-// stays as the fallback, and is the only way in the browser.
-const canScan = qrScanner.available
-const scanning = ref(false)
-const scan = async () => {
-  scanning.value = true
-  codeError.value = undefined
-  try {
-    const scanned = await qrScanner.scan()
-    if (!scanned) return
-    inviteToken.value = scanned
-    step.value = 'terms'
-  } catch {
-    codeError.value = 'QRコードを読み取れませんでした。招待コードを貼り付けてください'
-  } finally {
-    scanning.value = false
+/** A QR code that isn't an invite (another app's), while scanning. */
+const scanHint = ref<string>()
+const cameraFailed = ref(false)
+
+const onScan = (text: string) => {
+  const token = inviteTokenFromScan(text, location.origin)
+  if (!token) {
+    scanHint.value = '招待QRコードではありません。オーナーの画面の招待QRコードを写してください'
+    return
   }
+  inviteToken.value = token
+  codeError.value = undefined
+  scanHint.value = undefined
+  step.value = 'terms'
 }
-onMounted(() => {
-  if (canScan) void scan()
-})
 
 const join = async (name: string) => {
+  if (!inviteToken.value) return
   nameError.value = undefined
   try {
-    await redeem.mutateAsync({ inviteToken: inviteToken.value.trim(), name })
+    await redeem.mutateAsync({ inviteToken: inviteToken.value, name })
   } catch (error) {
     if (error instanceof ApiError && error.code === 'name_taken') {
       nameError.value = errorMessage(error)
@@ -82,49 +86,29 @@ const join = async (name: string) => {
       icon="close"
       @navigate="router.replace({ name: 'welcome' })"
     />
-    <v-form class="fill-height" @submit.prevent="inviteToken.trim() && (step = 'terms')">
-      <StepLayout>
-        <v-alert v-if="codeError" type="error" variant="tonal" :text="codeError" />
-        <template v-if="canScan">
-          <p class="text-body-2 text-medium-emphasis">
-            オーナーの画面に表示されたQRコードを読み取ってください。
-          </p>
-          <v-btn
-            color="primary"
-            size="x-large"
-            block
-            prepend-icon="mdi-qrcode-scan"
-            text="カメラで読み取る"
-            :loading="scanning"
-            @click="scan"
-          />
-          <p class="text-caption text-medium-emphasis mt-4">
-            読み取れないときは、招待コードを貼り付けてください。
-          </p>
-        </template>
-        <p v-else class="text-body-2 text-medium-emphasis">
-          オーナーの画面に表示された招待コードを貼り付けてください。
-        </p>
-        <v-textarea
-          v-model="inviteToken"
-          label="招待コード"
-          rows="3"
-          auto-grow
-          hide-details
-          @update:model-value="codeError = undefined"
+    <StepLayout>
+      <v-alert v-if="codeError" type="error" variant="tonal" :text="codeError" />
+      <p class="text-body-2 text-medium-emphasis text-center">
+        オーナーの画面に表示された招待QRコードを、<br />枠の中に写してください。
+      </p>
+      <template v-if="!cameraFailed">
+        <QrScanner @detect="onScan" @error="cameraFailed = true" />
+        <p v-if="scanHint" class="text-caption text-error text-center">{{ scanHint }}</p>
+      </template>
+      <template v-else>
+        <v-alert
+          type="warning"
+          variant="tonal"
+          text="カメラを使えませんでした。ブラウザでカメラの使用を許可してから、もう一度お試しください。"
         />
-        <template #actions>
-          <v-btn
-            type="submit"
-            :color="canScan ? undefined : 'primary'"
-            :variant="canScan ? 'outlined' : 'flat'"
-            size="x-large"
-            block
-            text="つぎへ"
-            :disabled="!inviteToken.trim()"
-          />
-        </template>
-      </StepLayout>
-    </v-form>
+        <v-btn
+          variant="outlined"
+          block
+          prepend-icon="mdi-camera-outline"
+          text="もう一度カメラを開く"
+          @click="cameraFailed = false"
+        />
+      </template>
+    </StepLayout>
   </template>
 </template>

@@ -64,7 +64,7 @@ export const useLeaveFamilyMutation = (queryClient?: QueryClient) => {
         else await apiClient.me.$delete()
       },
       onSuccess: async () => {
-        await auth.signOut()
+        auth.signOut()
         await router.replace({ name: 'welcome' })
         client.clear()
       },

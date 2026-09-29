@@ -48,7 +48,7 @@ const redeem = (body: unknown) => ({
   body: JSON.stringify(body),
 })
 
-test('POST /invites/redeem joins without credentials and returns the member key', async () => {
+test('POST /invites/redeem joins without credentials, setting the member key cookie', async () => {
   const redeemFn = vi.fn<InviteService['redeem']>(async () => ({ memberKey: 'mk_key' }))
   const app = createTestApp({ services: { inviteService: { redeem: redeemFn } } })
 
@@ -57,8 +57,8 @@ test('POST /invites/redeem joins without credentials and returns the member key'
     redeem({ inviteToken: 'invite', name: '二郎', termsVersion: 'v1' }),
   )
 
-  expect(res.status).toBe(200)
-  expect(await res.json()).toEqual({ memberKey: 'mk_key' })
+  expect(res.status).toBe(204)
+  expect(res.headers.get('set-cookie')).toMatch(/^__Host-credential=mk_key; Max-Age=\d+;.*HttpOnly/)
   expect(redeemFn).toHaveBeenCalledWith({ inviteToken: 'invite', name: '二郎', termsVersion: 'v1' })
 })
 

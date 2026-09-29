@@ -4,20 +4,18 @@ import { beforeEach, expect, test, vi } from 'vite-plus/test'
 import { effectScope } from 'vue'
 
 import { apiClient } from '../api/client.ts'
+import { ApiError } from '../api/errors.ts'
 import { useAuthStore } from '../stores/auth.ts'
-import { useLaunchQuery } from './useLaunchQuery.ts'
+import { queryKeys } from './query-keys.ts'
+import { loadSignIn, useLaunchQuery } from './useLaunchQuery.ts'
 
 vi.mock('../api/client.ts', () => ({ apiClient: { launch: { $post: vi.fn() } } }))
-vi.mock('../api/credential-storage.ts', () => ({
-  credentialStorage: { load: vi.fn(), save: vi.fn(), clear: vi.fn() },
-}))
 
-const launchResponse = (session: { sessionToken: string; expiresAt: number } | null) =>
+const launchResponse = (isOwner: boolean) =>
   Response.json({
-    me: { id: 'm1', name: '一郎', isOwner: session !== null },
+    me: { id: 'm1', name: '一郎', isOwner },
     termsVersion: '2026-10-01',
     termsAgreed: true,
-    session,
   })
 
 const run = () => {
@@ -37,27 +35,50 @@ test('does not call /launch while signed out', () => {
   expect(apiClient.launch.$post).not.toHaveBeenCalled()
 })
 
-test("replaces the owner's session token with the renewed one", async () => {
-  vi.mocked(apiClient.launch.$post).mockResolvedValue(
-    launchResponse({ sessionToken: 'renewed', expiresAt: 1 }) as never,
-  )
+test('fetches who this browser is while signed in, keeping owner/member in step', async () => {
+  vi.mocked(apiClient.launch.$post).mockResolvedValue(launchResponse(false) as never)
   const auth = useAuthStore()
-  await auth.signIn('old')
+  auth.signIn('owner')
 
   const query = run()
 
   await vi.waitFor(() => expect(query.isSuccess.value).toBe(true))
-  expect(auth.credential).toBe('renewed')
   expect(query.data.value?.me.name).toBe('一郎')
+  expect(auth.isMember).toBe(true)
 })
 
-test("keeps an invited member's key (no session in the response)", async () => {
-  vi.mocked(apiClient.launch.$post).mockResolvedValue(launchResponse(null) as never)
+test('loadSignIn signs in as whoever the API answers, and seeds the launch query', async () => {
+  vi.mocked(apiClient.launch.$post).mockResolvedValue(launchResponse(true) as never)
+  const queryClient = new QueryClient()
   const auth = useAuthStore()
-  await auth.signIn('mk_secret')
 
-  const query = run()
+  await loadSignIn(queryClient, auth)
 
-  await vi.waitFor(() => expect(query.isSuccess.value).toBe(true))
-  expect(auth.credential).toBe('mk_secret')
+  expect(auth.isOwner).toBe(true)
+  expect(queryClient.getQueryData(queryKeys.launch)).toMatchObject({ me: { isOwner: true } })
+})
+
+test('loadSignIn signs out quietly when the API rejects the credential cookie', async () => {
+  vi.mocked(apiClient.launch.$post).mockRejectedValue(new ApiError('unauthorized', 401))
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  const auth = useAuthStore()
+  auth.signIn('owner')
+
+  await loadSignIn(queryClient, auth)
+
+  expect(auth.isSignedIn).toBe(false)
+  // Signed out is an answer, not a failure for the app-wide error handler to report.
+  expect(queryClient.getQueryCache().find({ queryKey: queryKeys.launch })?.meta).toEqual({
+    handlesError: true,
+  })
+})
+
+test('loadSignIn goes by the last sign-in when the API cannot be reached', async () => {
+  vi.mocked(apiClient.launch.$post).mockRejectedValue(new ApiError('network_error', null))
+  const auth = useAuthStore()
+  vi.spyOn(auth, 'resumeLastSignIn')
+
+  await loadSignIn(new QueryClient({ defaultOptions: { queries: { retry: false } } }), auth)
+
+  expect(auth.resumeLastSignIn).toHaveBeenCalled()
 })

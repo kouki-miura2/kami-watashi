@@ -1,10 +1,19 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "kami-watashi-api",
+  // Served at https://<name>.<account subdomain>.workers.dev: the web app and its API together.
+  "name": "kami-watashi",
   "main": "src/worker.ts",
   "compatibility_date": "2026-09-11",
   "observability": {
     "enabled": true,
+  },
+  // The web app (`vp run frontend#build`), from this same Worker and origin as the API, which is under
+  // `/api` (worker.ts): only `/api/*` runs the Worker; any other path is a file, or the SPA's
+  // index.html for its routes.
+  "assets": {
+    "directory": "../frontend/dist",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"],
   },
   // `database_id` is filled in on the first remote deploy (automatic provisioning). Local dev
   // (`wrangler dev`) and local migrations don't need it.
@@ -29,12 +38,16 @@
   },
   // Public values only — anything here is readable by anyone with access to the Worker.
   // Secrets: `SESSION_SECRET` via `wrangler secret put` (locally `.dev.vars`).
+  // `GOOGLE_CLIENT_IDS`: the web OAuth client id (comma-separated if several) accepted as a Google
+  // ID token's `aud`. Not secret (it ships in the app), but it belongs to whoever deploys, so it
+  // isn't committed: `wrangler secret put` (locally `.dev.vars`). Unset = Google sign-in rejects
+  // everything.
   // `DEV_LOGIN_ENABLED` belongs in `.dev.vars` only, never here.
   "vars": {
     "TERMS_VERSION": "2026-10-01",
-    // OAuth client ids (iOS / Android / Web, comma-separated) accepted as a Google ID token's
-    // `aud`. Public by design (they ship in the app). Empty = Google sign-in rejects everything.
-    "GOOGLE_CLIENT_IDS": "",
-    "ALLOWED_ORIGINS": "capacitor://localhost,https://localhost",
+    // Other origins serving the web app (comma-separated), allowed to call the API with the sign-in
+    // cookie (CORS, CSRF). None when deployed: the web app is on the API's own origin, which is
+    // always allowed. Locally `.dev.vars` has the Vite dev server's.
+    "ALLOWED_ORIGINS": "",
   },
 }

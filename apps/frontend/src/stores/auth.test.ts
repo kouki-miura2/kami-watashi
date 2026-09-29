@@ -1,16 +1,21 @@
 import { createPinia, setActivePinia } from 'pinia'
-import { beforeEach, expect, test, vi } from 'vite-plus/test'
+import { afterEach, beforeEach, expect, test, vi } from 'vite-plus/test'
 
-import { credentialStorage } from '../api/credential-storage.ts'
 import { useAuthStore } from './auth.ts'
 
-vi.mock('../api/credential-storage.ts', () => ({
-  credentialStorage: { load: vi.fn(), save: vi.fn(), clear: vi.fn() },
-}))
-
+// Node has no `localStorage`: a Map-backed stand-in, fresh for every test.
 beforeEach(() => {
   setActivePinia(createPinia())
-  vi.clearAllMocks()
+  const items = new Map<string, string>()
+  vi.stubGlobal('localStorage', {
+    getItem: (key: string) => items.get(key) ?? null,
+    setItem: (key: string, value: string) => void items.set(key, value),
+    removeItem: (key: string) => void items.delete(key),
+  })
+})
+
+afterEach(() => {
+  vi.unstubAllGlobals()
 })
 
 test('starts signed out', () => {
@@ -21,41 +26,48 @@ test('starts signed out', () => {
   expect(auth.isMember).toBe(false)
 })
 
-test('restore loads the saved credential', async () => {
-  vi.mocked(credentialStorage.load).mockResolvedValue('session-token')
+test('signIn records the owner or a member, and signOut forgets it', () => {
   const auth = useAuthStore()
 
-  await auth.restore()
-
-  expect(auth.credential).toBe('session-token')
-  expect(auth.isSignedIn).toBe(true)
-})
-
-test('an owner session token makes the device an owner', async () => {
-  const auth = useAuthStore()
-
-  await auth.signIn('eyJhbGciOiJIUzI1NiJ9.payload.signature')
-
+  auth.signIn('owner')
   expect(auth.isOwner).toBe(true)
   expect(auth.isMember).toBe(false)
-})
 
-test('an invited member key makes the device a member', async () => {
-  const auth = useAuthStore()
-
-  await auth.signIn('mk_secret')
-
+  auth.signIn('member')
   expect(auth.isMember).toBe(true)
   expect(auth.isOwner).toBe(false)
+
+  auth.signOut()
+  expect(auth.isSignedIn).toBe(false)
 })
 
-test('signIn saves the credential and signOut clears it', async () => {
+test('resumeLastSignIn goes by what this browser last signed in as', () => {
+  useAuthStore().signIn('member')
+  setActivePinia(createPinia())
   const auth = useAuthStore()
 
-  await auth.signIn('mk_secret')
-  expect(credentialStorage.save).toHaveBeenCalledWith('mk_secret')
+  auth.resumeLastSignIn()
 
-  await auth.signOut()
-  expect(credentialStorage.clear).toHaveBeenCalled()
+  expect(auth.isMember).toBe(true)
+})
+
+test('resumeLastSignIn stays signed out after signing out', () => {
+  useAuthStore().signIn('owner')
+  useAuthStore().signOut()
+  setActivePinia(createPinia())
+  const auth = useAuthStore()
+
+  auth.resumeLastSignIn()
+
+  expect(auth.isSignedIn).toBe(false)
+})
+
+test('works without storage (private browsing)', () => {
+  vi.stubGlobal('localStorage', undefined)
+  const auth = useAuthStore()
+
+  auth.signIn('owner')
+  expect(auth.isOwner).toBe(true)
+  auth.resumeLastSignIn()
   expect(auth.isSignedIn).toBe(false)
 })

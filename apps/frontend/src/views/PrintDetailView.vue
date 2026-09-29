@@ -171,10 +171,12 @@ const remove = async () => {
       />
     </div>
 
+    <!-- Sized like the tabs' bottom navigation. -->
     <div class="detail__actions">
       <v-btn
         variant="text"
         stacked
+        rounded="0"
         prepend-icon="mdi-eye-outline"
         text="見てね"
         @click="miteneOpen = true"
@@ -182,13 +184,14 @@ const remove = async () => {
       <v-btn
         variant="text"
         stacked
+        rounded="0"
         :prepend-icon="
           print.data.value?.responseStatus === 'done'
             ? 'mdi-check-circle-outline'
             : 'mdi-clipboard-clock-outline'
         "
         :class="{
-          'text-disabled': print.data.value?.responseStatus === 'none',
+          'opacity-50': print.data.value?.responseStatus === 'none',
           'response-todo': print.data.value?.responseStatus === 'todo',
         }"
         :text="
@@ -201,6 +204,7 @@ const remove = async () => {
       <v-btn
         variant="text"
         stacked
+        rounded="0"
         prepend-icon="mdi-information-outline"
         text="情報"
         @click="infoOpen = true"
@@ -258,8 +262,19 @@ const remove = async () => {
 .detail__actions {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  padding: 8px 12px calc(12px + env(safe-area-inset-bottom));
+  height: calc(56px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  font-size: 0.6875rem;
   background: rgba(0, 0, 0, 0.25);
+}
+
+.detail__actions .v-btn {
+  height: 100%;
+  font-size: inherit;
+}
+
+.detail__actions .v-btn :deep(.v-icon) {
+  font-size: 1.5rem;
 }
 
 .response-todo {

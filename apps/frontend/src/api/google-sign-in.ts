@@ -1,43 +1,61 @@
-import { Capacitor } from '@capacitor/core'
-import { SocialLogin } from '@capgo/capacitor-social-login'
-
-import { isCancellation } from '../lib/cancellation.ts'
-
 /**
- * OAuth client ids (Google Cloud Console). The web client id is also what Android signs in with
- * (Credential Manager); iOS needs its own. The API accepts all of them as the ID token's `aud`
- * (`GOOGLE_CLIENT_IDS` in `apps/backend-worker/wrangler.jsonc`).
+ * The web OAuth client id (Google Cloud Console), with the web app's origin among its authorized
+ * JavaScript origins. The API accepts it as the ID token's `aud` (`GOOGLE_CLIENT_IDS`).
  */
-const webClientId = import.meta.env.VITE_GOOGLE_WEB_CLIENT_ID as string | undefined
-const iOSClientId = import.meta.env.VITE_GOOGLE_IOS_CLIENT_ID as string | undefined
+const clientId = import.meta.env.VITE_GOOGLE_WEB_CLIENT_ID as string | undefined
 
-let initialized: Promise<void> | undefined
+/** The part of Google Identity Services (`https://accounts.google.com/gsi/client`) used here. */
+interface GoogleIdentity {
+  accounts: {
+    id: {
+      initialize: (config: {
+        client_id: string
+        callback: (response: { credential: string }) => void
+      }) => void
+      renderButton: (parent: HTMLElement, options: Record<string, string | number>) => void
+    }
+  }
+}
+
+let loaded: Promise<GoogleIdentity> | undefined
+
+const loadGoogleIdentity = (): Promise<GoogleIdentity> =>
+  (loaded ??= new Promise((resolve, reject) => {
+    const script = document.createElement('script')
+    script.src = 'https://accounts.google.com/gsi/client'
+    script.async = true
+    script.onload = () => resolve((window as unknown as { google: GoogleIdentity }).google)
+    script.onerror = () => {
+      loaded = undefined
+      reject(new Error('Could not load Google sign-in'))
+    }
+    document.head.append(script)
+  }))
 
 /**
- * Google sign-in on the device, yielding the ID token that `POST /auth/google` verifies.
- * Unavailable (the button is disabled) until this platform's client ids are configured; local
- * development signs in through `/dev/login` instead.
+ * Google sign-in, yielding the ID token that `POST /auth/google` verifies. Only Google's own button
+ * hands out an ID token on the web, so this renders it. Unavailable (the caller shows a disabled
+ * button instead) until `VITE_GOOGLE_WEB_CLIENT_ID` is set; local development can sign in through
+ * `/dev/login` instead.
  */
 export const googleSignIn = {
-  available: Boolean(webClientId) && (Capacitor.getPlatform() !== 'ios' || Boolean(iOSClientId)),
+  available: Boolean(clientId),
 
-  /** The ID token, or `null` when the user backs out of the Google sheet. */
-  getIdToken: async (): Promise<string | null> => {
-    initialized ??= SocialLogin.initialize({
-      google: { webClientId, iOSClientId, iOSServerClientId: webClientId, mode: 'online' },
+  /** Renders Google's button into `parent`; `onIdToken` gets the ID token each time it signs someone in. */
+  renderButton: async (parent: HTMLElement, onIdToken: (idToken: string) => void) => {
+    const google = await loadGoogleIdentity()
+    google.accounts.id.initialize({
+      client_id: clientId!,
+      callback: ({ credential }) => onIdToken(credential),
     })
-    await initialized
-    try {
-      const { result } = await SocialLogin.login({
-        provider: 'google',
-        options: { scopes: ['profile'] },
-      })
-      const idToken = 'idToken' in result ? result.idToken : null
-      if (!idToken) throw new Error('Google sign-in returned no ID token')
-      return idToken
-    } catch (error) {
-      if (isCancellation(error)) return null
-      throw error
-    }
+    // As close to the design's main button as Google allows (at most 400px wide).
+    google.accounts.id.renderButton(parent, {
+      theme: 'filled_black',
+      shape: 'pill',
+      size: 'large',
+      text: 'signin_with',
+      locale: 'ja',
+      width: Math.min(parent.clientWidth, 400),
+    })
   },
 }

@@ -5,6 +5,7 @@ import { computed, ref } from 'vue'
 import { errorMessage } from '../api/errors.ts'
 import NameDialog from '../components/NameDialog.vue'
 import TabPage from '../components/TabPage.vue'
+import TypeToConfirmDialog from '../components/TypeToConfirmDialog.vue'
 import { useChildrenQuery } from '../composables/useChildren.ts'
 import {
   useLeaveFamilyMutation,
@@ -57,14 +58,18 @@ const remove = async (member: { id: string; name: string }) => {
   if (confirmed) removeMember.mutate(member.id)
 }
 
-// The owner withdraws (deleting the whole family's data); an invited member just leaves.
+/** The owner's withdrawal, past the first confirmation, awaiting 「退会する」 typed (spec). */
+const withdrawOpen = ref(false)
+
+// The owner withdraws (deleting the whole family's data, so confirmed twice: a dialog, then typing
+// 「退会する」); an invited member just leaves.
 const leave = async () => {
   const confirmed = await confirm.confirm(
     auth.isOwner
       ? {
           title: '退会しますか？',
           text: 'こども・プリント・写真・履歴など、家族のデータをすべて削除します。招待したメンバーも使えなくなります。元に戻せません。',
-          confirmText: '退会する',
+          confirmText: 'つぎへ',
           danger: true,
         }
       : {
@@ -74,7 +79,9 @@ const leave = async () => {
           danger: true,
         },
   )
-  if (confirmed) leaveFamily.mutate()
+  if (!confirmed) return
+  if (auth.isOwner) withdrawOpen.value = true
+  else leaveFamily.mutate()
 }
 </script>
 
@@ -239,5 +246,15 @@ const leave = async () => {
     :loading="renameMe.isPending.value"
     :error="renameError"
     @submit="rename"
+  />
+  <TypeToConfirmDialog
+    v-model="withdrawOpen"
+    title="本当に退会しますか？"
+    text="家族のデータはすべて削除され、元に戻せません。確認のため「退会する」と入力してください。"
+    label="「退会する」と入力"
+    expected="退会する"
+    confirm-text="退会する"
+    :loading="leaveFamily.isPending.value"
+    @confirm="leaveFamily.mutate()"
   />
 </template>

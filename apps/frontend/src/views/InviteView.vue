@@ -10,6 +10,7 @@ import { useBack } from '../composables/useBack.ts'
 import { useCreateInviteMutation } from '../composables/useCreateInviteMutation.ts'
 import { useMembersQuery } from '../composables/useMembers.ts'
 import { formatCountdown } from '../lib/countdown.ts'
+import { inviteUrl } from '../lib/invite.ts'
 
 const close = useBack({ name: 'settings' })
 const createInvite = useCreateInviteMutation()
@@ -27,17 +28,23 @@ const seatsLeft = computed(() =>
   members.data.value ? LIMITS.familyMembers - members.data.value.length : null,
 )
 
+/**
+ * The invite URL the QR code carries (spec "招待"): read in the app's join screen, or opened from
+ * the phone's own camera, it lands on joining either way.
+ */
+const url = computed(() =>
+  invite.value ? inviteUrl(location.origin, invite.value.inviteToken) : undefined,
+)
 const qrCode = ref<string>()
-watch(invite, async (next) => {
-  qrCode.value = next
-    ? await QRCode.toDataURL(next.inviteToken, { margin: 1, width: 480 })
-    : undefined
+watch(url, async (next) => {
+  qrCode.value = next ? await QRCode.toDataURL(next, { margin: 1, width: 480 }) : undefined
 })
 
 const recreate = () => createInvite.mutate()
 onMounted(recreate)
 
-const copyToken = () => invite.value && navigator.clipboard.writeText(invite.value.inviteToken)
+// Development: open the URL in another browser (profile) to join without a phone.
+const copyUrl = () => url.value && navigator.clipboard.writeText(url.value)
 </script>
 
 <!-- 5b: the owner shows this QR code to the person joining, in person. -->
@@ -53,7 +60,7 @@ const copyToken = () => invite.value && navigator.clipboard.writeText(invite.val
       />
       <template v-else>
         <p class="text-body-2 text-medium-emphasis">
-          招待する人のアプリで<br />「招待QRコードで参加」から読み取ってください
+          招待する人に、アプリの「招待QRコードで参加」<br />またはスマートフォンのカメラで読み取ってもらってください
         </p>
         <v-card width="240" height="240" class="d-flex align-center justify-center">
           <v-progress-circular v-if="!qrCode" indeterminate />
@@ -64,7 +71,7 @@ const copyToken = () => invite.value && navigator.clipboard.writeText(invite.val
             {{ expired ? '期限切れ' : formatCountdown(invite.expiresAt, now) }}
           </div>
           <div class="text-caption text-medium-emphasis">
-            {{ expired ? '新しいQRコードを作ってください' : 'この時間内なら何台でも参加できます' }}
+            {{ expired ? '新しいQRコードを作ってください' : 'この時間内なら何人でも参加できます' }}
           </div>
         </div>
         <v-chip v-if="seatsLeft !== null" prepend-icon="mdi-account-multiple">
@@ -75,8 +82,8 @@ const copyToken = () => invite.value && navigator.clipboard.writeText(invite.val
           variant="text"
           size="small"
           prepend-icon="mdi-content-copy"
-          text="招待コードをコピー（開発用）"
-          @click="copyToken"
+          text="招待URLをコピー（開発用）"
+          @click="copyUrl"
         />
       </template>
     </div>

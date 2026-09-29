@@ -24,6 +24,10 @@ export type AppErrorCode =
   | 'name_taken'
   /** The family already has `LIMITS.familyMembers` members. */
   | 'member_limit'
+  /** The family already has `LIMITS.familyChildren` children. */
+  | 'child_limit'
+  /** The family already has `LIMITS.familyTopics` topics. */
+  | 'topic_limit'
   /** Saving these photos would exceed the family's storage quota (`LIMITS.familyStorageBytes`). */
   | 'storage_limit'
 

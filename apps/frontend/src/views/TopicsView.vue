@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { LIMITS } from 'utils'
 import { computed } from 'vue'
 
 import NameDialog from '../components/NameDialog.vue'
@@ -25,6 +26,7 @@ const items = computed(() =>
   (topics.data.value ?? []).map((topic) => ({ ...topic, note: String(topic.printCount) })),
 )
 const topicOf = (id: string) => topics.data.value?.find((topic) => topic.id === id)
+const full = computed(() => items.value.length >= LIMITS.familyTopics)
 
 const editor = useNameEditor({
   create: (name) => createTopic.mutateAsync(name),
@@ -51,6 +53,9 @@ const startDelete = async (id: string) => {
 <template>
   <SubPageBar title="トピック" icon="back" @navigate="back" />
   <div class="px-4 pt-2 pb-16">
+    <p v-if="full" class="text-caption text-medium-emphasis px-1 pb-2">
+      トピックは最大{{ LIMITS.familyTopics }}個です
+    </p>
     <div v-if="topics.isPending.value" class="d-flex justify-center py-8">
       <v-progress-circular indeterminate />
     </div>
@@ -75,6 +80,7 @@ const startDelete = async (id: string) => {
     color="primary"
     prepend-icon="mdi-plus"
     text="トピックを追加"
+    :disabled="full"
     @click="editor.startAdd"
   />
 

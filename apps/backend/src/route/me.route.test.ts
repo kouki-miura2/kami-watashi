@@ -81,6 +81,7 @@ test('DELETE /me lets an invited member leave', async () => {
   const res = await app.request('/me', { method: 'DELETE', ...authorized })
 
   expect(res.status).toBe(204)
+  expect(res.headers.get('set-cookie')).toMatch(/^__Host-credential=; Max-Age=0;/)
   expect(leave).toHaveBeenCalledWith(invitedUser)
 })
 

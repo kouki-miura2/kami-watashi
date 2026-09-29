@@ -6,17 +6,6 @@ packages:
 catalogMode: prefer
 
 catalog:
-  '@aparajita/capacitor-secure-storage': ^8.0.1
-  '@capacitor-mlkit/barcode-scanning': ^8.2.1
-  '@capacitor/android': ^8.5.2
-  '@capacitor/app': ^8.1.1
-  '@capacitor/barcode-scanner': ^3.1.2
-  '@capacitor/camera': ^8.2.4
-  '@capacitor/cli': ^8.5.2
-  '@capacitor/core': ^8.5.2
-  '@capacitor/ios': ^8.5.2
-  '@capacitor/network': ^8.0.1
-  '@capgo/capacitor-social-login': ^8.5.11
   '@hono/zod-validator': ^0.9.1
   '@mdi/font': ^7.4.47
   '@panzoom/panzoom': ^4.6.2
@@ -24,6 +13,8 @@ catalog:
   '@types/node': ^24
   '@types/qrcode': ^1.5.6
   chart.js: ^4.5.1
+  hono: ^4.13.9
+  jsqr: ^1.4.0
   qrcode: ^1.5.4
   typescript: ^7.0.2
   vite: npm:@voidzero-dev/vite-plus-core@0.3.3

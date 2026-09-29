@@ -2,7 +2,7 @@ import { expect, test, vi } from 'vite-plus/test'
 
 import { AppError } from './service/errors.ts'
 import type { MemberService } from './service/member.service.ts'
-import { authorized, createTestApp, invitedUser, ownerUser } from './testing.ts'
+import { WEB_ORIGIN, authorized, createTestApp, invitedUser, ownerUser } from './testing.ts'
 
 const memberService = (listMembers: MemberService['listMembers']): Partial<MemberService> => ({
   listMembers,
@@ -16,6 +16,51 @@ test('rejects a request without credentials with 401', async () => {
 
   expect(res.status).toBe(401)
   expect(await res.json()).toEqual({ error: 'unauthorized' })
+})
+
+test('rejects a credential that no longer works with 401, clearing its cookie', async () => {
+  const app = createTestApp({ user: null, services: { memberService: listOk } })
+
+  const res = await app.request('/members', authorized)
+
+  expect(res.status).toBe(401)
+  expect(res.headers.get('set-cookie')).toMatch(/^__Host-credential=; Max-Age=0;/)
+})
+
+test('refuses a form-like request from another origin (CSRF)', async () => {
+  const create = vi.fn()
+  const app = createTestApp({ services: { printService: { create } } })
+
+  const res = await app.request('/prints', {
+    method: 'POST',
+    headers: { ...authorized.headers, origin: 'https://evil.example' },
+    body: new FormData(),
+  })
+
+  expect(res.status).toBe(403)
+  expect(create).not.toHaveBeenCalled()
+})
+
+test('lets a request from the API’s own origin change state (web app served alongside)', async () => {
+  const createInvite = vi.fn(async () => ({ inviteToken: 'token', expiresAt: 1 }))
+  const app = createTestApp({ services: { inviteService: { createInvite } } })
+
+  const res = await app.request('https://app.example.com/invites', {
+    method: 'POST',
+    headers: { ...authorized.headers, origin: 'https://app.example.com' },
+  })
+
+  expect(res.status).toBe(200)
+  expect(createInvite).toHaveBeenCalled()
+})
+
+test('lets the web app send its credential cookie cross-origin (CORS)', async () => {
+  const app = createTestApp({ services: { memberService: listOk } })
+
+  const res = await app.request('/members', authorized)
+
+  expect(res.headers.get('access-control-allow-origin')).toBe(WEB_ORIGIN)
+  expect(res.headers.get('access-control-allow-credentials')).toBe('true')
 })
 
 test('rejects a member who has not agreed to the current terms with 403', async () => {
