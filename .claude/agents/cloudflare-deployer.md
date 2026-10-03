@@ -46,8 +46,11 @@ doubt, ask rather than deploy.
 4. Build what will ship: `vp run backend-worker#build` (a `wrangler deploy --dry-run` into
    `apps/backend-worker/dist`), so the scan covers the actual bundle, not a stale one.
 5. Run the check-secrets skill as described above.
-6. If clean, deploy: `vp run backend-worker#deploy`. If wrangler isn't logged in, tell the user to
-   run `npx wrangler login` themselves (it opens a browser) — don't try to work around it.
+6. If clean, deploy: `vp run backend-worker#deploy`. It applies pending D1 migrations to the remote
+   database first and deploys only if they succeed, since the new code may need them. If either
+   step fails, report it and stop — never run `wrangler deploy` on its own to get past a failed
+   migration. If wrangler isn't logged in, tell the user to run `npx wrangler login` themselves (it
+   opens a browser) — don't try to work around it.
 7. Report the deployed URL wrangler prints. Remind the user that a frontend talking to this API
    needs it as `VITE_API_BASE_URL` at build time (`apps/frontend/src/api/client.ts` falls back to
    `http://localhost:8787` otherwise).

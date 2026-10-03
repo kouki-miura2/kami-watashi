@@ -6,7 +6,8 @@
 - Config is `wrangler.jsonc`. After adding bindings, run `vp run backend-worker#cf-typegen` to regenerate `worker-configuration.d.ts` (untracked).
 - Secrets: use `wrangler secret put`, never `.env` / commit `.dev.vars`. `GOOGLE_CLIENT_IDS` goes the same way: not secret, but deployment-specific, so the public repository doesn't carry one.
 - D1 writes that can hit a UNIQUE constraint end in `.catch(rethrowUniqueConstraint)` (`src/dao/d1-errors.ts`), and history rows go in the same `db.batch()` via `insertHistory` (`src/dao/history.d1.ts`).
-- D1 schema changes are new files in `migrations/` (`NNNN_<name>.sql`), never edits to applied ones. Apply with `vp run backend-worker#db:migrate:local` / `db:migrate:remote`.
+- D1 schema changes are new files in `migrations/` (`NNNN_<name>.sql`), never edits to applied ones. Apply locally with `vp run backend-worker#db:migrate:local`. Remotely, `vp run backend-worker#deploy` applies them itself, right before `wrangler deploy` and stopping the deploy if they fail — code that needs a migration must never go live without it (`db:migrate:remote` is only for applying one by hand).
+  - Since migrations go first, the code still deployed runs against the new schema for a moment: keep each migration compatible with it (add columns, tables, indexes; drop or rename only once no deployed code uses them).
 - DAO tests (`src/dao/*.d1.test.ts`) run under `vp test` against a fresh in-memory local D1 from `createTestD1()` (`src/dao/d1.testing.ts`: wrangler's `getPlatformProxy` + every migration applied), so they exercise the real SQL, constraints and FK cascades.
 
 ## Local development
