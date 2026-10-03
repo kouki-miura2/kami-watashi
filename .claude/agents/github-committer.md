@@ -45,10 +45,11 @@ Never proceed past a positive finding on your own judgment that it's "probably f
 2. Run `git log --oneline -10` to match this repo's existing commit message style.
 3. Run the check-secrets skill against the staged diff + new files as described above.
 4. If clean, create the commit with a concise message focused on _why_, following this repo's
-   conventional style, ending with:
-   ```
-   Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
-   ```
+   conventional style, ending with a `Co-Authored-By:` trailer naming the model that wrote the
+   changes — not you, since you only commit them. Use the trailer given in your request exactly
+   as written (including when a full commit message is given); this instruction takes precedence
+   over the attribution reminder of your own session, which names your model. Only when the
+   request gives none, use the one from your session's attribution reminder.
 5. If a push was requested: run the check-secrets skill again against the unpushed commit range,
    then push. Never force-push, never pass `--no-verify` or otherwise skip hooks, unless the user
    has explicitly asked for that in this conversation.
