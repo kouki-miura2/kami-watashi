@@ -5,10 +5,3 @@
  * mismatch fails with `invalid_terms_version` ("update the app").
  */
 export const TERMS_VERSION = '2026-10-01'
-
-/** Where the documents are published. Unset (not published yet) hides the link. */
-export const termsLinks = {
-  terms: import.meta.env.VITE_TERMS_URL as string | undefined,
-  privacy: import.meta.env.VITE_PRIVACY_URL as string | undefined,
-  help: import.meta.env.VITE_HELP_URL as string | undefined,
-}

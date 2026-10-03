@@ -81,3 +81,15 @@ test('redirects an unknown path to home', () => {
 
   expect(resolved.matched[0]?.redirect).toEqual({ name: 'home' })
 })
+
+test.each(['terms', 'privacy'])('resolves /legal/%s for anyone, with the document kind', (kind) => {
+  const resolved = router.resolve(`/legal/${kind}`)
+
+  expect(resolved.name).toBe('legal')
+  expect(resolved.params.kind).toBe(kind)
+  expect(resolved.meta.anyone).toBe(true)
+})
+
+test('takes no other document than the terms and privacy policy', () => {
+  expect(router.resolve('/legal/help').matched[0]?.redirect).toEqual({ name: 'home' })
+})

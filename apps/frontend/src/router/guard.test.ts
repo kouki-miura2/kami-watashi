@@ -37,3 +37,10 @@ test('lets only owners open owner-only routes', () => {
 test('lets a signed-in device open ordinary routes', () => {
   expect(resolveNavigation(to('/'), member)).toBe(true)
 })
+
+test('lets any device open the terms and privacy policy, signed in or out', () => {
+  const legal = { ...to('/'), meta: { anyone: true } }
+
+  expect(resolveNavigation(legal, signedOut)).toBe(true)
+  expect(resolveNavigation(legal, member)).toBe(true)
+})

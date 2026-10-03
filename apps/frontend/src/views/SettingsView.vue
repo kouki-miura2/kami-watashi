@@ -19,7 +19,6 @@ import { formatMegabytes } from '../lib/format.ts'
 import { useAuthStore } from '../stores/auth.ts'
 import { useConfirmStore } from '../stores/confirm.ts'
 import { useInstallStore } from '../stores/install.ts'
-import { termsLinks } from '../terms.ts'
 
 const auth = useAuthStore()
 const confirm = useConfirmStore()
@@ -221,27 +220,15 @@ const leave = async () => {
       <v-card>
         <v-list>
           <v-list-item
-            title="ヘルプ"
-            :href="termsLinks.help"
-            :disabled="!termsLinks.help"
-            target="_blank"
-            append-icon="mdi-open-in-new"
-          />
-          <v-divider />
-          <v-list-item
             title="利用規約"
-            :href="termsLinks.terms"
-            :disabled="!termsLinks.terms"
-            target="_blank"
-            append-icon="mdi-open-in-new"
+            :to="{ name: 'legal', params: { kind: 'terms' } }"
+            append-icon="mdi-chevron-right"
           />
           <v-divider />
           <v-list-item
             title="プライバシーポリシー"
-            :href="termsLinks.privacy"
-            :disabled="!termsLinks.privacy"
-            target="_blank"
-            append-icon="mdi-open-in-new"
+            :to="{ name: 'legal', params: { kind: 'privacy' } }"
+            append-icon="mdi-chevron-right"
           />
           <v-divider />
           <v-list-item

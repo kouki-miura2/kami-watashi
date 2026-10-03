@@ -10,6 +10,7 @@ export const resolveNavigation = (
   to: RouteLocationNormalized,
   auth: AuthState,
 ): RouteLocationRaw | true => {
+  if (to.meta.anyone) return true
   if (!to.meta.public && !auth.isSignedIn) return { name: 'welcome' }
   if (to.meta.public && auth.isSignedIn) return { name: 'home' }
   if (to.meta.ownerOnly && !auth.isOwner) return { name: 'home' }

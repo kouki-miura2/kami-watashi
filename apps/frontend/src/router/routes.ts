@@ -4,6 +4,8 @@ declare module 'vue-router' {
   interface RouteMeta {
     /** Reachable without a credential (welcome, joining). Signed-in devices are sent home instead. */
     public?: boolean
+    /** Reachable signed in or out alike (the terms of use and privacy policy). */
+    anyone?: boolean
     /** One of the bottom navigation's tabs: shows the bottom navigation. */
     tab?: boolean
     /** Owners only (invite, member removal, withdrawal). */
@@ -84,6 +86,13 @@ export const routes: RouteRecordRaw[] = [
     path: '/terms',
     name: 'terms',
     component: () => import('../views/TermsView.vue'),
+  },
+  {
+    path: '/legal/:kind(terms|privacy)',
+    name: 'legal',
+    component: () => import('../views/LegalView.vue'),
+    props: true,
+    meta: { anyone: true },
   },
   {
     path: '/welcome',

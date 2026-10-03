@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import { LIMITS } from 'utils'
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
-import { termsLinks } from '../terms.ts'
 import StepLayout from './StepLayout.vue'
 
 defineProps<{ loading?: boolean }>()
 defineEmits<{ agree: [] }>()
 
 const agreed = ref(false)
+
+// In a new tab: leaving this screen would lose the step in progress (the Google sign-in, the invite).
+const router = useRouter()
+const legalHref = (kind: 'terms' | 'privacy') =>
+  router.resolve({ name: 'legal', params: { kind } }).href
 </script>
 
 <!-- Agreement to the terms of use and privacy policy (design 1b): on registration, on joining, and after a revision. -->
@@ -19,16 +24,14 @@ const agreed = ref(false)
       <v-list>
         <v-list-item
           title="利用規約"
-          :href="termsLinks.terms"
-          :disabled="!termsLinks.terms"
+          :href="legalHref('terms')"
           target="_blank"
           append-icon="mdi-open-in-new"
         />
         <v-divider />
         <v-list-item
           title="プライバシーポリシー"
-          :href="termsLinks.privacy"
-          :disabled="!termsLinks.privacy"
+          :href="legalHref('privacy')"
           target="_blank"
           append-icon="mdi-open-in-new"
         />
