@@ -51,6 +51,11 @@ export interface AppConfig {
   allowedOrigins: string[]
   /** Mounts `/dev/*` (local-only sign-in). Must never be on in a deployed Worker. */
   devLogin: boolean
+  /**
+   * Identifies the deployed code, so a new deployment (whose responses may be shaped differently)
+   * invalidates what browsers cached from the previous one (`route/data-version-cache.ts`).
+   */
+  deploymentId: string
 }
 
 export interface AppDependencies {
@@ -145,7 +150,8 @@ export const createApp = (deps: AppDependencies) => {
       }
     })
     // API responses reflect per-member state (read/mitene) and must not be served from a cache.
-    // A route that is safe to cache (images) sets its own Cache-Control.
+    // A route that is safe to cache sets its own Cache-Control: images, and the reads revalidated
+    // against the family's data version (`route/data-version-cache.ts`).
     .use('*', async (c, next) => {
       await next()
       if (!c.res.headers.has('cache-control')) c.res.headers.set('cache-control', 'no-store')

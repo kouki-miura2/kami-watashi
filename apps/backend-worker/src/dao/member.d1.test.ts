@@ -34,8 +34,9 @@ test('finds a member by id, key hash, or google sub', async () => {
     key_hash: null,
     terms_version: 'v1',
     terms_agreed_at: 1,
+    data_version: 0,
   })
-  expect((await dao.findByKeyHash('hash-2'))?.id).toBe('invited')
+  expect(await dao.findByKeyHash('hash-2')).toMatchObject({ id: 'invited', data_version: 0 })
   expect((await dao.findByGoogleSub('google-3'))?.id).toBe('other')
 })
 

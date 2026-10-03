@@ -149,7 +149,7 @@ test('devLogin creates a family for a new googleSub', async () => {
 
 test('launch records the access and renews the owner session', async () => {
   const { service, familyRepository } = createService()
-  const user: AuthenticatedUser = { ...existingOwner, termsVersion: 'v2' }
+  const user: AuthenticatedUser = { ...existingOwner, termsVersion: 'v2', dataVersion: 0 }
 
   const result = await service.launch(user)
 
@@ -173,6 +173,7 @@ test('launch returns no session for an invited member and flags outdated terms',
     name: '二郎',
     isOwner: false,
     termsVersion: 'v1',
+    dataVersion: 0,
   }
 
   const result = await service.launch(user)

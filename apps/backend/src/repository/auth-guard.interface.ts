@@ -7,6 +7,8 @@ export interface AuthenticatedUser {
   isOwner: boolean
   /** Version of the terms/privacy policy this member last agreed to. */
   termsVersion: string | null
+  /** The family's data version at request time (`families.data_version`), for conditional GETs. */
+  dataVersion: number
 }
 
 export interface AuthGuard {

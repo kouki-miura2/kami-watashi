@@ -93,11 +93,46 @@ test('lets a member with outdated terms launch the app', async () => {
 })
 
 test('marks API responses as not cacheable', async () => {
-  const app = createTestApp({ services: { memberService: listOk } })
+  const countOld = async () => ({ count: 0, bytes: 0 })
+  const app = createTestApp({ services: { printService: { countOld } } })
 
-  const res = await app.request('/members', authorized)
+  // Bulk deletion's counts move with the clock, so they aren't revalidated by data version.
+  const res = await app.request('/prints/bulk-delete?olderThanMonths=1', authorized)
 
+  expect(res.status).toBe(200)
   expect(res.headers.get('cache-control')).toBe('no-store')
+})
+
+test('revalidates the screens’ reads against the family’s data version', async () => {
+  const app = createTestApp({
+    services: {
+      memberService: listOk,
+      childService: { listSlots: async () => [] },
+      topicService: { list: async () => [] },
+      printService: { list: async () => [] },
+      historyService: { list: async () => ({ items: [], nextCursor: null }) },
+      statsService: {
+        get: async () => ({ weekly: [], monthly: [], storage: { usedBytes: 0, limitBytes: 1 } }),
+      },
+    },
+  })
+
+  for (const path of [
+    '/members',
+    '/children',
+    '/topics',
+    '/prints?child=common',
+    '/histories',
+    '/stats',
+  ]) {
+    const etag = (await app.request(path, authorized)).headers.get('etag')
+    expect(etag, path).toMatch(/^W\/"test-deployment\.1\.owner\./)
+
+    const res = await app.request(path, {
+      headers: { ...authorized.headers, 'if-none-match': etag! },
+    })
+    expect(res.status, path).toBe(304)
+  }
 })
 
 test('maps an AppError from a service to its status and code', async () => {

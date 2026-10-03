@@ -1,6 +1,6 @@
 import { hashMemberKey, isMemberKey, verifySessionToken } from '../service/token.ts'
 import type { AuthGuard } from './auth-guard.interface.ts'
-import type { Member, MemberRepository } from './member.repository.ts'
+import type { MemberRepository, MemberWithDataVersion } from './member.repository.ts'
 
 /**
  * The credential is either an owner's session token (signed JWT) or an invited member's key
@@ -11,7 +11,7 @@ export const createTokenAuthGuard = (deps: {
   sessionSecret: string
   memberRepository: MemberRepository
 }): AuthGuard => {
-  const findMember = async (credential: string): Promise<Member | null> => {
+  const findMember = async (credential: string): Promise<MemberWithDataVersion | null> => {
     if (isMemberKey(credential)) {
       return deps.memberRepository.findByKeyHash(await hashMemberKey(credential))
     }
@@ -32,6 +32,7 @@ export const createTokenAuthGuard = (deps: {
             name: member.name,
             isOwner: member.isOwner,
             termsVersion: member.termsVersion,
+            dataVersion: member.dataVersion,
           }
         : null
     },

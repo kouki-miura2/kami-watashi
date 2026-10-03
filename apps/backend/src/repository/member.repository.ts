@@ -1,4 +1,8 @@
-import type { MemberDao, MemberRecord } from '../dao/member.interface.ts'
+import type {
+  MemberDao,
+  MemberRecord,
+  MemberWithDataVersionRecord,
+} from '../dao/member.interface.ts'
 import { type HistoryEntry, toHistoryRecord } from './history.repository.ts'
 
 export interface Member {
@@ -8,6 +12,12 @@ export interface Member {
   /** The owner is the member who signed in with Google (`google_sub` is set). */
   isOwner: boolean
   termsVersion: string | null
+}
+
+/** A member looked up by credential (the auth guard), with their family's data version. */
+export interface MemberWithDataVersion extends Member {
+  /** `families.data_version`: bumped on every change to the family's data. */
+  dataVersion: number
 }
 
 export interface NewInvitedMember {
@@ -21,8 +31,8 @@ export interface NewInvitedMember {
 }
 
 export interface MemberRepository {
-  findById: (id: string) => Promise<Member | null>
-  findByKeyHash: (keyHash: string) => Promise<Member | null>
+  findById: (id: string) => Promise<MemberWithDataVersion | null>
+  findByKeyHash: (keyHash: string) => Promise<MemberWithDataVersion | null>
   findByGoogleSub: (googleSub: string) => Promise<Member | null>
   listByFamily: (familyId: string) => Promise<Member[]>
   /** `false` if the family was already full. Throws `UniqueConstraintError` if the name is taken. */
@@ -53,9 +63,14 @@ const toMember = (record: MemberRecord): Member => ({
 const toMemberOrNull = (record: MemberRecord | null): Member | null =>
   record ? toMember(record) : null
 
+const withDataVersionOrNull = (
+  record: MemberWithDataVersionRecord | null,
+): MemberWithDataVersion | null =>
+  record ? { ...toMember(record), dataVersion: record.data_version } : null
+
 export const createMemberRepository = (dao: MemberDao): MemberRepository => ({
-  findById: async (id) => toMemberOrNull(await dao.findById(id)),
-  findByKeyHash: async (keyHash) => toMemberOrNull(await dao.findByKeyHash(keyHash)),
+  findById: async (id) => withDataVersionOrNull(await dao.findById(id)),
+  findByKeyHash: async (keyHash) => withDataVersionOrNull(await dao.findByKeyHash(keyHash)),
   findByGoogleSub: async (googleSub) => toMemberOrNull(await dao.findByGoogleSub(googleSub)),
   listByFamily: async (familyId) => (await dao.listByFamily(familyId)).map(toMember),
   createInvited: async (member, history) =>

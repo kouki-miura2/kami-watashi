@@ -3,27 +3,29 @@ import { expect, test } from 'vite-plus/test'
 import { hashMemberKey, issueSessionToken } from '../service/token.ts'
 import { fakeMemberRepository } from '../testing.ts'
 import { createTokenAuthGuard } from './auth-guard.token.ts'
-import type { Member } from './member.repository.ts'
+import type { MemberWithDataVersion } from './member.repository.ts'
 
 const secret = 'test-secret'
 const memberKey = 'mk_test-key'
 
-const owner: Member = {
+const owner: MemberWithDataVersion = {
   id: 'owner',
   familyId: 'f1',
   name: '一郎',
   isOwner: true,
   termsVersion: 'v1',
+  dataVersion: 3,
 }
-const invited: Member = {
+const invited: MemberWithDataVersion = {
   id: 'invited',
   familyId: 'f1',
   name: '二郎',
   isOwner: false,
   termsVersion: 'v1',
+  dataVersion: 3,
 }
 
-const createGuard = async (members: Member[] = [owner, invited]) => {
+const createGuard = async (members: MemberWithDataVersion[] = [owner, invited]) => {
   const invitedKeyHash = await hashMemberKey(memberKey)
   const repository = fakeMemberRepository({
     findById: async (id) => members.find((member) => member.id === id) ?? null,
@@ -45,6 +47,7 @@ test('authenticates an owner by session token', async () => {
     name: '一郎',
     isOwner: true,
     termsVersion: 'v1',
+    dataVersion: 3,
   })
 })
 

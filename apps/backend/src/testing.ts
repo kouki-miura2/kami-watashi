@@ -14,6 +14,7 @@ export const ownerUser: AuthenticatedUser = {
   name: '一郎',
   isOwner: true,
   termsVersion: TERMS_VERSION,
+  dataVersion: 1,
 }
 
 export const invitedUser: AuthenticatedUser = {
@@ -22,6 +23,7 @@ export const invitedUser: AuthenticatedUser = {
   name: '二郎',
   isOwner: false,
   termsVersion: TERMS_VERSION,
+  dataVersion: 1,
 }
 
 const notImplemented = () => {
@@ -65,6 +67,7 @@ export const createTestApp = (
       termsVersion: TERMS_VERSION,
       allowedOrigins: [WEB_ORIGIN],
       devLogin: false,
+      deploymentId: 'test-deployment',
       ...options.config,
     },
     auth: {

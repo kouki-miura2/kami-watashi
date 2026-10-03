@@ -57,6 +57,7 @@ const app = createApp({
   config: {
     termsVersion: env.TERMS_VERSION,
     allowedOrigins: splitList(env.ALLOWED_ORIGINS),
+    deploymentId: env.CF_VERSION_METADATA.id,
     devLogin: DEV_LOGIN_ENABLED === 'true',
   },
   auth: {

@@ -11,6 +11,11 @@ export interface MemberRecord {
   terms_agreed_at: number | null
 }
 
+/** A member looked up by credential, with their family's `data_version` (conditional GETs). */
+export interface MemberWithDataVersionRecord extends MemberRecord {
+  data_version: number
+}
+
 export interface CreateInvitedMemberInput {
   id: string
   familyId: string
@@ -24,8 +29,8 @@ export interface CreateInvitedMemberInput {
 }
 
 export interface MemberDao {
-  findById: (id: string) => Promise<MemberRecord | null>
-  findByKeyHash: (keyHash: string) => Promise<MemberRecord | null>
+  findById: (id: string) => Promise<MemberWithDataVersionRecord | null>
+  findByKeyHash: (keyHash: string) => Promise<MemberWithDataVersionRecord | null>
   findByGoogleSub: (googleSub: string) => Promise<MemberRecord | null>
   listByFamily: (familyId: string) => Promise<MemberRecord[]>
   /**

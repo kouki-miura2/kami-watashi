@@ -22,6 +22,7 @@ const user: AuthenticatedUser = {
   name: 'あきこ',
   isOwner: false,
   termsVersion: 'v1',
+  dataVersion: 0,
 }
 
 const family = [member('m2', 'たろう'), member('m3', 'あきこ'), member('m1', '一郎', true)]

@@ -1,9 +1,9 @@
 import { expect, test, vi } from 'vite-plus/test'
 
-import type { MemberDao, MemberRecord } from '../dao/member.interface.ts'
+import type { MemberDao, MemberWithDataVersionRecord } from '../dao/member.interface.ts'
 import { createMemberRepository } from './member.repository.ts'
 
-const owner: MemberRecord = {
+const owner: MemberWithDataVersionRecord = {
   id: 'm1',
   family_id: 'f1',
   name: '一郎',
@@ -11,8 +11,9 @@ const owner: MemberRecord = {
   key_hash: null,
   terms_version: '2026-10-01',
   terms_agreed_at: 1,
+  data_version: 7,
 }
-const invited: MemberRecord = {
+const invited: MemberWithDataVersionRecord = {
   id: 'm2',
   family_id: 'f1',
   name: '二郎',
@@ -20,6 +21,7 @@ const invited: MemberRecord = {
   key_hash: 'hash-2',
   terms_version: null,
   terms_agreed_at: null,
+  data_version: 7,
 }
 
 const dao = {
@@ -41,11 +43,16 @@ test('maps a row with google_sub to an owner', async () => {
     name: '一郎',
     isOwner: true,
     termsVersion: '2026-10-01',
+    dataVersion: 7,
   })
 })
 
 test('maps a row with key_hash to an invited member', async () => {
-  expect(await repository.findByKeyHash('hash-2')).toMatchObject({ id: 'm2', isOwner: false })
+  expect(await repository.findByKeyHash('hash-2')).toMatchObject({
+    id: 'm2',
+    isOwner: false,
+    dataVersion: 7,
+  })
 })
 
 test('returns null when the DAO finds nothing', async () => {

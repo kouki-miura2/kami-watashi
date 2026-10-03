@@ -27,7 +27,7 @@ test('createWithOwner inserts the family and its owner', async () => {
   await createFamilyD1Dao(testD1.db).createWithOwner(owner('f1', 'google-1'))
 
   expect(await testD1.db.prepare('SELECT * FROM families WHERE id = ?').bind('f1').first()).toEqual(
-    { id: 'f1', last_accessed_at: 1000, last_print_seq: 0 },
+    { id: 'f1', last_accessed_at: 1000, last_print_seq: 0, data_version: 0 },
   )
   expect(
     await testD1.db.prepare('SELECT * FROM members WHERE family_id = ?').bind('f1').first(),

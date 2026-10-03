@@ -6,6 +6,7 @@ import { z } from 'zod'
 import type { MiteneService } from '../service/mitene.service.ts'
 import type { PrintService } from '../service/print.service.ts'
 import { type AppEnv, currentUser, invalidInput } from './context.ts'
+import { createDataVersionCache } from './data-version-cache.ts'
 
 /** Query/form token for the family-common slot (JSON bodies use `null`). */
 const COMMON_SLOT = 'common'
@@ -56,10 +57,12 @@ const olderThanMonthsSchema = z.coerce
 export const createPrintsRoutes = (deps: {
   printService: PrintService
   miteneService: MiteneService
+  config: { deploymentId: string }
 }) =>
   new Hono<AppEnv>()
     .get(
       '/',
+      createDataVersionCache(deps.config),
       zValidator(
         'query',
         z.object({

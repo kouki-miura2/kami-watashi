@@ -4,10 +4,15 @@ import { z } from 'zod'
 
 import type { HistoryService } from '../service/history.service.ts'
 import { type AppEnv, currentUser, invalidInput } from './context.ts'
+import { createDataVersionCache } from './data-version-cache.ts'
 
-export const createHistoriesRoutes = (deps: { historyService: HistoryService }) =>
+export const createHistoriesRoutes = (deps: {
+  historyService: HistoryService
+  config: { deploymentId: string }
+}) =>
   new Hono<AppEnv>().get(
     '/',
+    createDataVersionCache(deps.config),
     zValidator(
       'query',
       /** `cursor`: the previous page's `nextCursor`; omit for the newest page. */

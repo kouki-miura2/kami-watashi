@@ -1,4 +1,8 @@
-import type { MemberDao, MemberRecord } from 'backend/src/dao/member.interface.ts'
+import type {
+  MemberDao,
+  MemberRecord,
+  MemberWithDataVersionRecord,
+} from 'backend/src/dao/member.interface.ts'
 
 import { rethrowUniqueConstraint } from './d1-errors.ts'
 import { insertHistory } from './history.d1.ts'
@@ -6,11 +10,19 @@ import { insertHistory } from './history.d1.ts'
 const COLUMNS = 'id, family_id, name, google_sub, key_hash, terms_version, terms_agreed_at'
 
 export const createMemberD1Dao = (db: D1Database): MemberDao => {
+  // With the family's data version for the auth guard: one more row read (by primary key), which
+  // lets a conditional GET answer 304 without running its own queries.
   const findOneBy = async (column: 'id' | 'key_hash' | 'google_sub', value: string) =>
     db
-      .prepare(`SELECT ${COLUMNS} FROM members WHERE ${column} = ?`)
+      .prepare(
+        `SELECT ${COLUMNS.split(', ')
+          .map((name) => `m.${name}`)
+          .join(', ')}, f.data_version
+         FROM members m JOIN families f ON f.id = m.family_id
+         WHERE m.${column} = ?`,
+      )
       .bind(value)
-      .first<MemberRecord>()
+      .first<MemberWithDataVersionRecord>()
 
   return {
     findById: async (id) => findOneBy('id', id),
