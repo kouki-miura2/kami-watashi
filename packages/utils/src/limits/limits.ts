@@ -6,7 +6,7 @@ export const LIMITS = {
   /** Storage quota per family, in bytes (300 MB). */
   familyStorageBytes: 300 * 1024 * 1024,
   /** Max members per family, including the owner. */
-  familyMembers: 3,
+  familyMembers: 5,
   /** Max children per family (the family-common slot not counted). Checked in both the UI and the API. */
   familyChildren: 5,
   /** Max topics (the topic master) per family. Checked in both the UI and the API. */

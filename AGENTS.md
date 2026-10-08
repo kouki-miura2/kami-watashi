@@ -17,6 +17,14 @@ Monorepo managed with pnpm workspaces (`apps/*`, `packages/*`). Project-specific
 - API request/response types are not hand-shared: `apps/frontend` gets them from `apps/backend` via Hono RPC, not from a separate types package.
 - Runtime-agnostic shared code goes in `packages/utils`, not duplicated per app.
 
+## Commit, Push, and Deployment Rules
+
+- Before committing, pushing, or deploying, read and follow `.claude/skills/check-secrets/SKILL.md`, including its public-repository identifier checks. Run the scan separately for each operation's scope.
+- For commits and pushes, also read and follow `.claude/agents/github-committer.md`.
+- For Cloudflare deployments, also read and follow `.claude/agents/cloudflare-deployer.md`.
+- These files apply to all coding agents working in this repository. Follow their procedures using the tools available in your environment; they are not limited to Claude Code.
+- Never add production Cloudflare resource IDs to tracked files to resolve a deployment failure. Keep deployment-specific IDs in an untracked configuration.
+
 <!--VITE PLUS START-->
 
 # Using Vite+, the Unified Toolchain for the Web

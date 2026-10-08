@@ -29,7 +29,7 @@ watch(page, () => {
         />
       </v-window-item>
     </v-window>
-    <div v-if="imageIds.length > 1" class="d-flex justify-center align-center ga-2">
+    <div v-if="imageIds.length > 1" class="d-flex justify-center align-center ga-2 pb-1">
       <v-btn
         icon="mdi-chevron-left"
         variant="text"
