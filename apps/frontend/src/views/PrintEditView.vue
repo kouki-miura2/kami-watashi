@@ -7,13 +7,12 @@ import { ApiError, errorMessage } from '../api/errors.ts'
 import PhotoSourceSheet from '../components/PhotoSourceSheet.vue'
 import PhotoStrip from '../components/PhotoStrip.vue'
 import PrintForm from '../components/PrintForm.vue'
-import PrintThumb from '../components/PrintThumb.vue'
 import StepLayout from '../components/StepLayout.vue'
 import StorageFullDialog from '../components/StorageFullDialog.vue'
 import SubPageBar from '../components/SubPageBar.vue'
 import { useBack } from '../composables/useBack.ts'
 import { useChildrenQuery } from '../composables/useChildren.ts'
-import { usePhotoDraft } from '../composables/usePhotoDraft.ts'
+import { usePrintPhotoDraft } from '../composables/usePrintPhotoDraft.ts'
 import {
   type PrintFormValues,
   usePrintQuery,
@@ -35,6 +34,7 @@ const children = useChildrenQuery()
 const stats = useStatsQuery()
 const updatePrint = useUpdatePrintMutation()
 const replacePhotos = useReplacePhotosMutation()
+const photos = usePrintPhotoDraft()
 
 const form = ref<PrintFormValues>()
 // Filled from the print once, so a background refetch doesn't overwrite what's being edited.
@@ -50,28 +50,18 @@ watch(
       topicIds: [...current.topicIds],
       responseStatus: current.responseStatus,
     }
+    void photos.load(current.images.map((image) => image.id))
   },
   { immediate: true },
 )
 const titleValid = ref<boolean | null>(null)
 
-// Retaking replaces every page at once (spec: no per-page editing).
-const retaking = ref(false)
-const photos = usePhotoDraft()
-const existingCount = computed(() => (retaking.value ? 0 : (print.data.value?.images.length ?? 0)))
-const photosLeft = computed(() => Math.max(0, photos.photosLeft.value - existingCount.value))
 const sourceSheetOpen = ref(false)
-const startRetake = () => {
-  photos.clear()
-  retaking.value = true
-  sourceSheetOpen.value = true
-}
-const cancelRetake = () => {
-  retaking.value = false
-  photos.clear()
+const startRetake = async () => {
+  if (await photos.startRetake()) sourceSheetOpen.value = true
 }
 const addPhotos = (pick: () => Promise<Blob[]>) => {
-  if (photosLeft.value === 0 || photos.loading.value) return
+  if (photos.photosLeft.value === 0 || saving.value || photos.busy.value) return
   sourceSheetOpen.value = false
   void photos.add(pick)
 }
@@ -83,9 +73,8 @@ const canSave = computed(
     form.value !== undefined &&
     !saving.value &&
     titleValid.value !== false &&
-    !photos.loading.value &&
-    !photos.photos.value.some((photo) => photo.rotating) &&
-    (!retaking.value || photos.photos.value.length > 0),
+    !photos.busy.value &&
+    photos.photos.value.length > 0,
 )
 
 const slotNameOf = (childId: string | null) =>
@@ -93,7 +82,7 @@ const slotNameOf = (childId: string | null) =>
     .name ?? ''
 
 const save = async () => {
-  if (!form.value || !print.data.value) return
+  if (!canSave.value || !form.value || !print.data.value) return
   const movedFrom = print.data.value.childId
   try {
     const saved = await updatePrint.mutateAsync({ id: id.value, changes: form.value })
@@ -103,12 +92,11 @@ const save = async () => {
   } catch {
     return // Reported app-wide.
   }
-  if (retaking.value || photos.photos.value.length > 0) {
+  if (photos.changed.value) {
     try {
       await replacePhotos.mutateAsync({
         id: id.value,
         photos: photos.blobs(),
-        existingImageIds: retaking.value ? [] : print.data.value.images.map((image) => image.id),
       })
     } catch (error) {
       // The other changes are saved; only the photos stay as they were.
@@ -121,7 +109,7 @@ const save = async () => {
 }
 </script>
 
-<!-- 4a, changing a print: the same form, plus retaking every photo. -->
+<!-- 4a, changing a print: the same form, with per-page photo editing and full retakes. -->
 <template>
   <SubPageBar title="プリントを変更" icon="close" @navigate="close" />
   <v-form v-if="form" v-model="titleValid" class="fill-height" @submit.prevent="canSave && save()">
@@ -131,66 +119,55 @@ const save = async () => {
           <section>
             <div class="field-label d-flex justify-space-between">
               <span>写真</span>
-              <span>{{ existingCount + photos.photos.value.length }}/{{ LIMITS.printImages }}</span>
+              <span>{{ photos.photos.value.length }}/{{ LIMITS.printImages }}</span>
             </div>
-            <template v-if="retaking">
-              <PhotoStrip
-                :photos="photos.photos.value"
-                :photos-left="photosLeft"
-                :loading="photos.loading.value"
-                @add="sourceSheetOpen = true"
-                @rotate="photos.rotate"
-                @remove="photos.remove"
-              />
+            <PhotoStrip
+              :photos="photos.photos.value"
+              :photos-left="0"
+              :loading="photos.loading.value"
+              :disabled="saving"
+              @rotate="photos.rotate"
+              @remove="photos.remove"
+            />
+            <v-progress-circular v-if="photos.loading.value" indeterminate size="24" class="mt-2" />
+            <v-btn
+              v-else-if="!photos.ready.value"
+              variant="text"
+              size="small"
+              text="写真を再読み込み"
+              @click="photos.load(print.data.value?.images.map((image) => image.id) ?? [])"
+            />
+            <template v-if="photos.retaking.value">
               <v-btn
                 variant="text"
                 size="small"
                 prepend-icon="mdi-undo"
                 text="撮り直しをやめる"
-                :disabled="saving || photos.loading.value"
+                :disabled="saving || photos.busy.value"
                 class="mt-2"
-                @click="cancelRetake"
+                @click="photos.cancelRetake"
               />
             </template>
-            <template v-else>
-              <div class="d-flex flex-wrap ga-2">
-                <PrintThumb
-                  v-for="image in print.data.value?.images"
-                  :key="image.id"
-                  :image-id="image.id"
-                  :width="72"
-                  :height="92"
-                />
-              </div>
-              <PhotoStrip
-                v-if="photos.photos.value.length > 0"
-                class="mt-2"
-                :photos="photos.photos.value"
-                :photos-left="0"
+            <div class="d-flex flex-wrap ga-2 mt-2">
+              <v-btn
+                v-if="!photos.retaking.value"
+                variant="outlined"
+                size="small"
+                prepend-icon="mdi-camera-retake-outline"
+                text="写真をすべて撮り直す"
+                :disabled="saving || photos.busy.value"
+                @click="startRetake"
+              />
+              <v-btn
+                variant="outlined"
+                size="small"
+                prepend-icon="mdi-plus"
+                text="追加"
+                :disabled="photos.photosLeft.value === 0 || saving || photos.busy.value"
                 :loading="photos.loading.value"
-                @rotate="photos.rotate"
-                @remove="photos.remove"
+                @click="sourceSheetOpen = true"
               />
-              <div class="d-flex flex-wrap ga-2 mt-2">
-                <v-btn
-                  variant="outlined"
-                  size="small"
-                  prepend-icon="mdi-camera-retake-outline"
-                  text="写真をすべて撮り直す"
-                  :disabled="saving || photos.loading.value"
-                  @click="startRetake"
-                />
-                <v-btn
-                  variant="outlined"
-                  size="small"
-                  prepend-icon="mdi-plus"
-                  text="追加"
-                  :disabled="photosLeft === 0 || saving"
-                  :loading="photos.loading.value"
-                  @click="sourceSheetOpen = true"
-                />
-              </div>
-            </template>
+            </div>
           </section>
         </template>
       </PrintForm>
@@ -215,7 +192,7 @@ const save = async () => {
   <PhotoSourceSheet
     v-model="sourceSheetOpen"
     @take="addPhotos(takePhoto)"
-    @choose="addPhotos(() => choosePhotos(photosLeft))"
+    @choose="addPhotos(() => choosePhotos(photos.photosLeft.value))"
   />
   <StorageFullDialog
     v-if="stats.data.value"

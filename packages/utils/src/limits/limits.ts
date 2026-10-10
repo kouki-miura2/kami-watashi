@@ -13,6 +13,8 @@ export const LIMITS = {
   familyTopics: 15,
   /** Max photos (pages) per print. Checked in both the UI and the API, not by a DB constraint. */
   printImages: 5,
+  /** Max QR codes readable from the currently displayed print photo in one scan. */
+  printQrCodes: 8,
   /** Max topics per print. Checked in both the UI and the API, not by a DB constraint. */
   printTopics: 5,
   /** Photos are downscaled so their long edge is at most this many pixels. Provisional — finalize before launch. */

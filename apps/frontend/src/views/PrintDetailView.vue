@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { LIMITS } from 'utils'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import MiteneSheet from '../components/MiteneSheet.vue'
 import MovePrintDialog from '../components/MovePrintDialog.vue'
 import PhotoViewer from '../components/PhotoViewer.vue'
 import PrintInfoSheet from '../components/PrintInfoSheet.vue'
+import PrintQrCodeDialog from '../components/PrintQrCodeDialog.vue'
 import ResponseStatusSheet from '../components/ResponseStatusSheet.vue'
 import { useBack } from '../composables/useBack.ts'
 import { useChildrenQuery } from '../composables/useChildren.ts'
 import { useMembersQuery } from '../composables/useMembers.ts'
+import { type PrintQrCode, usePrintQrCodes } from '../composables/usePrintQrCodes.ts'
 import {
   useDeletePrintMutation,
   usePrintQuery,
@@ -37,6 +40,44 @@ const members = useMembersQuery()
 const updatePrint = useUpdatePrintMutation()
 const deletePrint = useDeletePrintMutation()
 const sendMitene = useSendMiteneMutation()
+const qrReader = usePrintQrCodes()
+const qrOpen = ref(false)
+const qrCodes = ref<PrintQrCode[]>([])
+const photoPage = ref(0)
+const currentImage = computed(() => print.data.value?.images[photoPage.value])
+watch(
+  () => print.data.value?.images.map((image) => image.id).join(),
+  () => {
+    photoPage.value = 0
+  },
+)
+
+const readQrCodes = () => {
+  if (!currentImage.value || qrReader.isPending.value) return
+  qrCodes.value = []
+  qrOpen.value = true
+  qrReader.mutate(
+    { imageId: currentImage.value.id, page: photoPage.value + 1 },
+    {
+      onSuccess: (codes) => {
+        if (codes.length === 0) {
+          qrOpen.value = false
+          notification.show('QRコードを見つけられませんでした。')
+        } else if (codes.length > LIMITS.printQrCodes) {
+          qrOpen.value = false
+          notification.show(
+            `QRコードが${LIMITS.printQrCodes + 1}つ以上見つかりました。対応可能なQRコードは${LIMITS.printQrCodes}つまでです。`,
+          )
+        } else {
+          qrCodes.value = codes
+        }
+      },
+      onError: () => {
+        qrOpen.value = false
+      },
+    },
+  )
+}
 
 const slots = computed(() =>
   toSlotCards(children.data.value ?? []).map((card) => ({
@@ -129,6 +170,12 @@ const remove = async () => {
         </template>
         <v-list>
           <v-list-item
+            title="QRコード読み取り"
+            prepend-icon="mdi-qrcode-scan"
+            :disabled="!currentImage || qrReader.isPending.value"
+            @click="readQrCodes"
+          />
+          <v-list-item
             title="変更"
             prepend-icon="mdi-pencil-outline"
             :to="{ name: 'print-edit', params: { id } }"
@@ -167,6 +214,7 @@ const remove = async () => {
       <PhotoViewer
         v-else-if="print.data.value"
         :key="print.data.value.images.map((image) => image.id).join()"
+        v-model:page="photoPage"
         :image-ids="print.data.value.images.map((image) => image.id)"
       />
     </div>
@@ -213,6 +261,7 @@ const remove = async () => {
   </div>
 
   <template v-if="print.data.value">
+    <PrintQrCodeDialog v-model="qrOpen" :codes="qrCodes" :loading="qrReader.isPending.value" />
     <MiteneSheet
       v-model="miteneOpen"
       :members="otherMembers"

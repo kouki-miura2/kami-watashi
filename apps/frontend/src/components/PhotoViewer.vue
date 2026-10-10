@@ -5,7 +5,7 @@ import ZoomableImage from './ZoomableImage.vue'
 
 defineProps<{ imageIds: string[] }>()
 
-const page = ref(0)
+const page = defineModel<number>('page', { default: 0 })
 const zoomed = ref(false)
 const images = ref<InstanceType<typeof ZoomableImage>[]>([])
 

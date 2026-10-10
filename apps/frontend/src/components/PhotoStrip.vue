@@ -4,11 +4,12 @@ defineProps<{
   /** How many more can be added; the add tile hides at 0. */
   photosLeft: number
   loading?: boolean
+  disabled?: boolean
 }>()
 defineEmits<{ add: []; rotate: [index: number]; remove: [index: number] }>()
 </script>
 
-<!-- New photos in page order, numbered, each rotatable and removable, with a tile to add more (4a). -->
+<!-- Photos in page order, numbered, each rotatable and removable, with a tile to add more (4a). -->
 <template>
   <div class="d-flex flex-wrap ga-2">
     <div v-for="(photo, index) in photos" :key="photo.url" class="photo">
@@ -18,7 +19,8 @@ defineEmits<{ add: []; rotate: [index: number]; remove: [index: number] }>()
         class="photo__remove"
         icon="mdi-close"
         size="x-small"
-        :aria-label="`${index + 1}ページ目を外す`"
+        :aria-label="`${index + 1}ページ目の写真を削除`"
+        :disabled="disabled || loading || photo.rotating"
         @click="$emit('remove', index)"
       />
       <v-btn
@@ -26,6 +28,7 @@ defineEmits<{ add: []; rotate: [index: number]; remove: [index: number] }>()
         icon="mdi-rotate-right"
         size="x-small"
         :loading="photo.rotating"
+        :disabled="disabled || loading"
         :aria-label="`${index + 1}ページ目を右に90°回転`"
         @click="$emit('rotate', index)"
       />
@@ -38,11 +41,12 @@ defineEmits<{ add: []; rotate: [index: number]; remove: [index: number] }>()
       width="72"
       height="92"
       :loading
+      :disabled="disabled"
       @click="$emit('add')"
     >
       <div class="d-flex flex-column align-center ga-1">
         <v-icon icon="mdi-camera-plus-outline" />
-        <span class="text-caption">追加</span>
+        <span class="text-body-small">追加</span>
       </div>
     </v-btn>
   </div>
@@ -68,13 +72,13 @@ defineEmits<{ add: []; rotate: [index: number]; remove: [index: number] }>()
 .photo__remove {
   position: absolute;
   right: -6px;
-  top: -6px;
+  bottom: -6px;
 }
 
 .photo__rotate {
   position: absolute;
   right: -6px;
-  bottom: -6px;
+  top: -6px;
 }
 
 .photo-add {

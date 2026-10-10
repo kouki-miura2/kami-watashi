@@ -42,8 +42,10 @@ export const usePhotoDraft = () => {
           rotating: false,
         })),
       )
+      return true
     } catch {
       notification.show('写真を読み込めませんでした')
+      return false
     } finally {
       loading.value = false
     }
