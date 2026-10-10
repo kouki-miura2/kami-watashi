@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { LIMITS } from 'utils'
 import { computed, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 
 import { ApiError, errorMessage } from '../api/errors.ts'
 import PhotoSourceSheet from '../components/PhotoSourceSheet.vue'
@@ -27,7 +27,6 @@ import { slotParam, toSlotCards } from '../lib/slots.ts'
 import { useNotificationStore } from '../stores/notification.ts'
 
 const route = useRoute()
-const router = useRouter()
 const id = computed(() => String(route.params.id))
 const close = useBack({ name: 'print', params: { id: id.value } })
 const notification = useNotificationStore()
@@ -59,8 +58,11 @@ const titleValid = ref<boolean | null>(null)
 // Retaking replaces every page at once (spec: no per-page editing).
 const retaking = ref(false)
 const photos = usePhotoDraft()
+const existingCount = computed(() => (retaking.value ? 0 : (print.data.value?.images.length ?? 0)))
+const photosLeft = computed(() => Math.max(0, photos.photosLeft.value - existingCount.value))
 const sourceSheetOpen = ref(false)
 const startRetake = () => {
+  photos.clear()
   retaking.value = true
   sourceSheetOpen.value = true
 }
@@ -69,6 +71,7 @@ const cancelRetake = () => {
   photos.clear()
 }
 const addPhotos = (pick: () => Promise<Blob[]>) => {
+  if (photosLeft.value === 0 || photos.loading.value) return
   sourceSheetOpen.value = false
   void photos.add(pick)
 }
@@ -78,7 +81,10 @@ const saving = computed(() => updatePrint.isPending.value || replacePhotos.isPen
 const canSave = computed(
   () =>
     form.value !== undefined &&
+    !saving.value &&
     titleValid.value !== false &&
+    !photos.loading.value &&
+    !photos.photos.value.some((photo) => photo.rotating) &&
     (!retaking.value || photos.photos.value.length > 0),
 )
 
@@ -97,9 +103,13 @@ const save = async () => {
   } catch {
     return // Reported app-wide.
   }
-  if (retaking.value) {
+  if (retaking.value || photos.photos.value.length > 0) {
     try {
-      await replacePhotos.mutateAsync({ id: id.value, photos: photos.blobs() })
+      await replacePhotos.mutateAsync({
+        id: id.value,
+        photos: photos.blobs(),
+        existingImageIds: retaking.value ? [] : print.data.value.images.map((image) => image.id),
+      })
     } catch (error) {
       // The other changes are saved; only the photos stay as they were.
       if (error instanceof ApiError && error.code === 'storage_limit') storageFullOpen.value = true
@@ -107,7 +117,7 @@ const save = async () => {
       return
     }
   }
-  await router.replace({ name: 'print', params: { id: id.value } })
+  await close()
 }
 </script>
 
@@ -121,12 +131,12 @@ const save = async () => {
           <section>
             <div class="field-label d-flex justify-space-between">
               <span>写真</span>
-              <span v-if="retaking">{{ photos.photos.value.length }}/{{ LIMITS.printImages }}</span>
+              <span>{{ existingCount + photos.photos.value.length }}/{{ LIMITS.printImages }}</span>
             </div>
             <template v-if="retaking">
               <PhotoStrip
                 :photos="photos.photos.value"
-                :photos-left="photos.photosLeft.value"
+                :photos-left="photosLeft"
                 :loading="photos.loading.value"
                 @add="sourceSheetOpen = true"
                 @rotate="photos.rotate"
@@ -137,6 +147,7 @@ const save = async () => {
                 size="small"
                 prepend-icon="mdi-undo"
                 text="撮り直しをやめる"
+                :disabled="saving || photos.loading.value"
                 class="mt-2"
                 @click="cancelRetake"
               />
@@ -151,14 +162,34 @@ const save = async () => {
                   :height="92"
                 />
               </div>
-              <v-btn
-                variant="outlined"
-                size="small"
-                prepend-icon="mdi-camera-retake-outline"
-                text="写真をすべて撮り直す"
+              <PhotoStrip
+                v-if="photos.photos.value.length > 0"
                 class="mt-2"
-                @click="startRetake"
+                :photos="photos.photos.value"
+                :photos-left="0"
+                :loading="photos.loading.value"
+                @rotate="photos.rotate"
+                @remove="photos.remove"
               />
+              <div class="d-flex flex-wrap ga-2 mt-2">
+                <v-btn
+                  variant="outlined"
+                  size="small"
+                  prepend-icon="mdi-camera-retake-outline"
+                  text="写真をすべて撮り直す"
+                  :disabled="saving || photos.loading.value"
+                  @click="startRetake"
+                />
+                <v-btn
+                  variant="outlined"
+                  size="small"
+                  prepend-icon="mdi-plus"
+                  text="追加"
+                  :disabled="photosLeft === 0 || saving"
+                  :loading="photos.loading.value"
+                  @click="sourceSheetOpen = true"
+                />
+              </div>
             </template>
           </section>
         </template>
@@ -184,7 +215,7 @@ const save = async () => {
   <PhotoSourceSheet
     v-model="sourceSheetOpen"
     @take="addPhotos(takePhoto)"
-    @choose="addPhotos(() => choosePhotos(photos.photosLeft.value))"
+    @choose="addPhotos(() => choosePhotos(photosLeft))"
   />
   <StorageFullDialog
     v-if="stats.data.value"

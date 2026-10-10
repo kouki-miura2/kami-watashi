@@ -43,17 +43,17 @@ const loadMore = async ({ done }: { done: (status: 'ok' | 'empty' | 'error') => 
     <!-- Fills the page's content area and scrolls itself, so it loads more as its end comes into view. -->
     <v-infinite-scroll v-else height="100%" :items="lines" empty-text="" @load="loadMore">
       <div v-for="line in lines" :key="line.id" class="entry">
-        <div class="entry__time text-caption text-medium-emphasis">
+        <div class="entry__time text-medium-emphasis">
           {{ line.date }}<br /><span class="text-high-emphasis">{{ line.time }}</span>
         </div>
         <div class="entry__rail">
           <span class="entry__dot" :style="{ background: DOT_COLORS[line.kind] }" />
           <span class="entry__line" />
         </div>
-        <div class="entry__text text-body-2">
+        <div class="entry__text">
           <b>{{ line.who }}</b
           >が{{ line.text }}
-          <div v-if="line.detail" class="text-caption text-medium-emphasis">{{ line.detail }}</div>
+          <div v-if="line.detail" class="text-medium-emphasis">{{ line.detail }}</div>
         </div>
       </div>
     </v-infinite-scroll>
@@ -62,6 +62,7 @@ const loadMore = async ({ done }: { done: (status: 'ok' | 'empty' | 'error') => 
 
 <style scoped>
 .entry {
+  font-size: 0.8rem;
   display: grid;
   grid-template-columns: 44px 14px minmax(0, 1fr);
   gap: 8px;

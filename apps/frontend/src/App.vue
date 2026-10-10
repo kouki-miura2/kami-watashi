@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 import ConfirmDialog from './components/ConfirmDialog.vue'
 import { useLaunchQuery } from './composables/useLaunchQuery.ts'
+import { usePwaUpdate } from './composables/usePwaUpdate.ts'
 import { useConnectivityStore } from './stores/connectivity.ts'
 import { useInstallStore } from './stores/install.ts'
 import { useNotificationStore } from './stores/notification.ts'
@@ -13,6 +14,7 @@ const router = useRouter()
 const connectivity = useConnectivityStore()
 const notification = useNotificationStore()
 const install = useInstallStore()
+const { needRefresh, update } = usePwaUpdate()
 
 // Full screen from the home screen, the bottom navigation sits right at the screen's edge (by the
 // home indicator): taller there than in a browser tab (Vuetify's default 56px).
@@ -82,6 +84,18 @@ const tabs = [
     </v-bottom-navigation>
     <ConfirmDialog />
     <v-snackbar v-model="notification.visible">{{ notification.message }}</v-snackbar>
+    <v-snackbar
+      :model-value="needRefresh && !notification.visible"
+      location="bottom"
+      color="primary"
+      :timeout="-1"
+    >
+      新しいバージョンがあります
+      <template #actions>
+        <v-btn variant="text" @click="needRefresh = false">後で</v-btn>
+        <v-btn variant="text" color="surface" @click="update">更新</v-btn>
+      </template>
+    </v-snackbar>
   </v-app>
 </template>
 

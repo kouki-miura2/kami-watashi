@@ -10,15 +10,17 @@ import {
   useDeletePrintMutation,
   usePrintQuery,
   usePrintsQuery,
+  useReplacePhotosMutation,
   useUpdatePrintMutation,
 } from './usePrints.ts'
 
 vi.mock('../api/client.ts', () => ({
   apiClient: {
+    images: { ':id': { $get: vi.fn() } },
     prints: {
       $get: vi.fn(),
       $post: vi.fn(),
-      ':id': { $get: vi.fn(), $patch: vi.fn(), $delete: vi.fn() },
+      ':id': { $get: vi.fn(), $patch: vi.fn(), $delete: vi.fn(), images: { $put: vi.fn() } },
     },
   },
 }))
@@ -32,6 +34,27 @@ const print: NewPrint = {
   responseStatus: 'todo',
   photos: [new Blob(['page 1']), new Blob(['page 2'])],
 }
+
+test('adding photos keeps the existing pages before the new pages without re-encoding them', async () => {
+  vi.mocked(apiClient.images[':id'].$get).mockImplementation(
+    async ({ param }) => new Response(new Blob([param.id], { type: 'image/webp' })) as never,
+  )
+  vi.mocked(apiClient.prints[':id'].images.$put).mockResolvedValue(
+    Response.json({ images: [] }) as never,
+  )
+  const mutation = effectScope().run(() => useReplacePhotosMutation(new QueryClient()))!
+  await mutation.mutateAsync({
+    id: 'p1',
+    existingImageIds: ['old-1', 'old-2'],
+    photos: [new Blob(['new'])],
+  })
+  const [args] = vi.mocked(apiClient.prints[':id'].images.$put).mock.calls[0]!
+  expect(await Promise.all((args.form.images as File[]).map((file) => file.text()))).toEqual([
+    'old-1',
+    'old-2',
+    'new',
+  ])
+})
 
 const setup = () => {
   const queryClient = new QueryClient()

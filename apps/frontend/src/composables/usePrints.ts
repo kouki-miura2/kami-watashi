@@ -19,7 +19,12 @@ const isListQuery = ({ queryKey }: { queryKey: readonly unknown[] }) =>
   queryKey[0] === queryKeys.prints[0] && queryKey[1] !== 'detail'
 
 const toPhotoFiles = (photos: Blob[]) =>
-  photos.map((photo, index) => new File([photo], `page-${index + 1}.webp`, { type: 'image/webp' }))
+  photos.map((photo, index) => {
+    const type = photo.type || 'image/webp'
+    return new File([photo], `page-${index + 1}.${type === 'image/jpeg' ? 'jpg' : 'webp'}`, {
+      type,
+    })
+  })
 
 /** `GET /prints`: a slot's prints in the filter's order. */
 export const usePrintsQuery = (
@@ -159,19 +164,33 @@ export const useUpdatePrintMutation = (queryClient?: QueryClient) => {
 
 /**
  * `PUT /prints/:id/images`: retakes every page. On `storage_limit` the original photos stay; the
- * edit screen shows that itself.
+ * edit screen shows that itself. For additions, prepend the existing photos unchanged.
  */
 export const useReplacePhotosMutation = (queryClient?: QueryClient) => {
   const client = queryClient ?? useQueryClient()
   return useMutation(
     {
-      mutationFn: async ({ id, photos }: { id: string; photos: Blob[] }) =>
-        (
+      mutationFn: async ({
+        id,
+        photos,
+        existingImageIds = [],
+      }: {
+        id: string
+        photos: Blob[]
+        existingImageIds?: string[]
+      }) => {
+        const existing = await Promise.all(
+          existingImageIds.map(async (imageId) =>
+            (await apiClient.images[':id'].$get({ param: { id: imageId } })).blob(),
+          ),
+        )
+        return (
           await apiClient.prints[':id'].images.$put(
-            { param: { id }, form: { images: toPhotoFiles(photos) } },
+            { param: { id }, form: { images: toPhotoFiles([...existing, ...photos]) } },
             { init: { signal: AbortSignal.timeout(UPLOAD_TIMEOUT_MS) } },
           )
-        ).json(),
+        ).json()
+      },
       onSuccess: () => afterPrintChange(client),
       meta: { handlesError: true },
     },
